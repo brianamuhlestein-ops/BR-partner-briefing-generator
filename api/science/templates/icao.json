@@ -1,0 +1,18 @@
+﻿{
+  "briefing_type": "icao",
+  "title": "ICAO Briefing",
+  "sections": [
+    {
+      "id": "solar_activity_summary",
+      "label": "Solar Activity - 24 hr Summary Discussion",
+      "kind": "text"
+    },
+    {
+      "id": "geospace_probability",
+      "label": "Geospace - Probability Table",
+      "kind": "probability_table",
+      "categories": ["G1-G2", "G3+"],
+      "days": ["Day 1", "Day 2", "Day 3"]
+    }
+  ]
+}

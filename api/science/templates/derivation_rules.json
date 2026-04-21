@@ -1,0 +1,7 @@
+﻿{
+  "master_to_downstream": {
+    "discussion": ["solar_activity_summary", "solar_activity_probability"],
+    "icao": ["solar_activity_summary", "geospace_probability"],
+    "staff": ["solar_activity_probability", "operational_notes"]
+  }
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Discussion and Briefing Generator</title>
+  <link rel="stylesheet" href="/briefing_tab/briefing_tab.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>Discussion and Briefing Generator</h1>
+
+    <div class="button-row">
+      <button class="mode-btn master" onclick="selectMode('Master', this)">Master Text Creator</button>
+      <button class="mode-btn discussion" onclick="selectMode('Discussion', this)">Forecast Discussion</button>
+      <button class="mode-btn icao" onclick="selectMode('ICAO', this)">ICAO Daily Briefing</button>
+      <button class="mode-btn staff" onclick="selectMode('Staff', this)">Staff Briefing</button>
+      <button class="mode-btn partner" onclick="selectMode('Partner', this)">Partner Briefing</button>
+      <button class="mode-btn social" onclick="selectMode('Social', this)">Social Graphic Builder</button>
+
+
+    </div>
+
+    <!-- ✅ add this wrapper -->
+    <div class="main-panel">
+      <div class="left-panel">
+        <div id="sectionContainer"></div>
+
+        <!-- ✅ Main content panel -->
+        <div class="main-panel">
+
+          <!-- === Left panel (main content area) === -->
+          <div class="left-panel">
+            <h3 id="briefingTypeTitle">Briefing Content</h3>
+            <div id="sectionContainer"></div>
+
+            <!-- === Partner-only content === -->
+            <div id="partnerIDSSWrapper" style="display:none;">
+
+              <!-- <h3 style="margin-top:0;">Partner Briefing</h3> -->
+
+              <!-- === IDSS philosophy / motivation section === -->
+              <div id="idssPhilosophyBlock"
+                  style="background:#f7f7f7; border-left:4px solid #4682B4;
+                          padding:12px 16px; margin-bottom:20px; max-width:900px;">
+                <h4 style="margin-top:0; color:#4682B4;">Why IDSS?</h4>
+                <p style="margin:0; font-size:16px; line-height:1.5;">
+                  The National Weather Service is evolving from information provider to
+                  <b>decision-support partner</b>. Impact-Based Decision Support Services (IDSS)
+                  focus not just on <i>what the weather is</i>, but on <i>what that weather means</i>
+                  for infrastructure, operations, and public safety.  
+                  By integrating <b>likelihood and consequence</b>, forecasters empower partners
+                  to make confident, timely decisions that save lives, protect property,
+                  and strengthen resilience to space-weather impacts.
+                </p>
+              </div>
+
+              <!-- === Sector Table Section === -->
+              <h3>IDSS Sector Table</h3>
+
+              <!-- Sector filter buttons -->
+              <div id="sectorButtons" class="sector-btn-row">
+                <!-- dynamically populated -->
+              </div>
+
+              <!-- Filtered sector table -->
+              <div id="idssTableContainer"></div>
+
+              <!-- === Risk Evaluation Section === -->
+              <div id="riskEquationBlock" style="margin:20px 0; text-align:center;">
+                <h3>Risk Evaluation</h3>
+
+                <label for="likelihoodSelect">Probability:</label>
+                <select id="likelihoodSelect" style="margin-right:10px;">
+                  <option value="1">Extremely Unlikely</option>
+                  <option value="2">Unlikely</option>
+                  <option value="3">As Likely as Not</option>
+                  <option value="4">Likely</option>
+                  <option value="5">Very Likely</option>
+                </select>
+
+                <label for="impactSelect">Impact Level:</label>
+                <select id="impactSelect" style="margin-right:10px;">
+                  <option value="1">No Impact</option>
+                  <option value="2">Minor</option>
+                  <option value="3">Moderate</option>
+                  <option value="4">Major</option>
+                  <option value="5">Extreme</option>
+                </select>
+
+                <button onclick="calculateRisk()">Calculate Risk</button>
+                <div id="riskResult" style="margin-top:10px; font-weight:bold;"></div>
+              </div>
+
+              <!-- === Risk Matrix === -->
+              <h3 style="margin-top:15px;">Risk Matrix</h3>
+              <div id="idssMatrixContainer"></div>
+            </div>
+          </div>
+        </div>
+
+            <!-- === Social Graphic Builder Tab === -->
+            <div id="socialBuilderWrapper" style="display:none;">
+              <!-- <h3>Social Graphic Builder</h3> -->
+
+              <div style="max-width:800px;">
+                <label>Header:</label><br>
+                <input id="slideHeader" type="text" style="width:100%;"><br><br>
+
+                <label>Date/Time:</label><br>
+                <input id="slideDate" type="text" style="width:100%;"><br><br>
+
+                <label>Body Text:</label><br>
+                <textarea id="slideBody" rows="4" style="width:100%;"></textarea><br><br>
+
+                <button onclick="generateSlide()">Generate Slide</button>
+              </div>
+
+              <div id="slidePreview" style="margin-top:20px; text-align:center;">
+                <em>Preview will appear here after generation.</em>
+              </div>
+            </div>
+
+
+        <!-- === Live SWPC Products Section === -->
+        <div id="activeProducts"
+            style="background:#f9f9f9;border:1px solid #ccc;border-radius:8px;
+                    padding:10px;margin-top:15px;max-height:250px;overflow-y:auto;">
+          <h3 style="margin-top:0;">Active SWPC Alerts</h3>
+          <em>Loading active alerts...</em>
+        </div>
+
+        <!-- ICAO Advisories (only visible on ICAO tab) -->
+        <div id="icaoProducts"
+            style="background:#f9f9f9;border:1px solid #ccc;border-radius:8px;
+                    padding:10px;margin-top:15px;max-height:250px;overflow-y:auto;display:none;">
+          <h3 style="margin-top:0;">Active ICAO Space Weather Advisories</h3>
+          <em>Loading ICAO advisories...</em>
+        </div>
+
+        <!-- === Control Buttons === -->
+        <div id="controlButtons" style="margin-bottom:10px;">
+          <button onclick="clearText()">Clear Text</button>
+          <button onclick="loadPrevious()">Load Previous</button>
+          <button onclick="saveDraft()">Save Draft</button>
+          <button onclick="generateBriefing()">Generate PDF</button>
+          <button onclick="pushDownstream()">Push Downstream</button>
+        </div>
+
+
+
+      </div>
+
+      <div class="right-panel">
+        <h3>Preview</h3>
+        <iframe id="previewFrame"></iframe>
+      </div>
+    </div>
+    <!-- ✅ end main-panel -->
+
+  </div>
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="/briefing_tab/briefing_tab.js"></script>
+</body>
+
+</html>

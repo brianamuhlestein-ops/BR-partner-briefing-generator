@@ -1,0 +1,18 @@
+﻿{
+  "briefing_type": "discussion",
+  "title": "Discussion Briefing",
+  "sections": [
+    {
+      "id": "solar_activity_summary",
+      "label": "Solar Activity - 24 hr Summary Discussion",
+      "kind": "text"
+    },
+    {
+      "id": "solar_activity_probability",
+      "label": "Solar Activity - Probability Table",
+      "kind": "probability_table",
+      "categories": ["R1-R2", "R3+"],
+      "days": ["Day 1", "Day 2", "Day 3"]
+    }
+  ]
+}

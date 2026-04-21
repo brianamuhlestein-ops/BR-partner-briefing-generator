@@ -1,0 +1,65 @@
+{
+  "Master": [
+    "Solar Activity – 24 hr Summary Discussion",
+    "Solar Activity – Probability Table",
+    "Solar Activity – Forecast Rationale",
+    "Energetic Particles – 24 hr Summary Discussion",
+    "Energetic Particles – Probability Table",
+    "Energetic Particles – Forecast Rationale",
+    "Solar Wind – 24 hr Summary Discussion",
+    "Solar Wind – Forecast Rationale",
+    "Ionosphere – 24 hr Summary Discussion",
+    "Geospace – 24 hr Summary Discussion",
+    "Geospace – Probability Table",
+    "Geospace – Forecast Rationale",
+    "Operational Notes"
+  ],
+
+  "Discussion": [
+    "Solar Activity – 24 hr Summary Discussion",
+    "Solar Activity – Probability Table",
+    "Solar Activity – Forecast Rationale",
+    "Energetic Particles – 24 hr Summary Discussion",
+    "Energetic Particles – Probability Table",
+    "Energetic Particles – Forecast Rationale",
+    "Solar Wind – 24 hr Summary Discussion",
+    "Solar Wind – Forecast Rationale",
+    "Geospace – 24 hr Summary Discussion",
+    "Geospace – Probability Table",
+    "Geospace – Forecast Rationale"
+  ],
+
+  "ICAO": [
+    "Solar Activity – 24 hr Summary Discussion",
+    "Solar Activity – Probability Table",
+    "Solar Activity – Forecast Rationale",
+    "Energetic Particles – 24 hr Summary Discussion",
+    "Energetic Particles – Probability Table",
+    "Energetic Particles – Forecast Rationale",
+    "Solar Wind – 24 hr Summary Discussion",
+    "Solar Wind – Forecast Rationale",
+    "Ionosphere – 24 hr Summary Discussion",
+    "Geospace – 24 hr Summary Discussion",
+    "Geospace – Probability Table",
+    "Geospace – Forecast Rationale"
+  ],
+
+  "Staff": [
+    "Solar Activity – Probability Table",
+    "Solar Activity – Forecast Rationale",
+    "Energetic Particles – Probability Table",
+    "Energetic Particles – Forecast Rationale",
+    "Solar Wind – Forecast Rationale",
+    "Geospace – Probability Table",
+    "Geospace – Forecast Rationale",
+    "Operational Notes"
+  ],
+
+  "Partner": [
+    "Key Impacts and Messaging",
+    "Plain-Language Forecast Summary",
+    "Impacts to Power Grid and Satellites",
+    "HF Comms and Navigation Outlook",
+    "Summary for Partners and Emergency Managers"
+  ]
+}

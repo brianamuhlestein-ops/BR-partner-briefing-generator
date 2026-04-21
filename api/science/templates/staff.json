@@ -1,0 +1,18 @@
+﻿{
+  "briefing_type": "staff",
+  "title": "Staff Briefing",
+  "sections": [
+    {
+      "id": "solar_activity_probability",
+      "label": "Solar Activity - Probability Table",
+      "kind": "probability_table",
+      "categories": ["R1-R2", "R3+"],
+      "days": ["Day 1", "Day 2", "Day 3"]
+    },
+    {
+      "id": "operational_notes",
+      "label": "Operational Notes",
+      "kind": "text"
+    }
+  ]
+}

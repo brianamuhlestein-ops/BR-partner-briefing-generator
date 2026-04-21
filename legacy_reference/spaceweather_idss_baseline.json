@@ -1,0 +1,137 @@
+{
+  "sectors": [
+    {
+      "name": "Power Grid",
+      "description": "High-voltage transmission systems affected by geomagnetically induced currents (GICs).",
+      "key_indicators": ["Kp", "dB/dt", "Dst"],
+      "impact_levels": {
+        "1": "Nominal geomagnetic activity. No measurable GICs or voltage deviations.",
+        "2": "Minor GICs at high latitudes. Operators monitor alerts.",
+        "3": "Regional voltage regulation required. Possible equipment alarms.",
+        "4": "Significant GICs; transformer heating or protection trips likely.",
+        "5": "Widespread instability or blackouts. Emergency grid operations activated."
+      },
+      "thresholds": {
+        "1": "Kp ≤ 4  |  dB/dt < 20 nT/min",
+        "2": "Kp = 5 (G1)  |  dB/dt ≈ 20–40 nT/min",
+        "3": "Kp = 6–7 (G2–G3)  |  dB/dt ≈ 40–80 nT/min",
+        "4": "Kp = 8 (G4)  |  dB/dt ≈ 80–120 nT/min",
+        "5": "Kp ≥ 9 (G5)  |  dB/dt > 120 nT/min"
+      }
+    },
+    {
+      "name": "Aviation & HF Communications",
+      "description": "Aircraft and communication systems using HF or GNSS affected by ionospheric disturbances and radiation.",
+      "key_indicators": [">10 MeV Proton Flux", "D-RAP Absorption Index", "Kp"],
+      "impact_levels": {
+        "1": "Nominal operations; no HF degradation.",
+        "2": "Polar HF signal fading possible; flight ops monitor SWPC advisories.",
+        "3": "Polar reroutes or altitude restrictions due to elevated radiation.",
+        "4": "Widespread HF blackout; GNSS errors; operational delays.",
+        "5": "Severe radiation hazard; trans-polar routes closed; crew/passenger dose management required."
+      },
+      "thresholds": {
+        "1": "Proton Flux < 10 pfu @ >10 MeV (S0)",
+        "2": "10–99 pfu (S1 Minor)",
+        "3": "100–999 pfu (S2–S3 Moderate–Strong)",
+        "4": "1,000–9,999 pfu (S4 Severe)",
+        "5": "≥10,000 pfu (S5 Extreme)"
+      }
+    },
+    {
+      "name": "Satellites / Spacecraft",
+      "description": "Space-based assets subject to surface charging, drag, and single-event upsets.",
+      "key_indicators": [">2 MeV Electron Flux", ">10 MeV Proton Flux", "F10.7"],
+      "impact_levels": {
+        "1": "Nominal charging environment.",
+        "2": "Minor sensor anomalies or drag variations.",
+        "3": "Increased upsets, orbit perturbations; safe-mode consideration.",
+        "4": "Multiple anomalies; risk of attitude loss or data corruption.",
+        "5": "Widespread spacecraft failures or total mission loss."
+      },
+      "thresholds": {
+        "1": "Electron Flux < 10³ cm⁻² s⁻¹ sr⁻¹",
+        "2": "10³–10⁴ cm⁻² s⁻¹ sr⁻¹",
+        "3": "10⁴–10⁵ cm⁻² s⁻¹ sr⁻¹",
+        "4": "10⁵–10⁶ cm⁻² s⁻¹ sr⁻¹",
+        "5": ">10⁶ cm⁻² s⁻¹ sr⁻¹"
+      }
+    },
+    {
+      "name": "GPS / Navigation",
+      "description": "GNSS signal degradation from ionospheric scintillation and storm-time TEC gradients.",
+      "key_indicators": ["Kp", "TEC", "S4 Index"],
+      "impact_levels": {
+        "1": "Accurate positioning within nominal error budget.",
+        "2": "Minor degradation at high latitudes or dusk sector.",
+        "3": "Intermittent signal loss; increased differential errors.",
+        "4": "Regional navigation outages; aviation and survey impact.",
+        "5": "Global GNSS outage or unrecoverable error magnitudes."
+      },
+      "thresholds": {
+        "1": "S4 Index < 0.3 | TEC variation < 5 TECU",
+        "2": "S4 ≈ 0.3–0.4 | TEC 5–15 TECU",
+        "3": "S4 ≈ 0.4–0.6 | TEC 15–30 TECU",
+        "4": "S4 ≈ 0.6–0.8 | TEC 30–50 TECU",
+        "5": "S4 > 0.8 | TEC > 50 TECU"
+      }
+    },
+    {
+      "name": "Pipelines",
+      "description": "Corrosion control systems influenced by geomagnetically induced voltages.",
+      "key_indicators": ["dB/dt", "Kp"],
+      "impact_levels": {
+        "1": "Nominal currents; corrosion control unaffected.",
+        "2": "Low-level induced voltages; monitoring initiated.",
+        "3": "Elevated rectifier currents; temporary mitigation actions.",
+        "4": "Significant corrosion potential; damage assessment required.",
+        "5": "Widespread cathodic protection failure; system damage."
+      },
+      "thresholds": {
+        "1": "dB/dt < 20 nT/min",
+        "2": "20–40 nT/min",
+        "3": "40–80 nT/min",
+        "4": "80–120 nT/min",
+        "5": ">120 nT/min"
+      }
+    },
+    {
+      "name": "Human Spaceflight",
+      "description": "Crewed missions exposed to radiation from solar energetic particles.",
+      "key_indicators": [">100 MeV Proton Flux"],
+      "impact_levels": {
+        "1": "Nominal radiation levels.",
+        "2": "Minor alert; increased monitoring.",
+        "3": "Elevated exposure; re-positioning recommended.",
+        "4": "Critical dose thresholds approached; shelter procedures.",
+        "5": "Severe exposure risk; mission-critical safety protocols enacted."
+      },
+      "thresholds": {
+        "1": "Proton Flux < 1 pfu @ >100 MeV",
+        "2": "1–9 pfu (S1)",
+        "3": "10–99 pfu (S2–S3)",
+        "4": "100–999 pfu (S4)",
+        "5": "≥1,000 pfu (S5)"
+      }
+    },
+    {
+      "name": "Public / Auroral Visibility",
+      "description": "Societal and public interest impacts including aurora visibility and communications.",
+      "key_indicators": ["Kp"],
+      "impact_levels": {
+        "1": "Aurora visible only at high latitudes.",
+        "2": "Aurora visible mid-latitudes; minor HF disruptions.",
+        "3": "Aurora visible to lower U.S. states; occasional HF loss.",
+        "4": "Strong aurora globally; moderate radio disruptions.",
+        "5": "Extreme visual and communication impacts worldwide."
+      },
+      "thresholds": {
+        "1": "Kp ≤ 4",
+        "2": "Kp = 5",
+        "3": "Kp = 6–7",
+        "4": "Kp = 8",
+        "5": "Kp ≥ 9"
+      }
+    }
+  ]
+}
