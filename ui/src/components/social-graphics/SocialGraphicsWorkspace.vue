@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import { useSocialGraphicsScene } from '../../composables/useSocialGraphicsScene'
 import type {
@@ -16,8 +16,11 @@ import SocialGraphicsInspector from './SocialGraphicsInspector.vue'
 import SocialGraphicsLayersPanel from './SocialGraphicsLayersPanel.vue'
 import SocialGraphicsStage from './SocialGraphicsStage.vue'
 
+const educationOnlySocialTemplate: SocialGraphicsTemplateId = 'educational-slide'
+
 const props = defineProps<{
   mode: GraphicsWorkspaceMode
+  presentation?: 'default' | 'social-tab'
   recommendation?: OpsToCommsRecommendation | null
 }>()
 
@@ -52,6 +55,14 @@ const {
   loadDraft,
   exportScene,
 } = useSocialGraphicsScene(props.mode)
+
+const availableTemplateOptions = computed(() => {
+  if (props.mode === 'social' && props.recommendation?.communicationMode === 'education-outreach') {
+    return templateOptions.filter((option) => option.id === educationOnlySocialTemplate)
+  }
+
+  return templateOptions
+})
 
 function pathForMode(mode: GraphicsWorkspaceMode): OpsToCommsPathId {
   return mode === 'social' ? 'social-design-review' : 'partner-design-review'
@@ -103,7 +114,7 @@ watch(
       return
     }
     hasAppliedRecommendation.value = true
-    startFreshFromTemplate(nextTemplate)
+    startFreshFromTemplate(nextTemplate, value)
     emit('recommendation-applied')
   },
   { immediate: true },
@@ -117,12 +128,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="social-graphics-workspace">
+  <section class="social-graphics-workspace" :class="{ 'social-graphics-workspace--social-tab': presentation === 'social-tab' }">
     <div class="toolbar social-graphics-toolbar">
       <label>
         Starter Template
         <select :value="templateId" @change="handleTemplateChange">
-          <option v-for="option in templateOptions" :key="option.id" :value="option.id">
+          <option v-for="option in availableTemplateOptions" :key="option.id" :value="option.id">
             {{ option.label }}
           </option>
         </select>
@@ -137,18 +148,20 @@ onMounted(async () => {
 
     <p v-if="errorMessage" class="message workspace-alert error">{{ errorMessage }}</p>
 
-    <div class="social-graphics-body">
-      <div class="social-graphics-canvas-panel">
-        <SocialGraphicsStage
-          ref="stageComponent"
-          :scene="scene"
-          :selected-element-id="selectedElementId"
-          @select-element="selectElement"
-          @update-element="updateElement"
-        />
+    <div class="social-graphics-body" :class="{ 'social-graphics-body--social-tab': presentation === 'social-tab' }">
+      <div class="social-graphics-main">
+        <div class="social-graphics-canvas-panel">
+          <SocialGraphicsStage
+            ref="stageComponent"
+            :scene="scene"
+            :selected-element-id="selectedElementId"
+            @select-element="selectElement"
+            @update-element="updateElement"
+          />
+        </div>
       </div>
 
-      <aside class="social-graphics-sidebar">
+      <aside class="social-graphics-sidebar social-graphics-sidebar--controls">
         <div class="social-graphics-sidebar-grid">
           <SocialGraphicsLayersPanel
             :scene="scene"
@@ -165,18 +178,20 @@ onMounted(async () => {
           />
         </div>
 
+        <SocialGraphicsExportPanel
+          :draft-id="draftId"
+          :save-status="saveStatus"
+          :export-result="exportResult"
+        />
+      </aside>
+
+      <aside class="social-graphics-sidebar social-graphics-sidebar--finder">
         <AssetFinderPanel
           :mode="mode"
           :recommendation="recommendation"
           :scene="scene"
           :selected-element-id="selectedElementId"
           @apply-asset="handleApplyAsset"
-        />
-
-        <SocialGraphicsExportPanel
-          :draft-id="draftId"
-          :save-status="saveStatus"
-          :export-result="exportResult"
         />
       </aside>
     </div>
@@ -189,6 +204,10 @@ onMounted(async () => {
   gap: 12px;
 }
 
+.social-graphics-workspace--social-tab {
+  display: contents;
+}
+
 .social-graphics-toolbar {
   margin-bottom: 0;
   justify-content: flex-start;
@@ -196,25 +215,71 @@ onMounted(async () => {
 
 .social-graphics-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 680px;
+  grid-template-columns: minmax(0, 1240px) 320px minmax(420px, 1fr);
   gap: 16px;
   align-items: start;
+  width: 100%;
+}
+
+.social-graphics-body--social-tab {
+  display: contents;
+}
+
+.social-graphics-workspace--social-tab .social-graphics-main {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding-top: 62px;
+}
+
+.social-graphics-workspace--social-tab .social-graphics-sidebar--finder {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.social-graphics-workspace--social-tab .social-graphics-sidebar--controls {
+  grid-column: 2;
+  grid-row: 3;
+  width: 100%;
+}
+
+.social-graphics-workspace--social-tab .social-graphics-toolbar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.social-graphics-workspace--social-tab .social-graphics-canvas-panel {
+  max-width: 100%;
+}
+
+.social-graphics-main {
+  min-width: 0;
 }
 
 .social-graphics-canvas-panel {
   min-width: 0;
+  max-width: 1240px;
 }
 
 .social-graphics-sidebar {
   display: grid;
   gap: 16px;
+  align-content: start;
 }
 
 .social-graphics-sidebar-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: start;
+}
+
+.social-graphics-sidebar--controls {
+  width: 320px;
+}
+
+.social-graphics-sidebar--finder {
+  width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 1600px) {
@@ -223,9 +288,23 @@ onMounted(async () => {
   }
 }
 
+@media (max-width: 1300px) {
+  .social-graphics-workspace--social-tab .social-graphics-toolbar,
+  .social-graphics-workspace--social-tab .social-graphics-main,
+  .social-graphics-workspace--social-tab .social-graphics-sidebar--finder,
+  .social-graphics-workspace--social-tab .social-graphics-sidebar--controls {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .social-graphics-workspace--social-tab .social-graphics-main {
+    padding-top: 0;
+  }
+}
+
 @media (max-width: 960px) {
-  .social-graphics-sidebar-grid {
-    grid-template-columns: 1fr;
+  .social-graphics-canvas-panel {
+    max-width: 100%;
   }
 }
 </style>

@@ -2,19 +2,17 @@
 import { computed, ref, watch } from 'vue'
 
 import {
-  recommendedAssetsForContext,
+  catalogAssetsForLibrary,
+  filterAssetsByLibraryCategory,
   socialGraphicsAssetApplyTargetLabels,
-  socialGraphicsAssetCatalog,
-  socialGraphicsAssetCategoryOptions,
-  socialGraphicsAssetTypeOptions,
+  socialGraphicsLibraryFilterOptions,
+  type SocialGraphicsLibraryFilter,
 } from '../../assetFinder/catalog'
 import type {
   GraphicsWorkspaceMode,
   OpsToCommsRecommendation,
   SocialGraphicsAsset,
   SocialGraphicsAssetApplyTarget,
-  SocialGraphicsAssetCategory,
-  SocialGraphicsAssetType,
   SocialGraphicsScene,
 } from '../../types'
 
@@ -29,17 +27,11 @@ const emit = defineEmits<{
   'apply-asset': [asset: SocialGraphicsAsset, target: SocialGraphicsAssetApplyTarget]
 }>()
 
-const searchTerm = ref('')
-const activeType = ref<SocialGraphicsAssetType | 'all'>('all')
-const activeCategory = ref<SocialGraphicsAssetCategory | 'all'>('all')
+const activeCategory = ref<SocialGraphicsLibraryFilter>('all-images')
 const selectedAssetId = ref<string | null>(null)
 const applyTarget = ref<SocialGraphicsAssetApplyTarget>('background')
 
-const recommendedAssets = computed(() =>
-  recommendedAssetsForContext(props.recommendation, props.mode),
-)
-
-const recommendedAssetIds = computed(() => new Set(recommendedAssets.value.map((asset) => asset.id)))
+const libraryAssets = computed(() => catalogAssetsForLibrary(props.recommendation))
 
 const availableTargets = computed<SocialGraphicsAssetApplyTarget[]>(() => {
   const targets = new Set<SocialGraphicsAssetApplyTarget>()
@@ -74,47 +66,18 @@ const availableTargets = computed<SocialGraphicsAssetApplyTarget[]>(() => {
 })
 
 const filteredAssets = computed(() => {
-  const term = searchTerm.value.trim().toLowerCase()
-
-  return socialGraphicsAssetCatalog.filter((asset) => {
-    if (activeType.value !== 'all' && asset.assetType !== activeType.value) {
-      return false
-    }
-    if (activeCategory.value !== 'all' && asset.category !== activeCategory.value) {
-      return false
-    }
-    if (!term) {
-      return true
-    }
-
-    return (
-      asset.title.toLowerCase().includes(term) ||
-      asset.description.toLowerCase().includes(term) ||
-      asset.tags.some((tag) => tag.toLowerCase().includes(term))
-    )
-  })
+  return filterAssetsByLibraryCategory(libraryAssets.value, activeCategory.value)
 })
 
 const selectedAsset = computed(() => {
   return (
-    socialGraphicsAssetCatalog.find((asset) => asset.id === selectedAssetId.value) ??
-    recommendedAssets.value[0] ??
+    libraryAssets.value.find((asset) => asset.id === selectedAssetId.value) ??
     filteredAssets.value[0] ??
     null
   )
 })
 
-const previewAssetList = computed(() => {
-  const seen = new Set<string>()
-  const merged = [...recommendedAssets.value, ...filteredAssets.value]
-  return merged.filter((asset) => {
-    if (seen.has(asset.id)) {
-      return false
-    }
-    seen.add(asset.id)
-    return true
-  })
-})
+const previewAssetList = computed(() => filteredAssets.value)
 
 function applyTargetForAsset(asset: SocialGraphicsAsset | null): SocialGraphicsAssetApplyTarget {
   if (!asset) {
@@ -137,11 +100,11 @@ watch(
 )
 
 watch(
-  recommendedAssets,
+  filteredAssets,
   (assets) => {
-    const firstAsset = assets[0]
-    if (!selectedAssetId.value && firstAsset) {
-      selectedAssetId.value = firstAsset.id
+    const selectedStillVisible = assets.some((asset) => asset.id === selectedAssetId.value)
+    if (!selectedStillVisible) {
+      selectedAssetId.value = assets[0]?.id ?? null
     }
   },
   { immediate: true },
@@ -159,20 +122,8 @@ function handleApplyAsset() {
   emit('apply-asset', selectedAsset.value, applyTarget.value)
 }
 
-function assetAudienceLabel(asset: SocialGraphicsAsset): string {
-  if (asset.audience.includes('public') && asset.audience.includes('partners')) {
-    return 'Public + partner ready'
-  }
-  if (asset.audience.includes('mixed')) {
-    return 'Mixed audience'
-  }
-  if (asset.audience.includes('public')) {
-    return 'Public leaning'
-  }
-  if (asset.audience.includes('partners') || asset.audience.includes('internal')) {
-    return 'Partner leaning'
-  }
-  return 'General use'
+function categoryLabel(filter: SocialGraphicsLibraryFilter): string {
+  return socialGraphicsLibraryFilterOptions.find((option) => option.value === filter)?.label ?? 'All Images'
 }
 </script>
 
@@ -184,69 +135,36 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
         <h2 class="social-side-card__title">Visual Finder</h2>
       </div>
       <p class="asset-finder__intro">
-        Surface message-first visual options that support the current Ops to Comms recommendation.
-      </p>
-    </div>
-
-    <div v-if="recommendation" class="asset-finder__guidance">
-      <span class="asset-finder__guidance-chip">Suggested visual: {{ recommendation.recommendedVisualType }}</span>
-      <span
-        v-for="category in recommendation.recommendedAssetCategories"
-        :key="category"
-        class="asset-finder__guidance-chip asset-finder__guidance-chip--muted"
-      >
-        {{ category }}
-      </span>
-      <p class="asset-finder__guidance-copy">
-        {{ recommendation.recommendedMessageEmphasis }}
+        Review approved local graphics and insert them into the current slide.
       </p>
     </div>
 
     <div class="asset-finder__controls">
       <label class="asset-finder__field">
-        Search
-        <input v-model="searchTerm" type="search" placeholder="Search approved visuals" />
+        Category
+        <select v-model="activeCategory">
+          <option v-for="option in socialGraphicsLibraryFilterOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
       </label>
-
-      <div class="asset-finder__control-grid">
-        <label class="asset-finder__field">
-          Asset Type
-          <select v-model="activeType">
-            <option v-for="option in socialGraphicsAssetTypeOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-
-        <label class="asset-finder__field">
-          Category
-          <select v-model="activeCategory">
-            <option
-              v-for="option in socialGraphicsAssetCategoryOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-      </div>
     </div>
 
-    <div class="asset-finder__recommended">
-      <div class="asset-finder__section-label">Recommended for this case</div>
-      <div class="asset-finder__card-row">
+    <div class="asset-finder__catalog">
+      <div class="asset-finder__section-label">Approved catalog</div>
+      <div class="asset-finder__catalog-grid">
         <button
-          v-for="asset in recommendedAssets.slice(0, 3)"
+          v-for="asset in previewAssetList"
           :key="asset.id"
           type="button"
-          class="asset-card asset-card--compact"
+          class="asset-card asset-card--catalog"
           :class="{ 'asset-card--active': asset.id === selectedAsset?.id }"
           @click="selectAsset(asset.id)"
         >
           <img class="asset-card__thumb" :src="asset.thumbnailPath ?? asset.localPath ?? asset.url" :alt="asset.title" />
           <span class="asset-card__title">{{ asset.title }}</span>
-          <span class="asset-card__meta">{{ assetAudienceLabel(asset) }}</span>
+          <span class="asset-card__meta">{{ categoryLabel(asset.tags.includes('cme-library') ? 'cme' : 'all-images') }}</span>
+          <span class="asset-card__tags">{{ asset.tags.slice(0, 3).join(' • ') }}</span>
         </button>
       </div>
     </div>
@@ -260,9 +178,6 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
       <div class="asset-finder__preview-copy">
         <div class="asset-finder__preview-title-row">
           <h3>{{ selectedAsset.title }}</h3>
-          <span v-if="recommendedAssetIds.has(selectedAsset.id)" class="asset-finder__recommended-badge">
-            Recommended
-          </span>
         </div>
         <p>{{ selectedAsset.description }}</p>
         <p class="asset-finder__use">{{ selectedAsset.recommendedUse }}</p>
@@ -297,28 +212,6 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
         </p>
       </div>
     </div>
-
-    <div class="asset-finder__catalog">
-      <div class="asset-finder__section-label">Approved catalog</div>
-      <div class="asset-finder__catalog-grid">
-        <button
-          v-for="asset in previewAssetList"
-          :key="asset.id"
-          type="button"
-          class="asset-card"
-          :class="{ 'asset-card--active': asset.id === selectedAsset?.id }"
-          @click="selectAsset(asset.id)"
-        >
-          <img class="asset-card__thumb" :src="asset.thumbnailPath ?? asset.localPath ?? asset.url" :alt="asset.title" />
-          <span class="asset-card__title-row">
-            <span class="asset-card__title">{{ asset.title }}</span>
-            <span v-if="recommendedAssetIds.has(asset.id)" class="asset-card__pill">Recommended</span>
-          </span>
-          <span class="asset-card__meta">{{ asset.category }} | {{ asset.assetType }}</span>
-          <span class="asset-card__tags">{{ asset.tags.slice(0, 3).join(' • ') }}</span>
-        </button>
-      </div>
-    </div>
   </section>
 </template>
 
@@ -329,7 +222,6 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
 }
 
 .asset-finder__intro,
-.asset-finder__guidance-copy,
 .asset-finder__use,
 .asset-finder__empty-note {
   margin: 0;
@@ -338,41 +230,10 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
   line-height: 1.45;
 }
 
-.asset-finder__guidance {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(118, 175, 255, 0.2);
-  background: rgba(85, 138, 224, 0.08);
-}
-
-.asset-finder__guidance-chip {
-  display: inline-flex;
-  width: fit-content;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: rgba(113, 187, 255, 0.18);
-  color: #e4f0ff;
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.asset-finder__guidance-chip--muted {
-  background: rgba(255, 255, 255, 0.05);
-}
-
 .asset-finder__controls,
 .asset-finder__preview {
   display: grid;
   gap: 12px;
-}
-
-.asset-finder__control-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
 }
 
 .asset-finder__field {
@@ -391,19 +252,18 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
   text-transform: uppercase;
 }
 
-.asset-finder__card-row,
 .asset-finder__catalog-grid {
   display: grid;
   gap: 10px;
 }
 
-.asset-finder__card-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .asset-finder__preview {
   grid-template-columns: 220px minmax(0, 1fr);
   align-items: start;
+}
+
+.asset-finder__catalog-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .asset-finder__preview-image,
@@ -437,17 +297,6 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
   font-size: 1rem;
 }
 
-.asset-finder__recommended-badge,
-.asset-card__pill {
-  display: inline-flex;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(103, 191, 255, 0.16);
-  color: #dff1ff;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
 .asset-finder__tags {
   display: flex;
   flex-wrap: wrap;
@@ -471,8 +320,22 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.asset-card--compact {
+.asset-card--catalog {
   padding: 8px;
+  gap: 6px;
+}
+
+.asset-card--catalog .asset-card__thumb {
+  aspect-ratio: 1 / 1;
+}
+
+.asset-card--catalog .asset-card__title {
+  font-size: 0.78rem;
+}
+
+.asset-card--catalog .asset-card__meta,
+.asset-card--catalog .asset-card__tags {
+  font-size: 0.68rem;
 }
 
 .asset-card--active {
@@ -482,13 +345,6 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
 
 .asset-card__thumb {
   aspect-ratio: 16 / 9;
-}
-
-.asset-card__title-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
 }
 
 .asset-card__title {
@@ -508,8 +364,8 @@ function assetAudienceLabel(asset: SocialGraphicsAsset): string {
     grid-template-columns: 1fr;
   }
 
-  .asset-finder__card-row {
-    grid-template-columns: 1fr;
+  .asset-finder__catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

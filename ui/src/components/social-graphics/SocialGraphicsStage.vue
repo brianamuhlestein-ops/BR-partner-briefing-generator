@@ -27,8 +27,16 @@ const imageCache = ref<Record<string, HTMLImageElement>>({})
 const nodeRefs = new Map<string, Konva.Node>()
 let resizeObserver: ResizeObserver | null = null
 
-const displayScale = computed(() => Math.min(1, stageWidth.value / props.scene.width))
+const MAX_DISPLAY_SCALE = 1
+
+const displayScale = computed(() =>
+  Math.min(MAX_DISPLAY_SCALE, stageWidth.value / props.scene.width),
+)
 const stageHeight = computed(() => props.scene.height * displayScale.value)
+
+function isEditable(element: SocialGraphicsElement): boolean {
+  return !element.locked
+}
 
 function setNodeRef(elementId: string) {
   return (instance: { getNode: () => Konva.Node } | null) => {
@@ -133,6 +141,13 @@ function handleStagePointerDown(event: { target: Konva.Node }) {
   }
 }
 
+function selectIfEditable(element: SocialGraphicsElement) {
+  if (!isEditable(element)) {
+    return
+  }
+  emit('select-element', element.id)
+}
+
 function handleDragEnd(elementId: string, event: { target: Konva.Node }) {
   emit('update-element', elementId, {
     x: Math.round(event.target.x()),
@@ -219,7 +234,6 @@ defineExpose({
   <div class="graphics-stage-shell">
     <div class="graphics-stage-meta">
       <span class="graphics-stage-chip">Canonical Canvas {{ scene.width }} x {{ scene.height }}</span>
-      <span class="graphics-stage-chip">Display Scale {{ Math.round(displayScale * 100) }}%</span>
     </div>
 
     <div ref="wrapperRef" class="graphics-stage-wrap">
@@ -247,10 +261,11 @@ defineExpose({
                 fill: element.fill,
                 cornerRadius: element.cornerRadius,
                 opacity: element.opacity,
-                draggable: true,
+                draggable: isEditable(element),
+                listening: isEditable(element),
               }"
-              @click="emit('select-element', element.id)"
-              @tap="emit('select-element', element.id)"
+              @click="selectIfEditable(element)"
+              @tap="selectIfEditable(element)"
               @dragend="handleDragEnd(element.id, $event)"
               @transformend="handleTransformEnd(element, $event)"
             />
@@ -271,10 +286,11 @@ defineExpose({
                 align: element.align,
                 lineHeight: element.lineHeight,
                 opacity: element.opacity,
-                draggable: true,
+                draggable: isEditable(element),
+                listening: isEditable(element),
               }"
-              @click="emit('select-element', element.id)"
-              @tap="emit('select-element', element.id)"
+              @click="selectIfEditable(element)"
+              @tap="selectIfEditable(element)"
               @dragend="handleDragEnd(element.id, $event)"
               @transformend="handleTransformEnd(element, $event)"
             />
@@ -282,9 +298,9 @@ defineExpose({
             <v-image
               v-else-if="element.kind === 'image' && element.visible"
               :ref="setNodeRef(element.id)"
-              :config="buildImageConfig(element)"
-              @click="emit('select-element', element.id)"
-              @tap="emit('select-element', element.id)"
+              :config="{ ...buildImageConfig(element), draggable: isEditable(element), listening: isEditable(element) }"
+              @click="selectIfEditable(element)"
+              @tap="selectIfEditable(element)"
               @dragend="handleDragEnd(element.id, $event)"
               @transformend="handleTransformEnd(element, $event)"
             />
@@ -299,10 +315,11 @@ defineExpose({
                 stroke: element.stroke,
                 strokeWidth: element.strokeWidth,
                 opacity: element.opacity,
-                draggable: true,
+                draggable: isEditable(element),
+                listening: isEditable(element),
               }"
-              @click="emit('select-element', element.id)"
-              @tap="emit('select-element', element.id)"
+              @click="selectIfEditable(element)"
+              @tap="selectIfEditable(element)"
               @dragend="handleDragEnd(element.id, $event)"
               @transformend="handleTransformEnd(element, $event)"
             />
@@ -363,5 +380,7 @@ defineExpose({
     rgba(4, 10, 18, 0.92);
   padding: 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  width: fit-content;
+  max-width: 100%;
 }
 </style>

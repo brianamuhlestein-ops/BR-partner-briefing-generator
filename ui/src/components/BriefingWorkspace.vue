@@ -3,8 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import {
   createDraft,
-  fetchActiveAlerts,
-  fetchActiveIcaoAdvisories,
   fetchBriefingTypes,
   updateDraft,
 } from '../api'
@@ -12,21 +10,25 @@ import type {
   BriefingDraft,
   BriefingTemplate,
   BriefingType,
-  ContextItem,
   DerivedOutputStatus,
   DownstreamOutputId,
-  OpsToCommsPathId,
   OpsToCommsRecommendation,
   SectionValue,
   TemplateSection,
   WorkspaceTypeId,
 } from '../types'
-import ContextPanel from './ContextPanel.vue'
 import OpsToCommsWorkspace from './ops-to-comms/OpsToCommsWorkspace.vue'
 import PartnerBriefing from './PartnerBriefing.vue'
+import PartnerEmailBriefing from './PartnerEmailBriefing.vue'
 import PreviewPanel from './PreviewPanel.vue'
 import SchemaForm from './SchemaForm.vue'
 import SocialGraphicsWorkspace from './social-graphics/SocialGraphicsWorkspace.vue'
+
+const titleActions = [
+  { label: 'Science Layer', icon: 'mdi-atom' },
+  { label: 'User Guide', icon: 'mdi-book-open-page-variant-outline' },
+  { label: 'Export Application JSON', icon: 'mdi-database-export-outline' },
+]
 
 const legacySchemas: Record<string, string[]> = {
   master: [
@@ -84,11 +86,9 @@ const legacySchemas: Record<string, string[]> = {
 }
 
 const workspaceBriefingTypes: BriefingType[] = [
-  { id: 'master', label: 'Master' },
-  { id: 'partner', label: 'I&R Awareness' },
-  { id: 'ops-to-comms', label: 'Ops to Comms' },
-  { id: 'social-graphic', label: 'Social Media Design Review' },
-  { id: 'single-briefing-graphic', label: 'Partner Graphic Design Review' },
+  { id: 'impact-risk', label: 'Impact & Risk Matrix' },
+  { id: 'partner', label: 'Partner Email Briefing' },
+  { id: 'social-graphic', label: 'Social Media' },
 ]
 
 const downstreamProducts: { id: DownstreamOutputId; label: string }[] = [
@@ -295,74 +295,57 @@ const downstreamTemplates: Record<DownstreamOutputId, BriefingTemplate> = {
   staff: buildLegacyTemplate('staff'),
 }
 
+const activeWorkspaceStorageKey = 'partnerbrief-hub.active-workspace'
+
 const briefingTypes = ref<BriefingType[]>([])
-const selectedType = ref<WorkspaceTypeId>('master')
+const selectedType = ref<WorkspaceTypeId>('impact-risk')
 const selectedOutput = ref<DownstreamOutputId>('discussion')
 const template = ref<BriefingTemplate | null>(null)
 const draft = ref<BriefingDraft | null>(null)
-const alerts = ref<ContextItem[]>([])
-const advisories = ref<ContextItem[]>([])
 const opsRecommendation = ref<OpsToCommsRecommendation | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const pdfMessage = ref('')
 
+const isImpactRiskMode = computed(() => selectedType.value === 'impact-risk')
 const isPartnerMode = computed(() => selectedType.value === 'partner')
 const isOpsToCommsMode = computed(() => selectedType.value === 'ops-to-comms')
 const isSocialGraphicsMode = computed(() => selectedType.value === 'social-graphic')
-const isSingleGraphicMode = computed(() => selectedType.value === 'single-briefing-graphic')
-const isGraphicMode = computed(() => {
-  return isSocialGraphicsMode.value || isSingleGraphicMode.value
-})
-const isMasterMode = computed(() => selectedType.value === 'master')
+const isMasterMode = computed(() => false)
+const isBlankSlateMode = computed(() => isOpsToCommsMode.value)
+const isBriefingSchemaMode = computed(() => false)
 
-const currentBadge = computed(() => {
-  if (selectedType.value === 'partner') {
-    return 'IDSS'
-  }
-  if (selectedType.value === 'ops-to-comms') {
-    return 'OTC'
-  }
-  if (selectedType.value === 'social-graphic') {
-    return 'SMDR'
-  }
-  if (selectedType.value === 'single-briefing-graphic') {
-    return 'PGDR'
-  }
-  return 'SWPC'
-})
-
-const currentTitle = computed(() => 'PartnerBrief Hub')
+const currentTitle = computed(() => 'Partner Briefing Generator')
 const currentSubtitle = computed(() => {
-  return 'A unified impact-based decision support services briefing generator'
+  return 'Brief: A unified impact-based decision support services briefing generator'
 })
 
 const workspaceIntro = computed(() => {
-  if (selectedType.value === 'master') {
+  if (selectedType.value === 'impact-risk') {
     return {
-      kicker: 'Master Briefing',
-      text: 'Build the source briefing content that feeds downstream discussion, ICAO, and staff outputs.',
+      kicker: '',
+      text: '',
     }
   }
 
   if (selectedType.value === 'partner') {
     return {
-      kicker: 'I&R Awareness',
-      text: 'Assess sector risk, consequence, and partner-facing impacts to support impact-based decision support services.',
+      kicker: '',
+      text: '',
     }
   }
 
   if (selectedType.value === 'ops-to-comms') {
     return {
-      kicker: 'Ops to Comms',
-      text: 'Characterize the event, assess operational significance, and get a recommended path into the right communication design review workspace.',
+      kicker: 'Significant Activity Response',
+      text: 'Blank slate for significant activity response content.',
     }
   }
 
   if (selectedType.value === 'social-graphic') {
     return {
-      kicker: 'Social Media Design Review',
-      text: 'Shape public-facing graphics with the recommended template, visual direction, and approved asset guidance.',
+      kicker: '',
+      text: '',
     }
   }
 
@@ -378,9 +361,16 @@ const availableBriefingTypes = computed(() => {
   })
 })
 
-const visibleAdvisories = computed(() => {
-  return isMasterMode.value && selectedOutput.value === 'icao' ? advisories.value : []
-})
+const briefingTypeIcon = (briefingTypeId: string) => {
+  const icons: Record<string, string> = {
+    'impact-risk': 'mdi-view-grid-outline',
+    partner: 'mdi-email-outline',
+    'ops-to-comms': 'mdi-alert-outline',
+    'social-graphic': 'mdi-share-variant-outline',
+  }
+
+  return icons[briefingTypeId] ?? 'mdi-file-document-outline'
+}
 
 const downstreamOutputs = computed<DerivedOutputStatus[]>(() => {
   const masterSections = draft.value?.sections ?? {}
@@ -422,10 +412,6 @@ const currentPdfButtonLabel = computed(() => {
   return activeOutput.value ? `Generate ${activeOutput.value.label} PDF` : 'Generate PDF'
 })
 
-function workspaceTypeForPath(path: OpsToCommsPathId): WorkspaceTypeId {
-  return path === 'social-design-review' ? 'social-graphic' : 'single-briefing-graphic'
-}
-
 async function loadWorkspace(briefingType: string) {
   loading.value = true
   errorMessage.value = ''
@@ -433,43 +419,37 @@ async function loadWorkspace(briefingType: string) {
 
   try {
     if (
-      briefingType === 'partner' ||
       briefingType === 'ops-to-comms' ||
       briefingType === 'social-graphic' ||
-      briefingType === 'single-briefing-graphic'
+      briefingType === 'single-briefing-graphic' ||
+      briefingType === 'impact-risk' ||
+      briefingType === 'partner'
     ) {
       template.value = null
       draft.value = null
       return
     }
 
-    template.value = buildLegacyTemplate('master')
-    selectedOutput.value = 'discussion'
+    const schemaType = briefingType === 'icao' ? 'icao' : 'master'
+    template.value = buildLegacyTemplate(schemaType)
+    selectedOutput.value = schemaType === 'icao' ? 'icao' : 'discussion'
 
     try {
       draft.value = await createDraft({
-        briefing_type: 'master',
+        briefing_type: schemaType,
         template_version: 'legacy-ui',
         sections: {},
       })
     } catch {
-      draft.value = createLocalDraft('master')
+      draft.value = createLocalDraft(schemaType)
     }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load workspace.'
-    template.value = buildLegacyTemplate('master')
-    draft.value = createLocalDraft('master')
+    const fallbackType = briefingType === 'icao' ? 'icao' : 'master'
+    template.value = buildLegacyTemplate(fallbackType)
+    draft.value = createLocalDraft(fallbackType)
   } finally {
     loading.value = false
-  }
-}
-
-async function loadContext() {
-  try {
-    alerts.value = await fetchActiveAlerts()
-    advisories.value = await fetchActiveIcaoAdvisories()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Failed to load context.'
   }
 }
 
@@ -506,13 +486,12 @@ function handleGeneratePdf() {
   pdfMessage.value = activeOutput.value.pdfMessage
 }
 
-function handleOpsRecommendationUpdate(recommendation: OpsToCommsRecommendation) {
-  opsRecommendation.value = recommendation
+function selectWorkspace(briefingType: string) {
+  selectedType.value = briefingType as WorkspaceTypeId
 }
 
-function handleOpenRecommendedPath(path: OpsToCommsPathId, recommendation: OpsToCommsRecommendation) {
-  opsRecommendation.value = { ...recommendation }
-  selectedType.value = workspaceTypeForPath(path)
+function handleOpsRecommendationUpdate(recommendation: OpsToCommsRecommendation) {
+  opsRecommendation.value = recommendation
 }
 
 function clearPendingGraphicsRecommendation() {
@@ -520,6 +499,9 @@ function clearPendingGraphicsRecommendation() {
 }
 
 watch(selectedType, async (briefingType) => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(activeWorkspaceStorageKey, briefingType)
+  }
   await loadWorkspace(briefingType)
 })
 
@@ -528,6 +510,13 @@ watch(selectedOutput, () => {
 })
 
 onMounted(async () => {
+  if (typeof window !== 'undefined') {
+    const storedWorkspace = window.localStorage.getItem(activeWorkspaceStorageKey) as WorkspaceTypeId | null
+    if (storedWorkspace && workspaceBriefingTypes.some((item) => item.id === storedWorkspace)) {
+      selectedType.value = storedWorkspace
+    }
+  }
+
   try {
     briefingTypes.value = await fetchBriefingTypes()
   } catch {
@@ -538,108 +527,123 @@ onMounted(async () => {
     availableBriefingTypes.value.length > 0 &&
     !availableBriefingTypes.value.some((item) => item.id === selectedType.value)
   ) {
-    selectedType.value = (availableBriefingTypes.value[0]?.id as WorkspaceTypeId | undefined) ?? 'master'
+    selectedType.value = (availableBriefingTypes.value[0]?.id as WorkspaceTypeId | undefined) ?? 'impact-risk'
   }
 
   await loadWorkspace(selectedType.value)
-  await loadContext()
 })
 </script>
 
 <template>
-  <main class="workspace-shell">
-    <header class="briefing-topbar">
-      <div class="briefing-topbar-shell">
-        <div class="briefing-topbar-badge">{{ currentBadge }}</div>
-        <div class="briefing-topbar-inner">
-          <div class="briefing-topbar-kicker">NOAA Space Weather Prediction Center</div>
-          <div class="briefing-topbar-title-row">
-            <div class="briefing-topbar-copy">
-              <div class="briefing-topbar-title">{{ currentTitle }}</div>
-              <div class="briefing-topbar-subtitle">{{ currentSubtitle }}</div>
-            </div>
-          </div>
+  <main class="app-shell ma-root">
+    <header class="suite-bar">
+      <div class="brand-lockup">
+        <div class="swift-mark" aria-hidden="true">
+          <span>SWIFT</span>
         </div>
+        <div class="title-copy">
+          <p class="eyebrow">NOAA Space Weather Prediction Center</p>
+          <h1>{{ currentTitle }}</h1>
+          <p class="mission-line">{{ currentSubtitle }}</p>
+        </div>
+      </div>
+
+      <div class="title-tools" aria-label="Application tools">
+        <button
+          v-for="action in titleActions"
+          :key="action.label"
+          class="icon-button"
+          type="button"
+          :title="action.label"
+          :aria-label="action.label"
+        >
+          <v-icon :icon="action.icon" size="21" />
+        </button>
       </div>
     </header>
 
-    <div
-      class="workspace-grid"
-      :class="{
-        'workspace-grid--partner': isPartnerMode,
-        'workspace-grid--ops': isOpsToCommsMode,
-        'workspace-grid--graphics': isGraphicMode,
-      }"
-    >
-      <section class="panel panel--primary">
-        <div class="workspace-controls-row">
-          <div class="toolbar workspace-controls-toolbar">
-            <label>
-              Workspace Controls
-              <select v-model="selectedType">
-                <option v-for="item in availableBriefingTypes" :key="item.id" :value="item.id">
-                  {{ item.label }}
-                </option>
-              </select>
-            </label>
-
-            <div v-if="isMasterMode" class="toolbar-actions">
-              <button :disabled="!draft || loading" @click="handleGeneratePdf">
-                {{ currentPdfButtonLabel }}
-              </button>
-            </div>
-          </div>
-
-          <div class="workspace-intro">
-            <div class="workspace-intro__kicker">{{ workspaceIntro.kicker }}</div>
-            <p class="workspace-intro__text">{{ workspaceIntro.text }}</p>
-          </div>
-        </div>
-
-        <div v-if="isMasterMode" class="status-row">
-          <span v-if="draft" class="status-chip">Draft ID: {{ draft.draft_id }}</span>
-          <span v-if="draft" class="status-chip">Status: {{ draft.status }}</span>
-          <span v-if="draft && isLocalDraft(draft.draft_id)" class="status-chip">Local schema mode</span>
-        </div>
-
-        <p v-if="errorMessage" class="message workspace-alert error">{{ errorMessage }}</p>
-        <p v-else-if="isMasterMode && pdfMessage" class="message workspace-alert">{{ pdfMessage }}</p>
-        <p v-if="loading" class="message workspace-alert">Loading workspace...</p>
-
-        <PartnerBriefing v-if="isPartnerMode && !loading" />
-        <OpsToCommsWorkspace
-          v-else-if="isOpsToCommsMode && !loading"
-          @update:recommendation="handleOpsRecommendationUpdate"
-          @open-path="handleOpenRecommendedPath"
-        />
-        <SocialGraphicsWorkspace
-          v-else-if="isSocialGraphicsMode && !loading"
-          mode="social"
-          :recommendation="opsRecommendation"
-          @recommendation-applied="clearPendingGraphicsRecommendation"
-        />
-        <SocialGraphicsWorkspace
-          v-else-if="isSingleGraphicMode && !loading"
-          mode="briefing"
-          :recommendation="opsRecommendation"
-          @recommendation-applied="clearPendingGraphicsRecommendation"
-        />
-        <SchemaForm
-          v-else-if="template && draft && !loading"
-          :template="template"
-          :model-value="draft.sections"
-          @update:model-value="handleSectionsChange"
-        />
-      </section>
-
-      <PreviewPanel
-        v-if="isMasterMode"
-        :outputs="downstreamOutputs"
-        :selected-output="selectedOutput"
-        :pdf-message="pdfMessage"
-        @update:selected-output="selectedOutput = $event"
-      />
-      <ContextPanel v-if="!isGraphicMode" :alerts="alerts" :advisories="visibleAdvisories" />
+    <div class="ma-nav-shell">
+      <v-card class="ma-tabs-card" elevation="0">
+        <v-tabs v-model="selectedType" color="primary" density="comfortable" grow>
+          <v-tab
+            v-for="item in availableBriefingTypes"
+            :key="item.id"
+            :value="item.id"
+            @click="selectWorkspace(item.id)"
+          >
+            <v-icon start>{{ briefingTypeIcon(item.id) }}</v-icon>
+            {{ item.label }}
+          </v-tab>
+        </v-tabs>
+      </v-card>
     </div>
+
+    <section class="application-workspace" aria-label="Application content">
+      <div class="workflow-workspace" aria-label="Selected workflow">
+        <div
+          class="workspace-grid workflow-view"
+          :class="{
+            'workspace-grid--partner': isImpactRiskMode,
+            'workspace-grid--graphics': isSocialGraphicsMode,
+          }"
+        >
+          <section class="panel panel--primary" :class="{ 'panel--full-width': isImpactRiskMode || isPartnerMode }">
+            <div class="workspace-controls-row">
+              <div v-if="!isImpactRiskMode && !isPartnerMode && !isSocialGraphicsMode" class="workspace-intro">
+                <div class="workspace-intro__kicker">{{ workspaceIntro.kicker }}</div>
+                <p class="workspace-intro__text">{{ workspaceIntro.text }}</p>
+              </div>
+
+              <div v-if="isBriefingSchemaMode" class="toolbar-actions workspace-action-row">
+                <button :disabled="!draft || loading" @click="handleGeneratePdf">
+                  {{ currentPdfButtonLabel }}
+                </button>
+              </div>
+            </div>
+
+            <div v-if="isBriefingSchemaMode" class="status-row">
+              <span v-if="draft" class="status-chip">Draft ID: {{ draft.draft_id }}</span>
+              <span v-if="draft" class="status-chip">Status: {{ draft.status }}</span>
+              <span v-if="draft && isLocalDraft(draft.draft_id)" class="status-chip">Local schema mode</span>
+            </div>
+
+            <p v-if="errorMessage" class="message workspace-alert error">{{ errorMessage }}</p>
+            <p v-else-if="isBriefingSchemaMode && pdfMessage" class="message workspace-alert">{{ pdfMessage }}</p>
+            <p v-if="loading" class="message workspace-alert">Loading workspace...</p>
+
+            <PartnerBriefing v-if="isImpactRiskMode && !loading" />
+            <PartnerEmailBriefing v-else-if="isPartnerMode && !loading" />
+            <div v-else-if="isBlankSlateMode && !loading" class="blank-slate-panel">
+              <span>{{ workspaceIntro.kicker }} workspace pending layout.</span>
+            </div>
+            <div v-else-if="isSocialGraphicsMode && !loading" class="social-media-stack">
+              <OpsToCommsWorkspace
+                @update:recommendation="handleOpsRecommendationUpdate"
+              />
+              <SocialGraphicsWorkspace
+                mode="social"
+                presentation="social-tab"
+                :recommendation="opsRecommendation"
+                @recommendation-applied="clearPendingGraphicsRecommendation"
+              />
+            </div>
+            <SchemaForm
+              v-else-if="template && draft && !loading"
+              :template="template"
+              :model-value="draft.sections"
+              @update:model-value="handleSectionsChange"
+            />
+          </section>
+
+          <PreviewPanel
+            v-if="isMasterMode"
+            :outputs="downstreamOutputs"
+            :selected-output="selectedOutput"
+            :pdf-message="pdfMessage"
+            @update:selected-output="selectedOutput = $event"
+          />
+        </div>
+      </div>
+    </section>
   </main>
 </template>

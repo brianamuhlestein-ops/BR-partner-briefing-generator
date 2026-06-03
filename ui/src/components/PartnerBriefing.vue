@@ -174,11 +174,12 @@ const riskLevel = computed(() => {
 
 const riskLabel = computed(() => riskLabels[riskLevel.value - 1])
 const riskColor = computed(() => riskColors[riskLevel.value - 1])
-const selectedLikelihoodLabel = computed(() => {
-  return likelihoodOptions.find((option) => option.value === selectedLikelihood.value)?.label ?? ''
-})
-const selectedImpactLabel = computed(() => {
-  return impactOptions.find((option) => option.value === selectedImpact.value)?.label ?? ''
+const riskTextColor = computed(() => (riskLevel.value >= 3 ? '#ffffff' : '#111827'))
+const riskOutputStyle = computed(() => {
+  return {
+    backgroundColor: riskColor.value,
+    color: riskTextColor.value,
+  }
 })
 
 function cellRiskLevel(impact: number, likelihood: number): number {
@@ -248,32 +249,25 @@ function cellStyle(impact: number, likelihood: number) {
     </section>
 
     <section class="partner-section partner-risk-controls">
-      <h3>Risk Evaluation</h3>
-      <div class="partner-risk-row">
-        <label>
-          Probability
-          <select v-model="selectedLikelihood">
-            <option v-for="option in likelihoodOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
+      <h3 class="partner-risk-title">Risk Evaluation</h3>
 
-        <label>
-          Impact Level
-          <select v-model="selectedImpact">
-            <option v-for="option in impactOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-      </div>
+      <label class="partner-risk-label" for="partner-probability">Probability</label>
+      <select id="partner-probability" v-model="selectedLikelihood" class="partner-risk-select">
+        <option v-for="option in likelihoodOptions" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
 
-      <div class="partner-risk-result">
-        Probability: <strong>{{ selectedLikelihoodLabel }}</strong>, Impact:
-        <strong>{{ selectedImpactLabel }}</strong>
-        <span class="partner-risk-pill" :style="{ backgroundColor: riskColor }">
-          {{ riskLabel }} Risk
+      <label class="partner-risk-label" for="partner-impact">Impact Level</label>
+      <select id="partner-impact" v-model="selectedImpact" class="partner-risk-select">
+        <option v-for="option in impactOptions" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+
+      <div class="partner-risk-output">
+        <span class="partner-risk-output-cell" :style="riskOutputStyle">
+          {{ riskLabel }}
         </span>
       </div>
     </section>
@@ -397,31 +391,63 @@ function cellStyle(impact: number, likelihood: number) {
 }
 
 .partner-risk-controls {
-  justify-items: center;
-  text-align: center;
-}
-
-.partner-risk-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-}
-
-.partner-risk-row label {
   display: grid;
-  gap: 6px;
-  min-width: 220px;
-  color: rgba(220, 230, 244, 0.8);
+  grid-template-columns: minmax(150px, 0.8fr) minmax(120px, 0.6fr) minmax(220px, 1fr) minmax(220px, 1fr);
+  grid-template-rows: repeat(2, auto);
+  column-gap: 14px;
+  row-gap: 8px;
+  align-items: center;
+  padding: 14px 16px;
+  text-align: left;
 }
 
-.partner-risk-result {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
+.partner-risk-title {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  margin: 0;
+}
+
+.partner-risk-label {
+  color: rgba(220, 230, 244, 0.8);
+  font-weight: 650;
+}
+
+.partner-risk-select {
+  min-width: 0;
+  appearance: none;
+  border-color: #ffe864;
+  background-color: rgba(4, 10, 18, 0.9);
+  background-image:
+    linear-gradient(45deg, transparent 50%, #ffe864 50%),
+    linear-gradient(135deg, #ffe864 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+}
+
+.partner-risk-output {
+  grid-column: 4;
+  grid-row: 1 / 3;
+  display: grid;
+  gap: 5px;
+  align-content: center;
   color: rgba(220, 230, 244, 0.86);
+}
+
+.partner-risk-output-cell {
+  display: grid;
+  min-height: 56px;
+  min-width: 112px;
+  place-items: center;
+  border: 1px solid #d8e1ea;
+  border-radius: var(--app-radius);
+  font-size: 1.25rem;
+  font-weight: 800;
 }
 
 .partner-risk-pill {
@@ -430,6 +456,18 @@ function cellStyle(impact: number, likelihood: number) {
   display: inline-flex;
   font-weight: 700;
   padding: 4px 10px;
+}
+
+@media (max-width: 760px) {
+  .partner-risk-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .partner-risk-title,
+  .partner-risk-output {
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
 
 .partner-matrix-wrap {

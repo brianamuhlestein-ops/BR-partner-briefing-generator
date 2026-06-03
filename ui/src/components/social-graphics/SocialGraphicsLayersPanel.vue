@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+
 import type { SocialGraphicsScene } from '../../types'
 
-defineProps<{
+const props = defineProps<{
   scene: SocialGraphicsScene
   selectedElementId: string | null
 }>()
@@ -11,6 +13,9 @@ const emit = defineEmits<{
   toggle: [elementId: string]
   move: [elementId: string, direction: 'up' | 'down']
 }>()
+
+const expanded = ref(true)
+const editableElements = computed(() => props.scene.elements.filter((element) => !element.locked))
 </script>
 
 <template>
@@ -20,11 +25,14 @@ const emit = defineEmits<{
         <div class="panel-kicker">Layers</div>
         <h2 class="social-side-card__title">Element Stack</h2>
       </div>
+      <button type="button" class="social-side-card__toggle" @click="expanded = !expanded">
+        {{ expanded ? 'Collapse' : 'Expand' }}
+      </button>
     </div>
 
-    <div class="layer-list">
+    <div v-if="expanded" class="layer-list">
       <button
-        v-for="(element, index) in [...scene.elements].reverse()"
+        v-for="(element, index) in [...editableElements].reverse()"
         :key="element.id"
         type="button"
         class="layer-item"
@@ -38,14 +46,14 @@ const emit = defineEmits<{
             {{ element.visible ? 'Hide' : 'Show' }}
           </span>
           <span
-            v-if="scene.elements.length - 1 - index < scene.elements.length - 1"
+            v-if="editableElements.length - 1 - index < editableElements.length - 1"
             class="layer-item__action"
             @click.stop="emit('move', element.id, 'up')"
           >
             Up
           </span>
           <span
-            v-if="scene.elements.length - 1 - index > 0"
+            v-if="editableElements.length - 1 - index > 0"
             class="layer-item__action"
             @click.stop="emit('move', element.id, 'down')"
           >
@@ -53,6 +61,10 @@ const emit = defineEmits<{
           </span>
         </span>
       </button>
+    </div>
+
+    <div v-else-if="editableElements.length === 0" class="layer-empty">
+      This template only has locked structure right now.
     </div>
   </section>
 </template>
@@ -66,6 +78,10 @@ const emit = defineEmits<{
 }
 
 .social-side-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
@@ -75,9 +91,21 @@ const emit = defineEmits<{
   font-size: 1.1rem;
 }
 
+.social-side-card__toggle {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.76rem;
+  box-shadow: none;
+}
+
 .layer-list {
   display: grid;
   gap: 10px;
+}
+
+.layer-empty {
+  margin: 0;
+  color: rgba(220, 230, 244, 0.72);
+  font-size: 0.84rem;
 }
 
 .layer-item {

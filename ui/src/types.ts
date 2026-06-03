@@ -4,7 +4,7 @@ export type BriefingType = {
 }
 
 export type WorkspaceTypeId =
-  | 'master'
+  | 'impact-risk'
   | 'partner'
   | 'ops-to-comms'
   | 'social-graphic'
@@ -80,11 +80,7 @@ export type DerivedOutputStatus = {
 }
 
 export type SocialGraphicsTemplateId =
-  | 'briefing-summary'
-  | 'event-alert-card'
   | 'informed-design-event'
-  | 'partner-spotlight'
-  | 'partner-impact-brief'
   | 'operational-snapshot'
   | 'decision-support-focus'
   | 'educational-slide'
@@ -114,6 +110,8 @@ export type SocialGraphicsAssetCategory =
 
 export type SocialGraphicsAssetSourceType = 'local' | 'remote' | 'generated'
 
+export type SocialGraphicsAssetLibrary = 'event-based' | 'education-outreach' | 'shared'
+
 export type SocialGraphicsAssetRole =
   | 'background'
   | 'logo'
@@ -141,6 +139,7 @@ export type SocialGraphicsBaseElement = {
   height: number
   visible: boolean
   opacity: number
+  locked?: boolean
 }
 
 export type SocialGraphicsRectElement = SocialGraphicsBaseElement & {
@@ -226,6 +225,7 @@ export type SocialGraphicsAsset = {
   description: string
   assetType: SocialGraphicsAssetType
   category: SocialGraphicsAssetCategory
+  library: SocialGraphicsAssetLibrary
   tags: string[]
   audience: OpsToCommsAudience[]
   eventTypes: OpsToCommsEventType[]
@@ -273,24 +273,46 @@ export type OpsToCommsLevel = 'low' | 'moderate' | 'high' | 'very-high'
 
 export type OpsToCommsAudience = 'public' | 'partners' | 'internal' | 'mixed'
 
+export type OpsToCommsCommunicationMode = 'event-based' | 'education-outreach'
+
+export type OpsToCommsEducationTemplateFamily =
+  | 'phenomena'
+  | 'swpc-products-services'
+  | 'sector-highlight'
+
+export type OpsToCommsCannedStatementOption = {
+  id: string
+  label: string
+  text: string
+}
+
 export type OpsToCommsPathId = 'social-design-review' | 'partner-design-review'
 
 export type OpsToCommsInput = {
+  communicationMode: OpsToCommsCommunicationMode
+  educationTemplateFamily: OpsToCommsEducationTemplateFamily
   eventType: OpsToCommsEventType
+  whatItIsOptionId: string
+  whyItMattersOptionId: string
+  actionsToTakeOptionId: string
   severity: OpsToCommsSeverity
   timingStatus: OpsToCommsTimingStatus
   impactedSectors: OpsToCommsSector[]
   riskLevel: OpsToCommsLevel
   impactProbability: OpsToCommsLevel
   confidence: OpsToCommsLevel
-  audience: OpsToCommsAudience
 }
 
 export type OpsToCommsRecommendation = OpsToCommsInput & {
+  audience: OpsToCommsAudience
+  selectedWhatItIsText: string
+  selectedWhyItMattersText: string
+  selectedActionsToTakeText: string | null
   recommendedPrimaryPath: OpsToCommsPathId
   recommendedSecondaryPath: OpsToCommsPathId | null
   recommendedTemplate: SocialGraphicsTemplateId
   recommendedPathTemplates: Partial<Record<OpsToCommsPathId, SocialGraphicsTemplateId>>
+  recommendedAssetLibrary: SocialGraphicsAssetLibrary
   recommendedVisualType: SocialGraphicsAssetType
   recommendedVisualKeywords: string[]
   recommendedAssetTags: string[]

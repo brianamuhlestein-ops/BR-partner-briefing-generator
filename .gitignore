@@ -1,0 +1,17 @@
+# Logs
+*.log
+
+# Local generated assets / scratch copies
+graphics_library/
+
+# Dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+
+# Local environment/editor noise
+*.local
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
