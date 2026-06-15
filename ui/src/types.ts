@@ -60,12 +60,21 @@ export type PdfResponse = {
   message: string
 }
 
+export type PartnerImpactLevel = {
+  label: string
+  thresholdIndicators: string
+  impact: string
+  action: string
+  confidence: string
+}
+
 export type PartnerSector = {
   name: string
   description: string
+  hazardFamilies: string[]
   keyIndicators: string[]
-  impactLevels: Record<string, string>
-  thresholds: Record<string, string>
+  confidenceNote: string
+  impactLevels: Record<string, PartnerImpactLevel>
 }
 
 export type DownstreamOutputId = 'discussion' | 'icao' | 'staff'
