@@ -80,7 +80,10 @@ def build_export_artifacts(
                 "width": size[0],
                 "height": size[1],
                 "path": str(variant_path),
-                "url": f"/api/v1/social-graphics/exports/{export_id}/assets/{variant_id}",
+                "url": (
+                    "/api/v1/partner-briefing/social-graphics/"
+                    f"exports/{export_id}/assets/{variant_id}"
+                ),
             }
         )
 

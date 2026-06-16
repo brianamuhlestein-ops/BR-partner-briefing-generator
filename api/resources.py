@@ -1,9 +1,10 @@
-import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import falcon
 
 from api.config import get_settings
+from api.http import collection_response, item_response, read_json, result_response
 from api.persistence import (
     create_draft_record,
     create_social_graphics_draft_record,
@@ -34,13 +35,6 @@ TEMPLATES_DIR = Path(SETTINGS["templates_dir"])
 GENERATED_DIR = Path(SETTINGS["generated_dir"])
 
 
-def read_json(req: falcon.Request) -> dict:
-    body = req.bounded_stream.read()
-    if not body:
-        return {}
-    return json.loads(body.decode("utf-8"))
-
-
 def require_draft(draft_id: str) -> dict:
     draft = get_draft_record(draft_id)
     if not draft:
@@ -64,17 +58,21 @@ def require_social_graphics_export(export_id: str) -> dict:
 
 class HealthResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
-        resp.media = {"status": "ok"}
+        resp.media = {
+            "status": "ok",
+            "service": get_settings()["service_name"],
+            "timeUtc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
 
 
 class BriefingTypesResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
-        resp.media = {"items": get_briefing_types()}
+        resp.media = collection_response(get_briefing_types())
 
 
 class TemplateResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response, briefing_type: str) -> None:
-        resp.media = get_template(briefing_type, TEMPLATES_DIR)
+        resp.media = item_response(get_template(briefing_type, TEMPLATES_DIR))
 
 
 class TemplateVersionResource:
@@ -85,7 +83,7 @@ class TemplateVersionResource:
         briefing_type: str,
         version: str,
     ) -> None:
-        resp.media = get_template_version(briefing_type, version, TEMPLATES_DIR)
+        resp.media = item_response(get_template_version(briefing_type, version, TEMPLATES_DIR))
 
 
 class DraftCollectionResource:
@@ -95,12 +93,12 @@ class DraftCollectionResource:
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
         resp.status = falcon.HTTP_201
-        resp.media = create_draft_record(payload)
+        resp.media = item_response(create_draft_record(payload))
 
 
 class DraftResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
-        resp.media = require_draft(draft_id)
+        resp.media = item_response(require_draft(draft_id))
 
     def on_patch(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         current = require_draft(draft_id)
@@ -113,21 +111,21 @@ class DraftResource:
         validation = validate_draft_payload(merged, TEMPLATES_DIR)
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
-        resp.media = update_draft_record(draft_id, payload)
+        resp.media = item_response(update_draft_record(draft_id, payload))
 
 
 class DeriveResource:
     def on_post(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         draft = require_draft(draft_id)
         payload = read_json(req)
-        resp.media = derive_from_master(draft, payload, TEMPLATES_DIR)
+        resp.media = result_response(derive_from_master(draft, payload, TEMPLATES_DIR))
 
 
 class PreviewResource:
     def on_post(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         draft = require_draft(draft_id)
         payload = read_json(req)
-        resp.media = generate_html_preview(draft, payload, TEMPLATES_DIR)
+        resp.media = result_response(generate_html_preview(draft, payload, TEMPLATES_DIR))
 
 
 class PdfResource:
@@ -136,7 +134,7 @@ class PdfResource:
         payload = read_json(req)
         output = generate_pdf_output(draft, payload, TEMPLATES_DIR)
         save_generated_output(draft_id, output)
-        resp.media = output
+        resp.media = result_response(output)
 
 
 class SocialGraphicsDraftCollectionResource:
@@ -146,19 +144,19 @@ class SocialGraphicsDraftCollectionResource:
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
         resp.status = falcon.HTTP_201
-        resp.media = create_social_graphics_draft_record(payload)
+        resp.media = item_response(create_social_graphics_draft_record(payload))
 
 
 class SocialGraphicsDraftResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
-        resp.media = require_social_graphics_draft(draft_id)
+        resp.media = item_response(require_social_graphics_draft(draft_id))
 
     def on_patch(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         payload = read_json(req)
         validation = validate_social_graphics_scene(payload.get("scene"))
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
-        resp.media = update_social_graphics_draft_record(draft_id, payload)
+        resp.media = item_response(update_social_graphics_draft_record(draft_id, payload))
 
 
 class SocialGraphicsExportCollectionResource:
@@ -173,7 +171,7 @@ class SocialGraphicsExportCollectionResource:
         export_record = build_export_artifacts(payload, GENERATED_DIR)
         stored = save_social_graphics_export_record(export_record)
         resp.status = falcon.HTTP_201
-        resp.media = {
+        resp.media = result_response({
             "export_id": stored["export_id"],
             "draft_id": stored["draft_id"],
             "created_at": stored["created_at"],
@@ -187,7 +185,7 @@ class SocialGraphicsExportCollectionResource:
                 }
                 for variant in stored["variants"]
             ],
-        }
+        })
 
 
 class SocialGraphicsAssetResource:
@@ -218,36 +216,9 @@ class SocialGraphicsAssetResource:
 
 class ActiveAlertsResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
-        resp.media = {"items": get_active_alert_context()}
+        resp.media = collection_response(get_active_alert_context())
 
 
 class ActiveIcaoAdvisoriesResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
-        resp.media = {"items": get_active_icao_advisory_context()}
-
-
-def add_routes(app: falcon.App) -> None:
-    app.add_route("/api/v1/health", HealthResource())
-    app.add_route("/api/v1/briefing-types", BriefingTypesResource())
-    app.add_route("/api/v1/templates/{briefing_type}", TemplateResource())
-    app.add_route(
-        "/api/v1/templates/{briefing_type}/versions/{version}",
-        TemplateVersionResource(),
-    )
-    app.add_route("/api/v1/drafts", DraftCollectionResource())
-    app.add_route("/api/v1/drafts/{draft_id}", DraftResource())
-    app.add_route("/api/v1/drafts/{draft_id}/derive", DeriveResource())
-    app.add_route("/api/v1/drafts/{draft_id}/preview", PreviewResource())
-    app.add_route("/api/v1/drafts/{draft_id}/pdf", PdfResource())
-    app.add_route("/api/v1/social-graphics/drafts", SocialGraphicsDraftCollectionResource())
-    app.add_route("/api/v1/social-graphics/drafts/{draft_id}", SocialGraphicsDraftResource())
-    app.add_route("/api/v1/social-graphics/exports", SocialGraphicsExportCollectionResource())
-    app.add_route(
-        "/api/v1/social-graphics/exports/{export_id}/assets/{variant_id}",
-        SocialGraphicsAssetResource(),
-    )
-    app.add_route("/api/v1/context/alerts/active", ActiveAlertsResource())
-    app.add_route(
-        "/api/v1/context/advisories/icao/active",
-        ActiveIcaoAdvisoriesResource(),
-    )
+        resp.media = collection_response(get_active_icao_advisory_context())

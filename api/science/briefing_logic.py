@@ -11,7 +11,7 @@ PHASE1_BRIEFING_TYPES = [
 
 
 def _load_json(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as stream:
+    with path.open("r", encoding="utf-8-sig") as stream:
         return json.load(stream)
 
 

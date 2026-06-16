@@ -30,7 +30,7 @@ const titleActions = [
   { label: 'Export Application JSON', icon: 'mdi-database-export-outline' },
 ]
 
-const legacySchemas: Record<string, string[]> = {
+const defaultSchemas: Record<string, string[]> = {
   master: [
     'Solar Activity - 24 hr Summary Discussion',
     'Solar Activity - Probability Table',
@@ -118,8 +118,8 @@ function probabilityCategories(label: string): string[] {
   return ['R1-R2', 'R3+']
 }
 
-function buildLegacyTemplate(briefingType: string): BriefingTemplate {
-  const sectionLabels = legacySchemas[briefingType] ?? []
+function buildDefaultTemplate(briefingType: string): BriefingTemplate {
+  const sectionLabels = defaultSchemas[briefingType] ?? []
   const sections: TemplateSection[] = sectionLabels.map((label) => {
     if (label.toLowerCase().includes('probability table')) {
       return {
@@ -149,7 +149,7 @@ function createLocalDraft(briefingType: string): BriefingDraft {
   return {
     draft_id: `local-${briefingType}`,
     briefing_type: briefingType,
-    template_version: 'legacy-ui',
+    template_version: 'local-ui',
     sections: {},
     status: 'draft',
   }
@@ -290,9 +290,9 @@ function buildLocalPreviewHtml(
 }
 
 const downstreamTemplates: Record<DownstreamOutputId, BriefingTemplate> = {
-  discussion: buildLegacyTemplate('discussion'),
-  icao: buildLegacyTemplate('icao'),
-  staff: buildLegacyTemplate('staff'),
+  discussion: buildDefaultTemplate('discussion'),
+  icao: buildDefaultTemplate('icao'),
+  staff: buildDefaultTemplate('staff'),
 }
 
 const activeWorkspaceStorageKey = 'partnerbrief-hub.active-workspace'
@@ -431,13 +431,13 @@ async function loadWorkspace(briefingType: string) {
     }
 
     const schemaType = briefingType === 'icao' ? 'icao' : 'master'
-    template.value = buildLegacyTemplate(schemaType)
+    template.value = buildDefaultTemplate(schemaType)
     selectedOutput.value = schemaType === 'icao' ? 'icao' : 'discussion'
 
     try {
       draft.value = await createDraft({
         briefing_type: schemaType,
-        template_version: 'legacy-ui',
+        template_version: 'local-ui',
         sections: {},
       })
     } catch {
@@ -446,7 +446,7 @@ async function loadWorkspace(briefingType: string) {
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load workspace.'
     const fallbackType = briefingType === 'icao' ? 'icao' : 'master'
-    template.value = buildLegacyTemplate(fallbackType)
+    template.value = buildDefaultTemplate(fallbackType)
     draft.value = createLocalDraft(fallbackType)
   } finally {
     loading.value = false

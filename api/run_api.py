@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 from pathlib import Path
 
@@ -11,30 +11,22 @@ if str(REPO_ROOT) not in sys.path:
 import falcon
 from waitress import serve
 
-from api.briefing_api import add_routes
 from api.config import get_settings
+from api.errors import register_error_handlers
+from api.middleware import CorsMiddleware
 from api.persistence import initialize_storage
-
-
-class CorsMiddleware:
-    def process_response(self, req: falcon.Request, resp: falcon.Response, resource, req_succeeded):
-        resp.set_header("Access-Control-Allow-Origin", get_settings()["cors_allow_origin"])
-        resp.set_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
-        resp.set_header("Access-Control-Allow-Headers", "Content-Type")
-
-    def process_request(self, req: falcon.Request, resp: falcon.Response):
-        if req.method == "OPTIONS":
-            raise falcon.HTTPOk()
+from api.routes import register_routes
 
 
 def create_app() -> falcon.App:
     initialize_storage()
     app = falcon.App(middleware=[CorsMiddleware()])
-    add_routes(app)
+    register_routes(app)
+    register_error_handlers(app)
     return app
 
 
-app = create_app()
+app = application = create_app()
 
 
 if __name__ == "__main__":
