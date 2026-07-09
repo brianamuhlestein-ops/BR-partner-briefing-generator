@@ -1,0 +1,44 @@
+services:
+  api:
+    image: ${BUILD_PATH:-swift-partner-briefing-generator}/api:${API_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "${PARTNER_BRIEFING_API_PORT:-8089}:${PARTNER_BRIEFING_API_PORT:-8089}"
+    tty: true
+    restart: always
+    environment:
+      SERVICE_NAME: "partner-briefing-api"
+      API_HOST: "0.0.0.0"
+      API_PORT: "${PARTNER_BRIEFING_API_PORT:-8089}"
+      DATABASE_PATH: "/srv/partner-briefing/data/email_briefing.db"
+      GENERATED_DIR: "/srv/partner-briefing/generated"
+      CORS_ALLOW_ORIGINS: "${CORS_ALLOW_ORIGINS:-http://localhost:5179,http://127.0.0.1:5179}"
+      CORS_ALLOW_METHODS: "${CORS_ALLOW_METHODS:-GET,POST,PATCH,OPTIONS}"
+      CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID}"
+    command: ["python", "-m", "api.run_api"]
+    volumes:
+      - ./email_briefing.db:/srv/partner-briefing/data/email_briefing.db
+      - ./generated:/srv/partner-briefing/generated
+    logging:
+      options:
+        max-size: "10m"
+
+  ui:
+    image: ${BUILD_PATH:-swift-partner-briefing-generator}/ui:${UI_VERSION:-latest}
+    build:
+      context: ui
+      dockerfile: Dockerfile
+    ports:
+      - "${EXTERNAL_UI_PORT:-5179}:80"
+    tty: true
+    restart: always
+    depends_on:
+      - api
+    environment:
+      API_UPSTREAM_HOST: "api"
+      API_UPSTREAM_PORT: "${PARTNER_BRIEFING_API_PORT:-8089}"
+    logging:
+      options:
+        max-size: "10m"

@@ -12,14 +12,13 @@ import type {
   BriefingType,
   DerivedOutputStatus,
   DownstreamOutputId,
-  OpsToCommsRecommendation,
   SectionValue,
   TemplateSection,
   WorkspaceTypeId,
 } from '../types'
-import OpsToCommsWorkspace from './ops-to-comms/OpsToCommsWorkspace.vue'
 import PartnerBriefing from './PartnerBriefing.vue'
 import PartnerEmailBriefing from './PartnerEmailBriefing.vue'
+import PartnerTailoredBrief from './PartnerTailoredBrief.vue'
 import PreviewPanel from './PreviewPanel.vue'
 import SchemaForm from './SchemaForm.vue'
 import SocialGraphicsWorkspace from './social-graphics/SocialGraphicsWorkspace.vue'
@@ -87,7 +86,8 @@ const defaultSchemas: Record<string, string[]> = {
 
 const workspaceBriefingTypes: BriefingType[] = [
   { id: 'impact-risk', label: 'Impact & Risk Matrix' },
-  { id: 'partner', label: 'Partner Email Briefing' },
+  { id: 'partner', label: 'Core Distribution Brief' },
+  { id: 'partner-tailored', label: 'Partner Tailored Brief' },
   { id: 'social-graphic', label: 'Social Media' },
 ]
 
@@ -302,13 +302,14 @@ const selectedType = ref<WorkspaceTypeId>('impact-risk')
 const selectedOutput = ref<DownstreamOutputId>('discussion')
 const template = ref<BriefingTemplate | null>(null)
 const draft = ref<BriefingDraft | null>(null)
-const opsRecommendation = ref<OpsToCommsRecommendation | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const pdfMessage = ref('')
 
 const isImpactRiskMode = computed(() => selectedType.value === 'impact-risk')
 const isPartnerMode = computed(() => selectedType.value === 'partner')
+const isPartnerTailoredMode = computed(() => selectedType.value === 'partner-tailored')
+const isPartnerBriefMode = computed(() => isPartnerMode.value || isPartnerTailoredMode.value)
 const isOpsToCommsMode = computed(() => selectedType.value === 'ops-to-comms')
 const isSocialGraphicsMode = computed(() => selectedType.value === 'social-graphic')
 const isMasterMode = computed(() => false)
@@ -328,7 +329,7 @@ const workspaceIntro = computed(() => {
     }
   }
 
-  if (selectedType.value === 'partner') {
+  if (selectedType.value === 'partner' || selectedType.value === 'partner-tailored') {
     return {
       kicker: '',
       text: '',
@@ -365,6 +366,7 @@ const briefingTypeIcon = (briefingTypeId: string) => {
   const icons: Record<string, string> = {
     'impact-risk': 'mdi-view-grid-outline',
     partner: 'mdi-email-outline',
+    'partner-tailored': 'mdi-account-details-outline',
     'ops-to-comms': 'mdi-alert-outline',
     'social-graphic': 'mdi-share-variant-outline',
   }
@@ -423,7 +425,8 @@ async function loadWorkspace(briefingType: string) {
       briefingType === 'social-graphic' ||
       briefingType === 'single-briefing-graphic' ||
       briefingType === 'impact-risk' ||
-      briefingType === 'partner'
+      briefingType === 'partner' ||
+      briefingType === 'partner-tailored'
     ) {
       template.value = null
       draft.value = null
@@ -488,14 +491,6 @@ function handleGeneratePdf() {
 
 function selectWorkspace(briefingType: string) {
   selectedType.value = briefingType as WorkspaceTypeId
-}
-
-function handleOpsRecommendationUpdate(recommendation: OpsToCommsRecommendation) {
-  opsRecommendation.value = recommendation
-}
-
-function clearPendingGraphicsRecommendation() {
-  opsRecommendation.value = null
 }
 
 watch(selectedType, async (briefingType) => {
@@ -587,9 +582,9 @@ onMounted(async () => {
             'workspace-grid--graphics': isSocialGraphicsMode,
           }"
         >
-          <section class="panel panel--primary" :class="{ 'panel--full-width': isImpactRiskMode || isPartnerMode }">
+          <section class="panel panel--primary" :class="{ 'panel--full-width': isImpactRiskMode || isPartnerBriefMode }">
             <div class="workspace-controls-row">
-              <div v-if="!isImpactRiskMode && !isPartnerMode && !isSocialGraphicsMode" class="workspace-intro">
+              <div v-if="!isImpactRiskMode && !isPartnerBriefMode && !isSocialGraphicsMode" class="workspace-intro">
                 <div class="workspace-intro__kicker">{{ workspaceIntro.kicker }}</div>
                 <p class="workspace-intro__text">{{ workspaceIntro.text }}</p>
               </div>
@@ -613,18 +608,14 @@ onMounted(async () => {
 
             <PartnerBriefing v-if="isImpactRiskMode && !loading" />
             <PartnerEmailBriefing v-else-if="isPartnerMode && !loading" />
+            <PartnerTailoredBrief v-else-if="isPartnerTailoredMode && !loading" />
             <div v-else-if="isBlankSlateMode && !loading" class="blank-slate-panel">
               <span>{{ workspaceIntro.kicker }} workspace pending layout.</span>
             </div>
             <div v-else-if="isSocialGraphicsMode && !loading" class="social-media-stack">
-              <OpsToCommsWorkspace
-                @update:recommendation="handleOpsRecommendationUpdate"
-              />
               <SocialGraphicsWorkspace
                 mode="social"
                 presentation="social-tab"
-                :recommendation="opsRecommendation"
-                @recommendation-applied="clearPendingGraphicsRecommendation"
               />
             </div>
             <SchemaForm

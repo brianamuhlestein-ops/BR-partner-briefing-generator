@@ -6,6 +6,7 @@ export type BriefingType = {
 export type WorkspaceTypeId =
   | 'impact-risk'
   | 'partner'
+  | 'partner-tailored'
   | 'ops-to-comms'
   | 'social-graphic'
   | 'single-briefing-graphic'

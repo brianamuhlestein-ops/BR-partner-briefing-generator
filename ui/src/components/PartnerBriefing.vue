@@ -22,11 +22,11 @@ const impactOptions = [
 const riskLabels = ['Little to None', 'Minor', 'Moderate', 'High', 'Extreme']
 const riskColors = ['#00A878', '#FFE864', '#FF8C42', '#E84F4F', '#C12AFF']
 const sectorLevelTints = [
-  'rgba(0, 168, 120, 0.34)',
-  'rgba(255, 232, 100, 0.36)',
-  'rgba(255, 140, 66, 0.38)',
-  'rgba(232, 79, 79, 0.4)',
-  'rgba(193, 42, 255, 0.44)',
+  '#07584c',
+  '#6b6b3f',
+  '#764832',
+  '#73313e',
+  '#62238a',
 ]
 const impactLevelIds = ['1', '2', '3', '4', '5']
 
@@ -284,48 +284,138 @@ function cellStyle(impact: number, likelihood: number) {
 
 <template>
   <div class="partner-briefing">
-    <section class="partner-section">
-      <h3>IDSS Sector Table</h3>
-      <div class="partner-sector-buttons">
-        <button
-          v-for="sector in sectors"
-          :key="sector.name"
-          class="partner-sector-button"
-          :class="{ active: sector.name === selectedSectorName }"
-          @click="selectedSectorName = sector.name"
-        >
-          {{ sector.name }}
-        </button>
+    <section class="partner-section partner-sector-section">
+      <div class="partner-section-heading">
+        <h3>IDSS Sector Table</h3>
       </div>
 
-      <div v-if="selectedSector" class="table-wrap">
-        <div class="partner-sector-summary">
-          <div class="partner-sector-summary-item partner-sector-summary-item--wide">
-            <span>Sector Focus</span>
+      <v-btn-toggle
+        v-model="selectedSectorName"
+        class="partner-sector-toggle"
+        color="primary"
+        density="compact"
+        divided
+        mandatory
+        variant="outlined"
+      >
+        <v-btn
+          v-for="sector in sectors"
+          :key="sector.name"
+          :value="sector.name"
+          size="small"
+        >
+          {{ sector.name }}
+        </v-btn>
+      </v-btn-toggle>
+
+      <div v-if="selectedSector" class="partner-sector-topline">
+        <div class="partner-sector-summary-card">
+          <div class="partner-sector-summary-row partner-sector-summary-row--focus">
+            <span class="partner-summary-label">Sector Focus</span>
             <p>{{ selectedSector.description }}</p>
           </div>
-          <div class="partner-sector-summary-item">
-            <span>Hazard Families</span>
+          <div class="partner-sector-summary-row">
+            <span class="partner-summary-label">Hazard Families</span>
             <div class="partner-chip-row">
               <span v-for="family in selectedSector.hazardFamilies" :key="family" class="partner-chip">
                 {{ family }}
               </span>
             </div>
           </div>
-          <div class="partner-sector-summary-item">
-            <span>Primary Indicators</span>
+          <div class="partner-sector-summary-row">
+            <span class="partner-summary-label">Primary Indicators</span>
             <div class="partner-chip-row">
               <span v-for="indicator in selectedSector.keyIndicators" :key="indicator" class="partner-chip">
                 {{ indicator }}
               </span>
             </div>
           </div>
-          <div class="partner-sector-summary-item partner-sector-summary-item--wide">
-            <span>Confidence / Uncertainty</span>
-            <p>{{ selectedSector.confidenceNote }}</p>
-          </div>
         </div>
 
+        <div class="partner-risk-controls">
+          <div class="partner-risk-title-row">
+            <h3 class="partner-risk-title">Risk Evaluation</h3>
+            <div class="partner-risk-help">
+              <button
+                class="partner-risk-help-button"
+                type="button"
+                aria-label="Show risk matrix reference"
+              >
+                i
+              </button>
+              <div class="partner-risk-help-popover" role="tooltip">
+                <div class="partner-risk-help-title">Risk Matrix</div>
+                <div class="partner-matrix-layout">
+                  <table class="partner-matrix-table">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th v-for="option in likelihoodOptions" :key="option.value">
+                          {{ option.label }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="impact in [5, 4, 3, 2, 1]" :key="impact">
+                        <th>{{ impact }} ({{ impactOptions[impact - 1]?.label }})</th>
+                        <td
+                          v-for="likelihood in [1, 2, 3, 4, 5]"
+                          :key="`${impact}-${likelihood}`"
+                          :style="cellStyle(impact, likelihood)"
+                        >
+                          {{ cellRiskLevel(impact, likelihood) }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="partner-legend">
+                    <div class="partner-legend-title">Risk Level</div>
+                    <div v-for="(label, index) in riskLabels" :key="label" class="partner-legend-item" :style="{ backgroundColor: riskColors[index], color: index >= 2 ? '#ffffff' : '#111827' }">
+                      {{ label }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="partner-risk-note">
+            Probability is the chance that relevant hazard conditions reach the selected level in the
+            forecast window. Impact is the sector-specific consequence level, not a direct NOAA scale
+            translation.
+          </p>
+
+          <div class="partner-risk-fields">
+            <div class="partner-risk-field">
+              <label class="partner-risk-label" for="partner-probability">Hazard Probability</label>
+              <select id="partner-probability" v-model="selectedLikelihood" class="partner-risk-select">
+                <option v-for="option in likelihoodOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="partner-risk-field">
+              <label class="partner-risk-label" for="partner-impact">Sector Impact Level</label>
+              <select id="partner-impact" v-model="selectedImpact" class="partner-risk-select">
+                <option v-for="option in impactOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="partner-risk-output">
+            <span class="partner-risk-output-label">Risk Level</span>
+            <span class="partner-risk-output-cell" :style="riskOutputStyle">
+              {{ riskLabel }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="selectedSector" class="table-wrap">
         <table class="partner-sector-table">
           <thead>
             <tr>
@@ -362,77 +452,6 @@ function cellStyle(impact: number, likelihood: number) {
         </table>
       </div>
     </section>
-
-    <section class="partner-section partner-risk-controls">
-      <h3 class="partner-risk-title">Risk Evaluation</h3>
-
-      <p class="partner-risk-note">
-        Probability is the chance that relevant hazard conditions reach the selected level in the
-        forecast window. Impact is the sector-specific consequence level, not a direct NOAA scale
-        translation.
-      </p>
-
-      <div class="partner-risk-field">
-        <label class="partner-risk-label" for="partner-probability">Hazard Probability</label>
-        <select id="partner-probability" v-model="selectedLikelihood" class="partner-risk-select">
-          <option v-for="option in likelihoodOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="partner-risk-field">
-        <label class="partner-risk-label" for="partner-impact">Sector Impact Level</label>
-        <select id="partner-impact" v-model="selectedImpact" class="partner-risk-select">
-          <option v-for="option in impactOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="partner-risk-output">
-        <span class="partner-risk-output-cell" :style="riskOutputStyle">
-          {{ riskLabel }}
-        </span>
-      </div>
-    </section>
-
-    <section class="partner-section">
-      <h3>Risk Matrix</h3>
-      <div class="partner-matrix-wrap">
-        <div class="partner-matrix-layout">
-          <table class="partner-matrix-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th v-for="option in likelihoodOptions" :key="option.value">
-                  {{ option.label }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="impact in [5, 4, 3, 2, 1]" :key="impact">
-                <th>{{ impact }} ({{ impactOptions[impact - 1]?.label }})</th>
-                <td
-                  v-for="likelihood in [1, 2, 3, 4, 5]"
-                  :key="`${impact}-${likelihood}`"
-                  :style="cellStyle(impact, likelihood)"
-                >
-                  {{ cellRiskLevel(impact, likelihood) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="partner-legend">
-            <div class="partner-legend-title">Risk Level</div>
-            <div v-for="(label, index) in riskLabels" :key="label" class="partner-legend-item" :style="{ backgroundColor: riskColors[index], color: index >= 2 ? '#ffffff' : '#111827' }">
-              {{ label }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -440,121 +459,193 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-briefing {
   display: grid;
   gap: 20px;
+  font-weight: 400;
 }
 
 .partner-section {
   display: grid;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 16px;
+  gap: 20px;
+  padding: 18px;
+  border-radius: 8px;
   border: 1px solid rgba(171, 199, 235, 0.14);
   background: rgba(255, 255, 255, 0.025);
+}
+
+.partner-sector-section {
+  gap: 20px;
+}
+
+.partner-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .partner-section h3 {
   margin: 0;
   color: #f2f7ff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.15;
 }
 
-.partner-sector-buttons {
+.partner-sector-toggle {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  justify-self: center;
+  max-width: 100%;
+  background: rgba(145, 153, 166, 0.18);
+  border: 1px solid rgba(210, 218, 230, 0.18);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.partner-sector-button {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(171, 199, 235, 0.16);
-  color: #d7e8ff;
-  padding: 10px 16px;
-  box-shadow: none;
+.partner-sector-toggle :deep(.v-btn) {
+  flex: 0 1 auto;
+  min-height: 32px;
+  color: rgba(231, 236, 244, 0.78) !important;
+  background: rgba(145, 153, 166, 0.24) !important;
+  box-shadow: none !important;
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
 }
 
-.partner-sector-button.active {
-  background: linear-gradient(180deg, rgba(57, 126, 220, 0.95), rgba(30, 84, 165, 0.96));
-  border-color: rgba(171, 199, 235, 0.3);
+.partner-sector-toggle :deep(.v-btn.v-btn--active),
+.partner-sector-toggle :deep(.v-btn[aria-pressed="true"]) {
+  color: #ffe55e !important;
+  background: #0b3f73 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 229, 94, 0.38) !important;
+}
+
+.partner-sector-toggle :deep(.v-btn:not(.v-btn--active):hover) {
+  background: rgba(178, 187, 201, 0.32) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.partner-sector-topline {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(380px, 0.75fr);
+  gap: 24px;
+  align-items: stretch;
 }
 
 .table-wrap {
   display: grid;
-  gap: 14px;
+  gap: 18px;
   overflow-x: auto;
 }
 
-.partner-sector-summary {
+.partner-sector-summary-card {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  align-items: start;
-}
-
-.partner-sector-summary-item {
+  align-content: start;
   border: 1px solid rgba(171, 199, 235, 0.14);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.025);
-  padding: 12px;
+  overflow: hidden;
 }
 
-.partner-sector-summary-item--wide {
-  grid-column: 1 / -1;
+.partner-sector-summary-row {
+  display: grid;
+  grid-template-columns: 158px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 14px 16px;
 }
 
-.partner-sector-summary-item span {
+.partner-sector-summary-row + .partner-sector-summary-row {
+  border-top: 1px solid rgba(171, 199, 235, 0.12);
+}
+
+.partner-summary-label {
   display: block;
   color: #eff6ff;
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.775rem;
+  font-weight: 500;
   letter-spacing: 0.04em;
-  margin-bottom: 6px;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
-.partner-sector-summary-item p,
+.partner-sector-summary-card p,
 .partner-chip-row {
   margin: 0;
 }
 
-.partner-sector-summary-item p {
+.partner-sector-summary-card p {
   color: rgba(220, 230, 244, 0.8);
+  font-size: 0.91rem;
+  line-height: 1.4;
 }
 
 .partner-chip-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
 }
 
 .partner-chip {
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
+  min-height: 21px;
   border: 1px solid rgba(171, 199, 235, 0.18);
-  border-radius: 999px;
-  background: rgba(171, 199, 235, 0.08);
-  color: rgba(230, 239, 250, 0.84);
-  font-size: 0.84rem;
-  font-weight: 650;
+  border-radius: 6px;
+  background: rgba(95, 199, 255, 0.16);
+  color: #d9efff;
+  font-size: 0.775rem;
+  font-weight: 400;
   line-height: 1.2;
-  padding: 4px 9px;
+  padding: 4px 8px;
+}
+
+.partner-chip:nth-child(2n) {
+  border-color: rgba(62, 209, 159, 0.36);
+  background: rgba(62, 209, 159, 0.16);
+  color: #d9fff3;
+}
+
+.partner-chip:nth-child(3n) {
+  border-color: rgba(255, 232, 100, 0.36);
+  background: rgba(255, 232, 100, 0.16);
+  color: #fff4ad;
+}
+
+.partner-chip:nth-child(4n) {
+  border-color: rgba(255, 140, 66, 0.36);
+  background: rgba(255, 140, 66, 0.16);
+  color: #ffd2b2;
+}
+
+.partner-chip:nth-child(5n) {
+  border-color: rgba(193, 42, 255, 0.36);
+  background: rgba(193, 42, 255, 0.16);
+  color: #efd0ff;
 }
 
 .partner-sector-table {
-  min-width: 1240px;
+  min-width: 1120px;
   width: 100%;
   margin: 0;
+  font-size: 0.91rem;
+  line-height: 1.35;
 }
 
 .partner-sector-table td,
 .partner-sector-table th {
   vertical-align: top;
-  border: 1px solid rgba(171, 199, 235, 0.16);
-  padding: 10px;
+  border: 1px solid #05070a;
+  padding: 9px 11px;
+  font-weight: 400;
 }
 
 .partner-sector-table th {
-  background: rgba(255, 255, 255, 0.05);
+  background: #182536;
   color: #eff6ff;
+  font-size: 0.91rem;
+  font-weight: 500;
 }
 
 .partner-sector-table td {
@@ -562,9 +653,7 @@ function cellStyle(impact: number, likelihood: number) {
 }
 
 .partner-sector-table tbody tr {
-  box-shadow:
-    inset 7px 0 var(--sector-level-color),
-    inset 0 0 0 1px color-mix(in srgb, var(--sector-level-color) 62%, transparent);
+  box-shadow: inset 5px 0 var(--sector-level-color);
 }
 
 .partner-sector-table tbody td {
@@ -572,77 +661,147 @@ function cellStyle(impact: number, likelihood: number) {
 }
 
 .partner-sector-table tbody td:first-child {
-  width: 118px;
+  width: 96px;
   text-align: center;
   vertical-align: middle;
 }
 
 .partner-sector-table tbody td:nth-child(2) {
-  min-width: 360px;
+  min-width: 315px;
   width: 34%;
 }
 
 .partner-level-badge {
   display: inline-grid;
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
   place-items: center;
   border-radius: 999px;
-  font-weight: 850;
+  font-weight: 500;
+  font-size: 0.88rem;
 }
 
 .partner-level-label {
   display: block;
   color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 500;
   line-height: 1.15;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .partner-threshold-list {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
-  padding-left: 18px;
+  padding-left: 14px;
 }
 
 .partner-threshold-list li {
-  line-height: 1.35;
-  padding-left: 2px;
+  line-height: 1.3;
+  padding-left: 1px;
 }
 
 .partner-risk-controls {
   display: grid;
-  grid-template-columns: minmax(170px, 0.8fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(140px, 0.6fr);
-  column-gap: 14px;
-  row-gap: 10px;
-  align-items: center;
-  padding: 14px 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-content: start;
+  border: 1px solid rgba(171, 199, 235, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 16px;
   text-align: left;
 }
 
 .partner-risk-title {
-  grid-column: 1;
   margin: 0;
 }
 
+.partner-risk-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.partner-risk-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.partner-risk-help-button {
+  display: inline-grid;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid rgba(171, 199, 235, 0.28);
+  border-radius: 999px;
+  background: rgba(95, 199, 255, 0.1);
+  color: #d9efff;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0;
+}
+
+.partner-risk-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(820px, calc(100vw - 80px));
+  padding: 10px;
+  border: 1px solid rgba(171, 199, 235, 0.28);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(17, 38, 61, 0.98), rgba(7, 18, 31, 0.99)),
+    #0b1320;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.partner-risk-help:hover .partner-risk-help-popover,
+.partner-risk-help:focus-within .partner-risk-help-popover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.partner-risk-help-title {
+  margin-bottom: 8px;
+  color: #f2f7ff;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .partner-risk-note {
-  grid-column: 2 / -1;
   margin: 0;
   color: rgba(220, 230, 244, 0.72);
-  font-size: 0.94rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.partner-risk-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .partner-risk-field {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 
 .partner-risk-label {
   color: rgba(220, 230, 244, 0.8);
-  font-weight: 650;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .partner-risk-select {
@@ -660,93 +819,102 @@ function cellStyle(impact: number, likelihood: number) {
     6px 6px,
     6px 6px;
   background-repeat: no-repeat;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  min-height: 40px;
+  padding-block: 9px;
   padding-right: 34px;
 }
 
 .partner-risk-output {
-  grid-column: 4;
-  grid-row: 2 / 4;
   display: grid;
-  gap: 5px;
-  align-content: center;
+  grid-template-columns: auto minmax(130px, 1fr);
+  gap: 8px;
+  align-items: center;
   color: rgba(220, 230, 244, 0.86);
+}
+
+.partner-risk-output-label {
+  color: rgba(220, 230, 244, 0.76);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .partner-risk-output-cell {
   display: grid;
-  min-height: 56px;
+  min-height: 44px;
   min-width: 112px;
   place-items: center;
   border: 1px solid #d8e1ea;
-  border-radius: var(--app-radius);
-  font-size: 1.25rem;
-  font-weight: 800;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .partner-risk-pill {
   border-radius: 999px;
   color: #fff;
   display: inline-flex;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 10px;
 }
 
 @media (max-width: 760px) {
-  .partner-risk-controls {
+  .partner-sector-topline,
+  .partner-risk-fields,
+  .partner-risk-output,
+  .partner-sector-summary-row {
     grid-template-columns: 1fr;
   }
 
-  .partner-risk-title,
-  .partner-risk-note,
-  .partner-risk-output {
-    grid-column: auto;
-    grid-row: auto;
+  .partner-sector-toggle {
+    justify-content: flex-start;
   }
-
-  .partner-sector-summary {
-    grid-template-columns: 1fr;
-  }
-}
-
-.partner-matrix-wrap {
-  overflow-x: auto;
 }
 
 .partner-matrix-layout {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   align-items: flex-start;
 }
 
 .partner-matrix-table {
-  min-width: 760px;
+  min-width: 620px;
+  font-size: 0.72rem;
 }
 
 .partner-matrix-table td,
 .partner-matrix-table th {
-  min-width: 96px;
+  min-width: 78px;
+  padding: 6px 8px;
 }
 
 .partner-legend {
   border: 1px solid rgba(171, 199, 235, 0.16);
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   min-width: 160px;
 }
 
 .partner-legend-title,
 .partner-legend-item {
-  padding: 8px 10px;
+  padding: 7px 9px;
   text-align: center;
 }
 
 .partner-legend-title {
   background: rgba(255, 255, 255, 0.05);
   color: #eff6ff;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 @media (max-width: 900px) {
+  .partner-sector-topline {
+    grid-template-columns: 1fr;
+  }
+
   .partner-sector-table {
     width: 100%;
   }

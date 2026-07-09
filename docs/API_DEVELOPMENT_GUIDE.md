@@ -95,7 +95,14 @@ Local server settings can be changed with:
 API_HOST=127.0.0.1
 API_PORT=8089
 SERVICE_NAME=partner-briefing-api
+DATABASE_PATH=email_briefing.db
+GENERATED_DIR=generated
 ```
+
+In Docker, the API binds to `0.0.0.0`, keeps SQLite under
+`/srv/partner-briefing/data/email_briefing.db`, and writes generated graphics to
+`/srv/partner-briefing/generated`. The UI container serves the production build
+with nginx and proxies `/api` to the API service.
 
 ## Current Stable Route Surface
 

@@ -102,6 +102,39 @@ Routes:
 
 ## Local Development
 
+### Docker Desktop
+
+From the repository root, build and start the API and UI containers:
+
+```powershell
+docker compose up --build
+```
+
+Default Docker URLs:
+
+```text
+UI:  http://localhost:5179
+API: http://localhost:8089
+```
+
+The UI container serves the built Vue app with nginx and proxies `/api` to the
+API container. The API container persists local data through these bind mounts:
+
+```text
+./email_briefing.db -> /srv/partner-briefing/data/email_briefing.db
+./generated         -> /srv/partner-briefing/generated
+```
+
+Optional port overrides:
+
+```powershell
+$env:EXTERNAL_UI_PORT = "5180"
+$env:PARTNER_BRIEFING_API_PORT = "8090"
+docker compose up --build
+```
+
+### Native
+
 Start the API:
 
 ```powershell
