@@ -493,22 +493,26 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-sector-toggle {
   display: flex;
   flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
   justify-self: center;
   max-width: 100%;
-  background: rgba(145, 153, 166, 0.18);
-  border: 1px solid rgba(210, 218, 230, 0.18);
-  border-radius: 6px;
-  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .partner-sector-toggle :deep(.v-btn) {
   flex: 0 1 auto;
-  min-height: 32px;
+  min-height: 34px;
+  padding-inline: 16px;
   color: rgba(231, 236, 244, 0.78) !important;
   background: rgba(145, 153, 166, 0.24) !important;
+  border: 1px solid rgba(210, 218, 230, 0.18) !important;
+  border-radius: 6px !important;
   box-shadow: none !important;
-  font-size: 0.84rem !important;
+  font-size: 0.91rem !important;
   font-weight: 500 !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
@@ -553,7 +557,7 @@ function cellStyle(impact: number, likelihood: number) {
   grid-template-columns: 158px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
-  padding: 14px 16px;
+  padding: 16px 18px;
 }
 
 .partner-sector-summary-row + .partner-sector-summary-row {
@@ -563,7 +567,7 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-summary-label {
   display: block;
   color: #eff6ff;
-  font-size: 0.775rem;
+  font-size: 0.84rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.25;
@@ -577,7 +581,7 @@ function cellStyle(impact: number, likelihood: number) {
 
 .partner-sector-summary-card p {
   color: rgba(220, 230, 244, 0.8);
-  font-size: 0.91rem;
+  font-size: 0.98rem;
   line-height: 1.4;
 }
 
@@ -590,15 +594,15 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-chip {
   display: inline-flex;
   align-items: center;
-  min-height: 21px;
+  min-height: 24px;
   border: 1px solid rgba(171, 199, 235, 0.18);
   border-radius: 6px;
   background: rgba(95, 199, 255, 0.16);
   color: #d9efff;
-  font-size: 0.775rem;
+  font-size: 0.84rem;
   font-weight: 400;
   line-height: 1.2;
-  padding: 4px 8px;
+  padding: 5px 10px;
 }
 
 .partner-chip:nth-child(2n) {
@@ -629,7 +633,7 @@ function cellStyle(impact: number, likelihood: number) {
   min-width: 1120px;
   width: 100%;
   margin: 0;
-  font-size: 0.91rem;
+  font-size: 0.98rem;
   line-height: 1.35;
 }
 
@@ -637,14 +641,14 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-sector-table th {
   vertical-align: top;
   border: 1px solid #05070a;
-  padding: 9px 11px;
+  padding: 11px 13px;
   font-weight: 400;
 }
 
 .partner-sector-table th {
   background: #182536;
   color: #eff6ff;
-  font-size: 0.91rem;
+  font-size: 0.98rem;
   font-weight: 500;
 }
 
@@ -673,13 +677,13 @@ function cellStyle(impact: number, likelihood: number) {
 
 .partner-level-badge {
   display: inline-grid;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   place-items: center;
   border-radius: 999px;
   font-weight: 500;
-  font-size: 0.88rem;
+  font-size: 0.94rem;
 }
 
 .partner-level-label {

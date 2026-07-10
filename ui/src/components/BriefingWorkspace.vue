@@ -88,7 +88,7 @@ const workspaceBriefingTypes: BriefingType[] = [
   { id: 'impact-risk', label: 'Impact & Risk Matrix' },
   { id: 'partner', label: 'Core Distribution Brief' },
   { id: 'partner-tailored', label: 'Partner Tailored Brief' },
-  { id: 'social-graphic', label: 'Social Media' },
+  { id: 'social-graphic', label: 'Media Generator' },
 ]
 
 const downstreamProducts: { id: DownstreamOutputId; label: string }[] = [
@@ -559,7 +559,7 @@ onMounted(async () => {
 
     <div class="ma-nav-shell">
       <v-card class="ma-tabs-card" elevation="0">
-        <v-tabs v-model="selectedType" color="primary" density="comfortable" grow>
+        <v-tabs v-model="selectedType" color="primary" density="comfortable" grow :show-arrows="false">
           <v-tab
             v-for="item in availableBriefingTypes"
             :key="item.id"

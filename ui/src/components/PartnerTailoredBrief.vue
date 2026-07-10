@@ -149,7 +149,7 @@ function exportBriefingPdf() {
           </label>
         </section>
 
-        <details class="tailored-editor-section" open>
+        <details class="tailored-editor-section">
           <summary>G-Scale Probabilities</summary>
           <div class="tailored-probability-editor">
             <div
@@ -177,7 +177,7 @@ function exportBriefingPdf() {
           </div>
         </details>
 
-        <details class="tailored-editor-section" open>
+        <details class="tailored-editor-section">
           <summary>Timing</summary>
           <div class="tailored-timing-editor">
             <div v-for="(row, index) in briefing.timingRows" :key="index" class="tailored-timing-row">
@@ -261,7 +261,7 @@ function exportBriefingPdf() {
           </label>
         </section>
 
-        <details class="tailored-editor-section" open>
+        <details class="tailored-editor-section">
           <summary>Operational Narrative</summary>
           <label>
             Potential Grid-Relevant Impacts
@@ -417,17 +417,27 @@ function exportBriefingPdf() {
 }
 
 .tailored-sector-button {
-  border: 1px solid rgba(95, 199, 255, 0.24);
-  background: rgba(95, 199, 255, 0.09);
-  color: rgba(232, 239, 248, 0.86);
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid rgba(210, 218, 230, 0.18);
+  border-radius: 6px;
+  background: rgba(145, 153, 166, 0.24);
+  color: rgba(231, 236, 244, 0.78);
+  font-size: 0.84rem;
   font-weight: 400;
+  letter-spacing: 0;
 }
 
 .tailored-sector-button--active {
-  border-color: rgba(95, 199, 255, 0.7);
-  background: linear-gradient(180deg, rgba(95, 199, 255, 0.28), rgba(37, 117, 204, 0.34));
-  color: #f2fbff;
-  box-shadow: inset 0 -2px 0 rgba(95, 199, 255, 0.72);
+  border-color: rgba(255, 229, 94, 0.38);
+  background: #0b3f73;
+  color: #ffe55e;
+  box-shadow: inset 0 0 0 1px rgba(255, 229, 94, 0.38);
+}
+
+.tailored-sector-button:not(.tailored-sector-button--active):hover {
+  background: rgba(178, 187, 201, 0.32);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .tailored-workspace {
@@ -586,8 +596,9 @@ function exportBriefingPdf() {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  background: rgba(2, 8, 15, 0.96);
-  color: #e8eff8;
+  border-color: rgba(171, 199, 235, 0.58);
+  background: #ffffff;
+  color: #111827;
   font-weight: 400;
 }
 
@@ -649,7 +660,7 @@ function exportBriefingPdf() {
 .tailored-brief-page {
   width: min(100%, 760px);
   min-width: 0;
-  padding: 0 24px 22px;
+  padding: 10px 24px 22px;
   border: 1px solid rgba(171, 199, 235, 0.18);
   border-radius: var(--app-radius);
   background: #ffffff;
@@ -666,8 +677,8 @@ function exportBriefingPdf() {
   gap: 18px;
   align-items: center;
   margin: 0 -8px 14px;
-  padding: 12px 16px;
-  background: linear-gradient(90deg, #0057a8, #003b70);
+  padding: 14px 16px;
+  background: linear-gradient(90deg, #001b3f, #003e7e);
   color: #ffffff;
 }
 

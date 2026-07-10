@@ -441,9 +441,14 @@ h1 {
 
 .social-media-stack {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(420px, 2fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   align-items: start;
+}
+
+.social-media-stack > .swift-social-workspace {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .social-media-stack > .ops-to-comms {
@@ -1059,6 +1064,11 @@ td {
 
 .ma-tabs-card .v-slide-group__content {
   gap: 0;
+}
+
+.ma-tabs-card .v-slide-group__prev,
+.ma-tabs-card .v-slide-group__next {
+  display: none !important;
 }
 
 .ma-tabs-card .v-tab {

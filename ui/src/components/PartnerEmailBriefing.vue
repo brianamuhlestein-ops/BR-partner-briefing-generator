@@ -158,49 +158,20 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="partner-email-briefing">
-    <div class="partner-email-layout">
-      <aside class="partner-email-editor" aria-label="Forecaster briefing inputs">
-        <details class="partner-email-input-section" open>
-          <summary class="partner-email-editor-heading">Briefing Header</summary>
-          <label>
-            Issue Time
-            <input :value="briefing.dateTime" type="text" readonly />
-          </label>
+    <div class="partner-email-workspace">
+      <aside class="partner-email-editor partner-email-editor--forecast" aria-label="Core distribution forecast inputs">
+        <div class="partner-email-column-heading">
+          <h2>Forecast</h2>
+          <span>SWIFT suite JSON</span>
+        </div>
 
+        <section class="partner-email-input-section">
+          <div class="partner-email-editor-heading">Active Products</div>
           <label>
-            Headline
-            <input v-model="briefing.headline" type="text" />
-          </label>
-
-          <label>
-            Summary
-            <textarea v-model="briefing.summary" />
-          </label>
-        </details>
-
-        <details class="partner-email-input-section" open>
-          <summary class="partner-email-editor-heading">Briefing Body</summary>
-          <label>
-            Key Points
-            <textarea v-model="briefing.keyPoints" />
-          </label>
-
-          <label>
-            Active Products
             <span class="partner-email-field-note">Future feed: auto-populated from SWIFT Suite product JSON APIs.</span>
             <textarea v-model="briefing.activeProducts" />
           </label>
-
-          <label>
-            Potential Impacts
-            <textarea v-model="briefing.impacts" />
-          </label>
-
-          <label>
-            What To Watch Next
-            <textarea v-model="briefing.watchNext" />
-          </label>
-        </details>
+        </section>
 
         <details class="partner-email-input-section partner-email-risk-editor" open>
           <summary class="partner-email-editor-heading">Risk Outlook</summary>
@@ -223,6 +194,60 @@ onBeforeUnmount(() => {
               </select>
             </template>
           </div>
+        </details>
+      </aside>
+
+      <aside class="partner-email-editor partner-email-editor--narrative" aria-label="Core distribution narrative inputs">
+        <div class="partner-email-column-heading">
+          <h2>Narrative</h2>
+          <span>Forecaster review</span>
+        </div>
+
+        <section class="partner-email-input-section">
+          <div class="partner-email-editor-heading">Briefing Header</div>
+          <label>
+            Issue Time
+            <input :value="briefing.dateTime" type="text" readonly />
+          </label>
+
+          <label>
+            Headline
+            <input v-model="briefing.headline" type="text" />
+          </label>
+        </section>
+
+        <section class="partner-email-input-section partner-email-review-section">
+          <div class="partner-email-editor-heading">Summary</div>
+          <label>
+            Forecaster-reviewed summary
+            <textarea v-model="briefing.summary" />
+          </label>
+        </section>
+
+        <section class="partner-email-input-section partner-email-review-section">
+          <div class="partner-email-editor-heading">Key Points</div>
+          <label>
+            Forecaster-reviewed key points
+            <textarea v-model="briefing.keyPoints" />
+          </label>
+        </section>
+
+        <details class="partner-email-input-section">
+          <summary class="partner-email-editor-heading">Operational Narrative</summary>
+          <label>
+            Potential Impacts
+            <textarea v-model="briefing.impacts" />
+          </label>
+
+          <label>
+            What To Watch Next
+            <textarea v-model="briefing.watchNext" />
+          </label>
+
+          <label>
+            More Information
+            <textarea v-model="briefing.info" />
+          </label>
         </details>
 
         <details class="partner-email-input-section partner-email-media-editor" open>
@@ -247,7 +272,11 @@ onBeforeUnmount(() => {
       </aside>
 
       <div class="partner-preview-column">
-        <div class="partner-preview-actions">
+        <div class="partner-email-column-heading partner-email-column-heading--preview">
+          <div>
+            <h2>Preview</h2>
+            <span>Generated product</span>
+          </div>
           <button class="partner-export-button" type="button" @click="exportBriefingPdf">
             Export PDF
           </button>
@@ -361,9 +390,9 @@ onBeforeUnmount(() => {
   gap: 14px;
 }
 
-.partner-email-layout {
+.partner-email-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(420px, 2fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
   min-width: 0;
@@ -375,17 +404,41 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.partner-preview-column {
-  display: grid;
-  gap: 10px;
-  min-width: 0;
-  justify-items: center;
+.partner-email-column-heading {
+  display: flex;
+  min-height: 26px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(232, 239, 248, 0.72);
+  text-transform: uppercase;
 }
 
-.partner-preview-actions {
-  width: min(100%, 860px);
-  display: flex;
-  justify-content: flex-end;
+.partner-email-column-heading h2 {
+  margin: 0;
+  color: #eef7ff;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.partner-email-column-heading span {
+  color: rgba(232, 239, 248, 0.46);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.partner-email-column-heading--preview {
+  width: 100%;
+  align-items: center;
+}
+
+.partner-preview-column {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  justify-items: center;
 }
 
 .partner-export-button {
@@ -407,6 +460,17 @@ onBeforeUnmount(() => {
   background:
     linear-gradient(180deg, rgba(95, 199, 255, 0.06), rgba(95, 199, 255, 0.025)),
     rgba(4, 10, 18, 0.28);
+}
+
+.partner-email-review-section {
+  border-color: rgba(255, 229, 94, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 229, 94, 0.11), rgba(255, 229, 94, 0.045)),
+    rgba(4, 10, 18, 0.26);
+}
+
+.partner-email-review-section .partner-email-editor-heading {
+  color: #ffe55e;
 }
 
 .partner-email-input-section[open] {
@@ -467,9 +531,15 @@ onBeforeUnmount(() => {
   max-width: 100%;
   box-sizing: border-box;
   display: block;
-  background: rgba(2, 8, 15, 0.96);
-  color: #e8eff8;
+  border-color: rgba(171, 199, 235, 0.58);
+  background: #ffffff;
+  color: #111827;
   font-weight: 400;
+}
+
+.partner-email-editor input:read-only {
+  background: #eef3f8;
+  color: #344256;
 }
 
 .partner-email-editor textarea {
@@ -491,7 +561,7 @@ onBeforeUnmount(() => {
 
 .partner-email-risk-grid {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(0, 0.75fr));
+  grid-template-columns: minmax(112px, 1fr) repeat(3, minmax(0, 0.72fr));
   gap: 6px;
   align-items: center;
   min-width: 0;
@@ -515,7 +585,7 @@ onBeforeUnmount(() => {
 
 .partner-email-media-row {
   display: grid;
-  grid-template-columns: minmax(120px, auto) minmax(0, 0.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(118px, auto) minmax(0, 1fr);
   gap: 12px;
   min-width: 0;
   align-items: start;
@@ -527,6 +597,10 @@ onBeforeUnmount(() => {
 
 .partner-email-media-row > * {
   min-width: 0;
+}
+
+.partner-email-media-row label:last-child {
+  grid-column: 1 / -1;
 }
 
 .partner-media-upload-button {
@@ -572,14 +646,16 @@ onBeforeUnmount(() => {
 }
 
 .partner-pdf-preview {
-  width: min(100%, 860px);
+  width: min(100%, 760px);
   min-width: 0;
   justify-self: center;
-  padding: 18px 42px 28px;
+  padding: 10px 24px 22px;
+  border: 1px solid rgba(171, 199, 235, 0.18);
+  border-radius: var(--app-radius);
   background: #ffffff;
-  color: #111827;
+  color: #172033;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 0.78rem;
   line-height: 1.28;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
@@ -589,25 +665,25 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 18px;
   align-items: center;
-  margin: 0 -18px 18px;
-  padding: 16px 18px;
-  background: linear-gradient(90deg, #003f86, #002d62);
+  margin: 0 -8px 14px;
+  padding: 14px 16px;
+  background: linear-gradient(90deg, #001b3f, #003e7e);
   color: #ffffff;
 }
 
 .partner-pdf-brand {
   display: flex;
-  gap: 10px;
+  gap: 7px;
   align-items: center;
   text-transform: uppercase;
 }
 
 .partner-pdf-brand img {
-  width: 52px;
-  height: 52px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   background: #ffffff;
-  border-radius: 999px;
+  border-radius: 50%;
 }
 
 .partner-pdf-brand div {
@@ -616,12 +692,13 @@ onBeforeUnmount(() => {
 }
 
 .partner-pdf-brand strong {
-  font-size: 18px;
+  font-size: 0.76rem;
+  font-weight: 600;
 }
 
 .partner-pdf-brand span,
 .partner-pdf-brand div > div {
-  font-size: 11px;
+  font-size: 0.48rem;
 }
 
 .partner-pdf-meta {
@@ -632,45 +709,52 @@ onBeforeUnmount(() => {
 }
 
 .partner-pdf-meta strong {
-  font-size: 18px;
+  font-size: 0.78rem;
   font-weight: 500;
+}
+
+.partner-pdf-meta span {
+  font-size: 0.58rem;
 }
 
 .partner-pdf-title {
   display: grid;
-  gap: 8px;
+  gap: 7px;
+  padding-bottom: 11px;
+  border-bottom: 2px solid #0b4f8a;
   text-align: center;
 }
 
 .partner-pdf-title h3 {
   margin: 0;
-  color: #0052b5;
-  font-size: 22px;
+  color: #0b4f8a;
+  font-size: 1.05rem;
   line-height: 1.18;
 }
 
 .partner-pdf-title p {
-  margin: 8px auto 0;
+  margin: 0 auto;
   max-width: 720px;
+  color: #3d4b5f;
   text-align: left;
 }
 
 .partner-pdf-section {
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 11px;
+  padding-top: 8px;
   border-top: 1px solid #cfd8e3;
 }
 
 .partner-pdf-section h4 {
-  margin: 0 0 6px;
-  color: #0052b5;
-  font-size: 17px;
+  margin: 0 0 5px;
+  color: #0b4f8a;
+  font-size: 0.72rem;
   text-transform: uppercase;
 }
 
 .partner-pdf-section ul {
   margin: 0;
-  padding-left: 24px;
+  padding-left: 16px;
 }
 
 .partner-pdf-risk-table {
@@ -681,14 +765,14 @@ onBeforeUnmount(() => {
 
 .partner-pdf-risk-table th,
 .partner-pdf-risk-table td {
-  border: 3px solid #ffffff;
-  padding: 8px;
+  border: 1px solid #aebdca;
+  padding: 4px 5px;
 }
 
 .partner-pdf-risk-table thead th,
 .partner-pdf-risk-table tbody th {
-  background: #e5e7eb;
-  color: #111827;
+  background: #dceaf7;
+  color: #172033;
   font-weight: 700;
 }
 
@@ -705,14 +789,14 @@ onBeforeUnmount(() => {
   gap: 4px;
   align-items: center;
   justify-content: center;
-  margin-top: 12px;
-  font-size: 12px;
+  margin-top: 8px;
+  font-size: 0.58rem;
   font-weight: 700;
 }
 
 .partner-pdf-legend span {
-  min-width: 112px;
-  padding: 7px 10px;
+  min-width: 86px;
+  padding: 5px 8px;
   text-align: center;
 }
 
@@ -738,7 +822,7 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1300px) {
-  .partner-email-layout {
+  .partner-email-workspace {
     grid-template-columns: 1fr;
   }
 
@@ -747,7 +831,7 @@ onBeforeUnmount(() => {
     justify-self: stretch;
   }
 
-  .partner-preview-actions {
+  .partner-email-column-heading--preview {
     width: 100%;
   }
 }

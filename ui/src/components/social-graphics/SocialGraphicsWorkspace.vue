@@ -33,11 +33,63 @@ type SocialTemplate = {
   imagePlaceholder: string
 }
 
+type SectorSymbol = {
+  id: string
+  label: string
+  icon: string
+  aliases: string[]
+}
+
 defineProps<{
   mode: GraphicsWorkspaceMode
   presentation?: 'default' | 'social-tab'
   recommendation?: OpsToCommsRecommendation | null
 }>()
+
+const sectorSymbols: SectorSymbol[] = [
+  {
+    id: 'power-grid',
+    label: 'Power Grid',
+    icon: 'mdi-transmission-tower',
+    aliases: ['power', 'power grid', 'electric power', 'electric power grid', 'grid'],
+  },
+  {
+    id: 'aviation',
+    label: 'Aviation',
+    icon: 'mdi-airplane',
+    aliases: ['aviation', 'aviation operations', 'aircraft'],
+  },
+  {
+    id: 'satellite',
+    label: 'Satellite',
+    icon: 'mdi-satellite-variant',
+    aliases: ['satellite', 'satellites', 'satellite operations', 'spacecraft'],
+  },
+  {
+    id: 'communications-gnss',
+    label: 'Comms / GNSS',
+    icon: 'mdi-radio-tower',
+    aliases: ['communications & gnss', 'communications', 'communication/gnss', 'communication', 'hf radio', 'hf communications', 'gnss', 'navigation'],
+  },
+  {
+    id: 'human-spaceflight',
+    label: 'Human Spaceflight',
+    icon: 'mdi-rocket-launch',
+    aliases: ['human spaceflight', 'spaceflight', 'crew', 'astronaut'],
+  },
+  {
+    id: 'emergency-management',
+    label: 'Emergency Mgmt',
+    icon: 'mdi-shield-alert-outline',
+    aliases: ['emergency management', 'critical comms', 'emergency management / critical comms', 'emergency'],
+  },
+  {
+    id: 'aurora',
+    label: 'Aurora',
+    icon: 'mdi-weather-night',
+    aliases: ['aurora', 'public / aurora', 'public', 'aurora observers'],
+  },
+]
 
 const templates: SocialTemplate[] = [
   {
@@ -54,7 +106,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Forecast confidence will be updated as new model guidance arrives.',
     whatWeKnow:
       'Active solar regions remain under monitoring.\nGeomagnetic activity may increase later in the outlook period.\nPartners should monitor SWPC updates for watches or warnings.\nForecast confidence may change with new observations.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aurora'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'Outlooks are issued once weekly on Mondays.',
     footerCenter: 'Monitor SWPC products for changes.',
     footerRight: 'spaceweather.gov',
@@ -74,7 +126,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Timing, strength, and duration remain uncertain.',
     whatWeKnow:
       'A solar event is under analysis.\nInitial model guidance is being reviewed.\nNo warning-level product is in effect unless separately issued.\nUpdates will follow as confidence changes.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite'],
     footerLeft: 'SWPC is analyzing the event and will issue updates as confidence changes.',
     footerCenter: 'No Watch or Warning in effect at this time.',
     footerRight: 'spaceweather.gov',
@@ -94,7 +146,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Potential for G3 or greater conditions is credible.',
     whatWeKnow:
       '70-80% chance of initial arrival Friday afternoon into Friday night.\nMultiple CME influences may continue into the weekend.\nG3 to G4 conditions are possible.\nElevated activity could persist 24-48 hours.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aurora'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'Watch will be updated at least every 12 hours.',
     footerCenter: 'Monitor SWPC updates as confidence changes.',
     footerRight: 'spaceweather.gov',
@@ -114,7 +166,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Conditions are expected to gradually decrease.',
     whatWeKnow:
       'Advisory-level conditions remain possible.\nResidual impacts may continue for susceptible systems.\nConditions are expected to decrease with time.\nPartners should continue routine monitoring.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aviation'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aviation'],
     footerLeft: 'Advisory replaces the previous Warning.',
     footerCenter: 'Continue monitoring SWPC products as conditions decrease.',
     footerRight: 'spaceweather.gov',
@@ -134,7 +186,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: '80-90% chance that two or more CMEs will impact Earth.',
     whatWeKnow:
       '70-80% chance of initial arrival Friday afternoon into Friday night.\n20-30% chance of arrival as early as midday Friday.\nG3 to G4 conditions expected; G5 conditions possible.\nElevated geomagnetic activity could persist 36-48 hours.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aurora'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'Warning will be updated at least every 12 hours while in effect.',
     footerCenter: 'Monitor SWPC updates and follow sector-specific procedures.',
     footerRight: 'spaceweather.gov',
@@ -154,7 +206,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Based on official space weather observations.',
     whatWeKnow:
       'Observed threshold has been reached.\nWarning remains in effect if separately issued.\nConditions may fluctuate during the event.\nAdditional alerts may be issued if higher thresholds are reached.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aurora'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'Event-level alert issued.',
     footerCenter: 'Warning remains in effect.',
     footerRight: 'spaceweather.gov',
@@ -194,7 +246,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Current status is based on active SWPC products.',
     whatWeKnow:
       'Event remains ongoing.\nObserved conditions and forecast guidance continue to be reviewed.\nSome operational areas may remain affected.\nAdditional updates will follow as conditions change.',
-    impactIcons: ['Power', 'HF Radio', 'GNSS', 'Satellites', 'Aurora'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'SWPC will continue to monitor the Sun and near-Earth space environment.',
     footerCenter: 'Partners should monitor active products.',
     footerRight: 'spaceweather.gov',
@@ -205,6 +257,7 @@ const templates: SocialTemplate[] = [
 const selectedProductId = ref<SocialProductId>('warning')
 const uploadedImage = ref('')
 const uploadedImageName = ref('')
+const isUpdatedProduct = ref(false)
 
 const selectedTemplate = computed(() => {
   return templates.find((template) => template.id === selectedProductId.value) ?? templates[0]!
@@ -213,21 +266,19 @@ const selectedTemplate = computed(() => {
 const draft = reactive({ ...selectedTemplate.value })
 
 const whatWeKnowLines = computed(() => lines(draft.whatWeKnow).slice(0, 5))
-const impactLabels = computed(() => draft.impactIcons.slice(0, 6))
-const impactIconsText = computed({
-  get: () => draft.impactIcons.join(', '),
-  set: (value: string) => {
-    draft.impactIcons = value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
-  },
+const impactLabels = computed(() => draft.impactIcons.slice(0, 7))
+const impactSymbols = computed(() => impactLabels.value.map((label) => sectorSymbolFor(label)))
+const updatedProductLabel = computed(() => `Updated ${selectedTemplate.value.label}`)
+const selectedSectorIds = computed(() => {
+  return new Set(draft.impactIcons.map((label) => sectorSymbolFor(label).id))
 })
+const productBadgeIcon = computed(() => (selectedProductId.value === 'outlook' ? 'mdi-calendar-month' : ''))
 
 watch(selectedTemplate, (template) => {
   Object.assign(draft, template)
   uploadedImage.value = ''
   uploadedImageName.value = ''
+  isUpdatedProduct.value = false
 })
 
 function lines(value: string) {
@@ -253,6 +304,43 @@ function handleImageUpload(event: Event) {
   })
   reader.readAsDataURL(file)
 }
+
+function normalizeSectorLabel(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function sectorSymbolFor(label: string) {
+  const normalized = normalizeSectorLabel(label)
+  return (
+    sectorSymbols.find((symbol) => {
+      return symbol.aliases.some((alias) => normalizeSectorLabel(alias) === normalized)
+    }) ?? {
+      id: normalized || 'custom',
+      label,
+      icon: 'mdi-alert-circle-outline',
+      aliases: [label],
+    }
+  )
+}
+
+function isSectorSelected(symbol: SectorSymbol) {
+  return selectedSectorIds.value.has(symbol.id)
+}
+
+function toggleSector(symbol: SectorSymbol, event: Event) {
+  const checked = (event.target as HTMLInputElement | null)?.checked ?? false
+  const selected = draft.impactIcons
+    .map((label) => sectorSymbolFor(label))
+    .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
+
+  if (checked && !selected.some((item) => item.id === symbol.id)) {
+    selected.push(symbol)
+  }
+
+  draft.impactIcons = selected
+    .filter((item) => checked || item.id !== symbol.id)
+    .map((item) => item.label)
+}
 </script>
 
 <template>
@@ -270,12 +358,42 @@ function handleImageUpload(event: Event) {
         >
           {{ template.label }}
         </button>
+        <button
+          type="button"
+          class="swift-social-product-button swift-social-update-button"
+          :class="{ 'swift-social-product-button--active': isUpdatedProduct }"
+          :style="isUpdatedProduct ? { borderColor: draft.color } : undefined"
+          @click="isUpdatedProduct = !isUpdatedProduct"
+        >
+          {{ isUpdatedProduct ? updatedProductLabel : 'Updated' }}
+        </button>
       </div>
 
       <span class="swift-social-product-source">SWIFT WWA JSON driven</span>
     </header>
 
     <div class="swift-social-grid">
+      <aside class="swift-social-panel swift-social-sector-panel">
+        <div class="swift-social-heading">
+          <h2>Impacted Sectors</h2>
+          <span>JSON sectors</span>
+        </div>
+
+        <div class="swift-social-sector-list">
+          <label v-for="symbol in sectorSymbols" :key="symbol.id" class="swift-social-sector-option">
+            <input
+              type="checkbox"
+              :checked="isSectorSelected(symbol)"
+              @change="toggleSector(symbol, $event)"
+            />
+            <span class="swift-social-sector-icon">
+              <i class="mdi" :class="symbol.icon" aria-hidden="true"></i>
+            </span>
+            <span>{{ symbol.label }}</span>
+          </label>
+        </div>
+      </aside>
+
       <aside class="swift-social-panel swift-social-json-panel">
         <div class="swift-social-heading">
           <h2>Product JSON</h2>
@@ -326,10 +444,14 @@ function handleImageUpload(event: Event) {
           Confidence / Status Detail
           <textarea v-model="draft.confidenceDetail" class="swift-social-short-textarea" />
         </label>
-        <label>
-          Impact Icons
-          <input v-model="impactIconsText" type="text" />
-        </label>
+      </aside>
+
+      <aside class="swift-social-panel swift-social-footer-panel">
+        <div class="swift-social-heading">
+          <h2>Footer</h2>
+          <span>Persistent template copy</span>
+        </div>
+
         <label>
           Footer Left
           <input v-model="draft.footerLeft" type="text" />
@@ -337,6 +459,10 @@ function handleImageUpload(event: Event) {
         <label>
           Footer Center
           <input v-model="draft.footerCenter" type="text" />
+        </label>
+        <label>
+          Footer Right
+          <input v-model="draft.footerRight" type="text" />
         </label>
       </aside>
 
@@ -347,11 +473,20 @@ function handleImageUpload(event: Event) {
               <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
               <img src="/assets/visual-finder/logos/NWSlogo.png" alt="National Weather Service" />
               <div>
-                <strong>Space Weather Prediction Center</strong>
                 <span>National Weather Service</span>
+                <strong>Space Weather Prediction Center</strong>
+                <span>National Oceanic and Atmospheric Administration</span>
               </div>
             </div>
-            <div class="swift-social-badge">{{ draft.badge }}</div>
+            <div class="swift-social-badge-stack">
+              <div class="swift-social-badge">
+                <span>{{ draft.badge }}</span>
+                <i v-if="productBadgeIcon" class="mdi" :class="productBadgeIcon" aria-hidden="true"></i>
+              </div>
+              <div v-if="isUpdatedProduct" class="swift-social-update-label">
+                {{ updatedProductLabel }}
+              </div>
+            </div>
           </header>
 
           <main class="swift-social-card-body">
@@ -389,9 +524,11 @@ function handleImageUpload(event: Event) {
             </div>
 
             <div class="swift-social-impact-strip">
-              <div v-for="impact in impactLabels" :key="impact" class="swift-social-impact">
-                <span>{{ impact.charAt(0) }}</span>
-                <strong>{{ impact }}</strong>
+              <div v-for="symbol in impactSymbols" :key="`${symbol.id}-${symbol.label}`" class="swift-social-impact">
+                <span>
+                  <i class="mdi" :class="symbol.icon" aria-hidden="true"></i>
+                </span>
+                <strong>{{ symbol.label }}</strong>
               </div>
             </div>
           </section>
@@ -443,6 +580,10 @@ function handleImageUpload(event: Event) {
   color: #ffffff;
 }
 
+.swift-social-update-button {
+  min-width: 96px;
+}
+
 .swift-social-upload-button {
   display: inline-flex;
   align-items: center;
@@ -458,17 +599,17 @@ function handleImageUpload(event: Event) {
 
 .swift-social-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 0.82fr) minmax(260px, 0.82fr) minmax(580px, 1.36fr);
-  gap: 14px;
+  grid-template-columns: minmax(170px, 190px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
+  gap: 18px;
   align-items: start;
   min-width: 0;
 }
 
 .swift-social-panel {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   min-width: 0;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid rgba(95, 199, 255, 0.22);
   border-radius: var(--app-radius);
   background:
@@ -499,7 +640,7 @@ function handleImageUpload(event: Event) {
 
 .swift-social-panel label {
   display: grid;
-  gap: 5px;
+  gap: 7px;
   min-width: 0;
   color: rgba(232, 239, 248, 0.78);
   font-weight: 400;
@@ -512,27 +653,87 @@ function handleImageUpload(event: Event) {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  background: rgba(2, 8, 15, 0.96);
-  color: #e8eff8;
+  border-color: rgba(171, 199, 235, 0.58);
+  background: #ffffff;
+  color: #111827;
   font-weight: 400;
 }
 
 .swift-social-panel textarea {
-  min-height: 82px;
+  min-height: 98px;
   resize: vertical;
 }
 
+.swift-social-sector-panel {
+  align-content: start;
+}
+
+.swift-social-footer-panel {
+  grid-column: 1 / 4;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+}
+
+.swift-social-footer-panel .swift-social-heading {
+  grid-column: 1 / -1;
+}
+
+.swift-social-sector-list {
+  display: grid;
+  gap: 8px;
+}
+
+.swift-social-sector-option {
+  display: grid !important;
+  grid-template-columns: 18px 28px minmax(0, 1fr);
+  gap: 8px !important;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 7px;
+  border: 1px solid rgba(171, 199, 235, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(232, 239, 248, 0.84) !important;
+  cursor: pointer;
+}
+
+.swift-social-sector-option input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--app-primary);
+}
+
+.swift-social-sector-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: #e7a01b;
+  font-size: 1.24rem;
+  line-height: 1;
+}
+
+.swift-social-sector-icon .mdi::before {
+  display: block;
+  line-height: 1;
+}
+
 .swift-social-short-textarea {
-  min-height: 54px !important;
+  min-height: 68px !important;
 }
 
 .swift-social-preview-panel {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 100%;
   min-width: 0;
+  justify-items: end;
 }
 
 .swift-social-card {
   --product-color: #d94a1e;
-  width: min(100%, 760px);
+  width: min(100%, 1120px);
   aspect-ratio: 3 / 2;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
@@ -548,9 +749,9 @@ function handleImageUpload(event: Event) {
 .swift-social-card-header {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  padding: 14px 18px;
+  padding: 8px 14px;
   background: linear-gradient(90deg, #001b3f, #003e7e);
   color: #ffffff;
 }
@@ -563,8 +764,8 @@ function handleImageUpload(event: Event) {
 }
 
 .swift-social-brand img {
-  width: 42px;
-  height: 42px;
+  width: 78px;
+  height: 78px;
   object-fit: contain;
   border-radius: 50%;
   background: #ffffff;
@@ -572,25 +773,64 @@ function handleImageUpload(event: Event) {
 
 .swift-social-brand div {
   display: grid;
-  line-height: 1;
+  line-height: 0.96;
 }
 
 .swift-social-brand strong {
-  font-size: 0.95rem;
+  font-size: 1.62rem;
+  font-weight: 500;
 }
 
 .swift-social-brand span {
-  font-size: 0.62rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.swift-social-badge-stack {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
 }
 
 .swift-social-badge {
-  max-width: 190px;
-  padding: 7px 10px;
-  border-radius: 4px;
+  display: flex;
+  min-width: 330px;
+  min-height: 62px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px 10px 32px;
+  border-radius: 6px 0 0 6px;
   background: var(--product-color);
   color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 700;
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.swift-social-badge .mdi {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.swift-social-badge .mdi::before {
+  display: block;
+  line-height: 1;
+}
+
+.swift-social-update-label {
+  width: fit-content;
+  max-width: 170px;
+  padding: 4px 9px;
+  border: 1px solid rgba(0, 43, 92, 0.18);
+  border-radius: 4px;
+  background: #f6d889;
+  color: #002b5c;
+  font-size: 0.68rem;
+  font-weight: 800;
   text-align: center;
   text-transform: uppercase;
 }
@@ -714,8 +954,8 @@ function handleImageUpload(event: Event) {
 
 .swift-social-know-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: 14px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   padding: 0 20px 14px;
 }
 
@@ -741,35 +981,47 @@ function handleImageUpload(event: Event) {
 
 .swift-social-impact-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #cdd8e4;
+  border-radius: 5px;
+  background: #f8fbff;
 }
 
 .swift-social-impact {
   display: grid;
   place-items: center;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-  padding: 7px 4px;
-  border: 1px solid #d6dee8;
-  border-radius: 4px;
+  padding: 7px 4px 6px;
+  border-right: 1px solid #d6dee8;
   background: #ffffff;
 }
 
+.swift-social-impact:last-child {
+  border-right: 0;
+}
+
 .swift-social-impact span {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: var(--product-color);
-  color: #ffffff;
-  font-weight: 700;
+  color: #bd7600;
+  font-size: 1.52rem;
+  line-height: 1;
+}
+
+.swift-social-impact .mdi::before {
+  display: block;
+  line-height: 1;
 }
 
 .swift-social-impact strong {
   color: #002b5c;
-  font-size: 0.64rem;
+  font-size: 0.57rem;
+  line-height: 1.05;
   text-align: center;
 }
 
@@ -791,6 +1043,12 @@ function handleImageUpload(event: Event) {
 @media (max-width: 1300px) {
   .swift-social-grid {
     grid-template-columns: 1fr;
+  }
+
+  .swift-social-footer-panel,
+  .swift-social-preview-panel {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .swift-social-card {
