@@ -2,8 +2,10 @@
 import { computed, reactive, ref, watch } from 'vue'
 
 import type { GraphicsWorkspaceMode, OpsToCommsRecommendation } from '../../types'
+import { exportElementToPng } from '../../utils/exportPng'
 
 type SocialProductId =
+  | 'swpc_brief'
   | 'outlook'
   | 'statement'
   | 'watch'
@@ -55,9 +57,9 @@ const sectorSymbols: SectorSymbol[] = [
   },
   {
     id: 'aviation',
-    label: 'Aviation',
+    label: 'Aviation & Radiation',
     icon: 'mdi-airplane',
-    aliases: ['aviation', 'aviation operations', 'aircraft'],
+    aliases: ['aviation', 'aviation & radiation', 'aviation radiation', 'aviation operations', 'aircraft'],
   },
   {
     id: 'satellite',
@@ -92,6 +94,26 @@ const sectorSymbols: SectorSymbol[] = [
 ]
 
 const templates: SocialTemplate[] = [
+  {
+    id: 'swpc_brief',
+    label: 'SWPC Brief',
+    badge: 'SWPC BRIEF',
+    color: '#0065B3',
+    headline: 'Space Weather Briefing',
+    subheadline: 'Executive update',
+    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    summary: 'SWPC is monitoring space weather conditions and will continue to provide updates as forecast confidence or observed conditions change.',
+    confidenceLabel: 'Status',
+    confidenceValue: 'Monitoring',
+    confidenceDetail: 'Current guidance is based on active SWPC analysis and partner decision-support information.',
+    whatWeKnow:
+      'SWPC forecast and observational data remain under review.\nActive products and updates will be reflected as conditions evolve.\nPartners should use official SWPC products for operational decisions.\nAdditional briefings may be issued as needed.',
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aviation & Radiation'],
+    footerLeft: 'SWPC will continue to monitor the Sun and near-Earth space environment.',
+    footerCenter: 'Use official SWPC products for current watches, warnings, and alerts.',
+    footerRight: 'spaceweather.gov',
+    imagePlaceholder: 'INSERT APPROPRIATE IMAGE HERE',
+  },
   {
     id: 'outlook',
     label: 'Outlook',
@@ -166,7 +188,7 @@ const templates: SocialTemplate[] = [
     confidenceDetail: 'Conditions are expected to gradually decrease.',
     whatWeKnow:
       'Advisory-level conditions remain possible.\nResidual impacts may continue for susceptible systems.\nConditions are expected to decrease with time.\nPartners should continue routine monitoring.',
-    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aviation'],
+    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aviation & Radiation'],
     footerLeft: 'Advisory replaces the previous Warning.',
     footerCenter: 'Continue monitoring SWPC products as conditions decrease.',
     footerRight: 'spaceweather.gov',
@@ -254,10 +276,11 @@ const templates: SocialTemplate[] = [
   },
 ]
 
-const selectedProductId = ref<SocialProductId>('warning')
+const selectedProductId = ref<SocialProductId>('swpc_brief')
 const uploadedImage = ref('')
 const uploadedImageName = ref('')
 const isUpdatedProduct = ref(false)
+const socialPreviewRef = ref<HTMLElement | null>(null)
 
 const selectedTemplate = computed(() => {
   return templates.find((template) => template.id === selectedProductId.value) ?? templates[0]!
@@ -273,6 +296,10 @@ const selectedSectorIds = computed(() => {
   return new Set(draft.impactIcons.map((label) => sectorSymbolFor(label).id))
 })
 const productBadgeIcon = computed(() => (selectedProductId.value === 'outlook' ? 'mdi-calendar-month' : ''))
+const socialCardStyle = computed(() => ({
+  '--product-color': draft.color,
+  '--product-rgb': hexToRgbTriplet(draft.color),
+}))
 
 watch(selectedTemplate, (template) => {
   Object.assign(draft, template)
@@ -309,6 +336,24 @@ function normalizeSectorLabel(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
+function hexToRgbTriplet(value: string) {
+  const normalized = value.replace('#', '').trim()
+  const fullHex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((character) => `${character}${character}`)
+          .join('')
+      : normalized
+
+  const number = Number.parseInt(fullHex, 16)
+  if (Number.isNaN(number)) {
+    return '217, 74, 30'
+  }
+
+  return `${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}`
+}
+
 function sectorSymbolFor(label: string) {
   const normalized = normalizeSectorLabel(label)
   return (
@@ -341,6 +386,10 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
     .filter((item) => checked || item.id !== symbol.id)
     .map((item) => item.label)
 }
+
+function exportSocialPng() {
+  exportElementToPng(socialPreviewRef.value, `${draft.label}-${draft.headline}`)
+}
 </script>
 
 <template>
@@ -366,6 +415,13 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
           @click="isUpdatedProduct = !isUpdatedProduct"
         >
           {{ isUpdatedProduct ? updatedProductLabel : 'Updated' }}
+        </button>
+        <button
+          type="button"
+          class="swift-social-product-button swift-social-export-button"
+          @click="exportSocialPng"
+        >
+          Export PNG
         </button>
       </div>
 
@@ -467,7 +523,7 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
       </aside>
 
       <section class="swift-social-preview-panel" aria-label="Social media graphic preview">
-        <article class="swift-social-card" :style="{ '--product-color': draft.color }">
+        <article ref="socialPreviewRef" class="swift-social-card" :style="socialCardStyle">
           <header class="swift-social-card-header">
             <div class="swift-social-brand">
               <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
@@ -494,12 +550,22 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
               <h1>{{ draft.headline }}</h1>
               <p class="swift-social-subhead">{{ draft.subheadline }}</p>
               <p class="swift-social-time">{{ draft.issueTime }}</p>
+              <div class="swift-social-message-divider" aria-hidden="true"></div>
               <p class="swift-social-summary">{{ draft.summary }}</p>
 
-              <div class="swift-social-confidence">
-                <span>{{ draft.confidenceLabel }}</span>
-                <strong>{{ draft.confidenceValue }}</strong>
-                <p>{{ draft.confidenceDetail }}</p>
+              <div class="swift-social-message-support">
+                <div class="swift-social-confidence">
+                  <span>{{ draft.confidenceLabel }}</span>
+                  <strong>{{ draft.confidenceValue }}</strong>
+                  <p>{{ draft.confidenceDetail }}</p>
+                </div>
+
+                <div class="swift-social-know">
+                  <h2>What We Know</h2>
+                  <ul>
+                    <li v-for="item in whatWeKnowLines" :key="item">{{ item }}</li>
+                  </ul>
+                </div>
               </div>
             </section>
 
@@ -515,15 +581,9 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
             </section>
           </main>
 
-          <section class="swift-social-know-row">
-            <div class="swift-social-know">
-              <h2>What We Know</h2>
-              <ul>
-                <li v-for="item in whatWeKnowLines" :key="item">{{ item }}</li>
-              </ul>
-            </div>
-
+          <section class="swift-social-impact-row">
             <div class="swift-social-impact-strip">
+              <div class="swift-social-impact-label">Potential Impacts</div>
               <div v-for="symbol in impactSymbols" :key="`${symbol.id}-${symbol.label}`" class="swift-social-impact">
                 <span>
                   <i class="mdi" :class="symbol.icon" aria-hidden="true"></i>
@@ -584,6 +644,12 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   min-width: 96px;
 }
 
+.swift-social-export-button {
+  border-color: rgba(255, 229, 100, 0.38);
+  background: rgba(255, 229, 100, 0.12);
+  color: #fff0a8;
+}
+
 .swift-social-upload-button {
   display: inline-flex;
   align-items: center;
@@ -599,7 +665,7 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 
 .swift-social-grid {
   display: grid;
-  grid-template-columns: minmax(170px, 190px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
+  grid-template-columns: minmax(220px, 250px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
   gap: 18px;
   align-items: start;
   min-width: 0;
@@ -733,6 +799,7 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 
 .swift-social-card {
   --product-color: #d94a1e;
+  --product-rgb: 217, 74, 30;
   width: min(100%, 1120px);
   aspect-ratio: 3 / 2;
   display: grid;
@@ -769,6 +836,11 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   object-fit: contain;
   border-radius: 50%;
   background: #ffffff;
+}
+
+.swift-social-brand img:first-child {
+  object-fit: cover;
+  padding: 0;
 }
 
 .swift-social-brand div {
@@ -839,21 +911,24 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(220px, 0.92fr);
   gap: 18px;
+  align-items: stretch;
   padding: 18px 20px 12px;
   min-height: 0;
 }
 
 .swift-social-message {
   display: grid;
-  gap: 7px;
-  align-content: start;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+  gap: 8px;
+  align-content: stretch;
   min-width: 0;
+  min-height: 0;
 }
 
 .swift-social-message h1 {
   margin: 0;
   color: #002b5c;
-  font-size: 1.45rem;
+  font-size: 2.04rem;
   line-height: 1.05;
 }
 
@@ -866,7 +941,7 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 
 .swift-social-subhead {
   color: var(--product-color);
-  font-size: 1rem;
+  font-size: 1.34rem;
   font-weight: 700;
 }
 
@@ -875,34 +950,55 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   font-size: 0.74rem;
 }
 
+.swift-social-message-divider {
+  width: 44%;
+  height: 3px;
+  margin: 2px 0 1px;
+  background: var(--product-color);
+}
+
 .swift-social-summary {
-  font-size: 0.86rem;
-  line-height: 1.25;
+  font-size: 1.2rem;
+  line-height: 1.18;
 }
 
 .swift-social-confidence {
   display: grid;
-  gap: 2px;
-  margin-top: 4px;
-  padding: 10px;
-  border-left: 5px solid var(--product-color);
+  align-content: start;
+  gap: 5px;
+  min-height: 128px;
+  height: 100%;
+  padding: 14px;
+  border-left: 6px solid var(--product-color);
   background: #eaf3fb;
+  box-sizing: border-box;
 }
 
 .swift-social-confidence span {
   color: #5c6b7a;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .swift-social-confidence strong {
   color: #002b5c;
-  font-size: 1.05rem;
+  font-size: 1.28rem;
 }
 
 .swift-social-confidence p {
-  font-size: 0.78rem;
+  font-size: 0.92rem;
+  line-height: 1.18;
+}
+
+.swift-social-message-support {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.52fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  align-self: stretch;
+  margin-top: 12px;
+  min-height: 0;
 }
 
 .swift-social-image-frame {
@@ -952,41 +1048,63 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   display: none;
 }
 
-.swift-social-know-row {
+.swift-social-impact-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
   padding: 0 20px 14px;
 }
 
 .swift-social-know {
-  padding: 10px 12px;
-  border-top: 4px solid var(--product-color);
-  background: #f5f8fb;
+  display: grid;
+  align-content: start;
+  min-height: 128px;
+  height: 100%;
+  padding: 14px;
+  border-left: 1px solid rgba(var(--product-rgb), 0.22);
+  background: #f8fbff;
+  box-sizing: border-box;
 }
 
 .swift-social-know h2 {
-  margin: 0 0 5px;
+  margin: 0 0 7px;
   color: #002b5c;
-  font-size: 0.82rem;
+  font-size: 1rem;
   text-transform: uppercase;
 }
 
 .swift-social-know ul {
   margin: 0;
-  padding-left: 18px;
-  font-size: 0.76rem;
-  line-height: 1.22;
+  padding-left: 20px;
+  font-size: 0.88rem;
+  line-height: 1.24;
+}
+
+.swift-social-know li + li {
+  margin-top: 4px;
 }
 
 .swift-social-impact-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  grid-template-columns: minmax(124px, 0.58fr) repeat(auto-fit, minmax(78px, 1fr));
   gap: 0;
   overflow: hidden;
-  border: 1px solid #cdd8e4;
+  border: 1px solid rgba(var(--product-rgb), 0.55);
   border-radius: 5px;
   background: #f8fbff;
+}
+
+.swift-social-impact-label {
+  display: grid;
+  place-items: center;
+  padding: 11px 8px;
+  border-right: 1px solid rgba(var(--product-rgb), 0.38);
+  background: rgba(var(--product-rgb), 0.12);
+  color: #002b5c;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .swift-social-impact {
@@ -994,8 +1112,8 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
   place-items: center;
   gap: 3px;
   min-width: 0;
-  padding: 7px 4px 6px;
-  border-right: 1px solid #d6dee8;
+  padding: 11px 4px 8px;
+  border-right: 1px solid rgba(var(--product-rgb), 0.26);
   background: #ffffff;
 }
 
@@ -1004,12 +1122,12 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 }
 
 .swift-social-impact span {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  color: #bd7600;
-  font-size: 1.52rem;
+  color: var(--product-color);
+  font-size: 1.84rem;
   line-height: 1;
 }
 
@@ -1020,23 +1138,43 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 
 .swift-social-impact strong {
   color: #002b5c;
-  font-size: 0.57rem;
+  font-size: 0.75rem;
   line-height: 1.05;
   text-align: center;
 }
 
 .swift-social-card-footer {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 58px;
+  gap: 0;
   align-items: center;
-  padding: 9px 16px;
+  padding: 8px 18px;
   background: #002b5c;
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
+  line-height: 1.16;
+}
+
+.swift-social-card-footer span,
+.swift-social-card-footer strong {
+  display: grid;
+  min-height: 34px;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  padding: 0 18px;
+  text-align: center;
+}
+
+.swift-social-card-footer span:nth-child(n + 2),
+.swift-social-card-footer strong {
+  border-left: 1px solid rgba(255, 255, 255, 0.36);
 }
 
 .swift-social-card-footer strong {
+  font-size: 1.05rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 

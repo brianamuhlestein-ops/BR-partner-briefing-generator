@@ -8,9 +8,16 @@ type TimingRow = {
   meaning: string
 }
 
+type MediaItem = {
+  id: number
+  fileName: string
+  dataUrl: string
+  caption: string
+}
+
 const sectorOptions = [
   'Power Grid',
-  'Aviation',
+  'Aviation & Radiation',
   'Satellite',
   'Communications & GNSS',
   'Human Spaceflight',
@@ -86,10 +93,19 @@ const briefing = reactive({
     'SWPC Warning Updates.\nObserved Space Weather Alerts, especially G4 or G5 conditions.\nSolar wind conditions after CME arrival.\nRegional geoelectric field guidance, if available.\nInternal GIC monitors, transformer response, voltage alarms, and local system indicators.\nAny reports from neighboring systems or reliability coordination channels.',
   activeProducts:
     'Space Weather Warning: In effect.\nObserved Space Weather Alerts: Expected if thresholds are reached.\nPartner briefings and Warning Updates: Continuing through the event.',
+  media: [
+    {
+      id: 1,
+      fileName: '',
+      dataUrl: '',
+      caption: '',
+    },
+  ] as MediaItem[],
 })
 
 const selectedSector = ref(sectorOptions[0]!)
 const pdfPreviewRef = ref<HTMLElement | null>(null)
+let mediaId = 1
 
 function lines(value: string) {
   return value
@@ -110,27 +126,62 @@ function removeTimingRow(index: number) {
   briefing.timingRows.splice(index, 1)
 }
 
+function addMediaItem() {
+  mediaId += 1
+  briefing.media.push({
+    id: mediaId,
+    fileName: '',
+    dataUrl: '',
+    caption: '',
+  })
+}
+
+function handleMediaUpload(item: MediaItem, event: Event) {
+  const input = event.target as HTMLInputElement | null
+  const file = input?.files?.[0]
+  item.fileName = file?.name ?? ''
+  item.dataUrl = ''
+
+  if (!file) {
+    return
+  }
+
+  const reader = new FileReader()
+  reader.addEventListener('load', () => {
+    item.dataUrl = typeof reader.result === 'string' ? reader.result : ''
+  })
+  reader.readAsDataURL(file)
+}
+
 function exportBriefingPdf() {
   exportElementToPdf(pdfPreviewRef.value, 'Partner Tailored Brief')
+}
+
+function isTailoredSectorLocked(sector: string) {
+  return sector !== 'Power Grid'
 }
 </script>
 
 <template>
   <section class="tailored-brief">
-    <nav class="tailored-sector-selector" aria-label="Partner tailored sectors">
-      <button
-        v-for="sector in sectorOptions"
-        :key="sector"
-        type="button"
-        class="tailored-sector-button"
-        :class="{ 'tailored-sector-button--active': selectedSector === sector }"
-        @click="selectedSector = sector"
-      >
-        {{ sector }}
-      </button>
-    </nav>
-
     <div class="tailored-workspace">
+      <nav class="tailored-sector-selector" aria-label="Partner tailored sectors">
+        <button
+          v-for="sector in sectorOptions"
+          :key="sector"
+          type="button"
+          class="tailored-sector-button"
+          :class="{
+            'tailored-sector-button--active': selectedSector === sector,
+            'tailored-sector-button--locked': isTailoredSectorLocked(sector),
+          }"
+          :disabled="isTailoredSectorLocked(sector)"
+          @click="selectedSector = sector"
+        >
+          {{ sector }}
+        </button>
+      </nav>
+
       <aside class="tailored-editor tailored-editor--forecast" aria-label="Forecast inputs">
         <div class="tailored-column-heading">
           <h2>Forecast</h2>
@@ -276,6 +327,26 @@ function exportBriefingPdf() {
             <textarea v-model="briefing.footer" class="tailored-short-textarea" />
           </label>
         </details>
+
+        <details class="tailored-editor-section tailored-media-editor" open>
+          <summary>Media</summary>
+          <div class="tailored-media-list">
+            <div v-for="item in briefing.media" :key="item.id" class="tailored-media-row">
+              <label class="tailored-media-upload-button">
+                Upload Image
+                <input type="file" accept="image/*" @change="handleMediaUpload(item, $event)" />
+              </label>
+              <span class="tailored-media-file-name">{{ item.fileName || 'No image selected' }}</span>
+              <label>
+                Image Caption
+                <textarea v-model="item.caption" class="tailored-media-caption" />
+              </label>
+            </div>
+          </div>
+          <button class="tailored-add-button" type="button" @click="addMediaItem">
+            Add More Media
+          </button>
+        </details>
       </aside>
 
       <div class="tailored-preview-column">
@@ -392,6 +463,15 @@ function exportBriefingPdf() {
         </div>
       </section>
 
+      <section class="tailored-section" v-if="briefing.media.some((item) => item.dataUrl || item.fileName || item.caption)">
+        <h3>Media</h3>
+        <div v-for="item in briefing.media" :key="item.id" class="tailored-pdf-media-item">
+          <img v-if="item.dataUrl" :src="item.dataUrl" :alt="item.caption || item.fileName || 'Uploaded media'" />
+          <strong v-else-if="item.fileName">{{ item.fileName }}</strong>
+          <p v-if="item.caption">{{ item.caption }}</p>
+        </div>
+      </section>
+
       <footer class="tailored-footer">
         {{ briefing.footer }}
       </footer>
@@ -410,13 +490,14 @@ function exportBriefingPdf() {
 }
 
 .tailored-sector-selector {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 8px;
+  align-content: start;
   min-width: 0;
 }
 
 .tailored-sector-button {
+  width: 100%;
   min-height: 32px;
   padding: 0 14px;
   border: 1px solid rgba(210, 218, 230, 0.18);
@@ -435,14 +516,20 @@ function exportBriefingPdf() {
   box-shadow: inset 0 0 0 1px rgba(255, 229, 94, 0.38);
 }
 
-.tailored-sector-button:not(.tailored-sector-button--active):hover {
+.tailored-sector-button:not(.tailored-sector-button--active):not(:disabled):hover {
   background: rgba(178, 187, 201, 0.32);
   color: rgba(255, 255, 255, 0.9);
 }
 
+.tailored-sector-button--locked,
+.tailored-sector-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .tailored-workspace {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(150px, 180px) repeat(3, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
   min-width: 0;
@@ -641,6 +728,66 @@ function exportBriefingPdf() {
   border: 1px solid rgba(95, 199, 255, 0.16);
   border-radius: calc(var(--app-radius) - 2px);
   background: rgba(2, 8, 15, 0.22);
+}
+
+.tailored-media-editor {
+  align-content: start;
+}
+
+.tailored-media-list {
+  display: grid;
+  gap: 12px;
+}
+
+.tailored-media-row {
+  display: grid;
+  grid-template-columns: minmax(118px, auto) minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(95, 199, 255, 0.16);
+  border-radius: calc(var(--app-radius) - 2px);
+  background: rgba(2, 8, 15, 0.22);
+}
+
+.tailored-media-row > * {
+  min-width: 0;
+}
+
+.tailored-media-row label:last-child {
+  grid-column: 1 / -1;
+}
+
+.tailored-media-upload-button {
+  display: inline-flex !important;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 229, 100, 0.42);
+  border-radius: 6px;
+  background: rgba(255, 229, 100, 0.12);
+  color: #fff0a8 !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+}
+
+.tailored-media-upload-button input {
+  display: none;
+}
+
+.tailored-media-file-name {
+  align-self: center;
+  overflow: hidden;
+  color: rgba(232, 239, 248, 0.72);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tailored-media-caption {
+  min-height: 76px !important;
 }
 
 .tailored-add-button,
@@ -875,6 +1022,29 @@ function exportBriefingPdf() {
   gap: 14px;
 }
 
+.tailored-pdf-media-item + .tailored-pdf-media-item {
+  margin-top: 10px;
+}
+
+.tailored-pdf-media-item img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border: 1px solid #d8e0ea;
+  background: #f7fbff;
+}
+
+.tailored-pdf-media-item strong {
+  color: #172033;
+}
+
+.tailored-pdf-media-item p {
+  margin-top: 5px;
+  color: #3d4b5f;
+  font-size: 0.72rem;
+}
+
 .tailored-footer {
   margin-top: 11px;
   padding-top: 8px;
@@ -888,6 +1058,10 @@ function exportBriefingPdf() {
     grid-template-columns: 1fr;
   }
 
+  .tailored-sector-selector {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
   .tailored-preview-column,
   .tailored-brief-page {
     justify-self: center;
@@ -898,6 +1072,10 @@ function exportBriefingPdf() {
 @media (max-width: 800px) {
   .tailored-grid,
   .tailored-probability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tailored-media-row {
     grid-template-columns: 1fr;
   }
 

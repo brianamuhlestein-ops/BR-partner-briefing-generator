@@ -14,7 +14,7 @@ const riskLevels: { label: RiskLevel; color: string; text: string }[] = [
 
 const sectors = [
   'Power Grid',
-  'Aviation',
+  'Aviation & Radiation',
   'Satellite',
   'Communications & GNSS',
   'Human Spaceflight',
@@ -64,7 +64,7 @@ const briefing = reactive({
   riskOutlook: Object.fromEntries(
     sectors.map((sector) => [
       sector,
-      sector === 'Aviation' || sector === 'Human Spaceflight'
+      sector === 'Aviation & Radiation' || sector === 'Human Spaceflight'
         ? ['Little to None', 'Little to None', 'Minor']
         : sector === 'Satellite'
           ? ['Little to None', 'Minor', 'Minor']
@@ -186,6 +186,8 @@ onBeforeUnmount(() => {
                 v-for="(_, index) in days"
                 :key="`${sector}-editor-${index}`"
                 :value="riskLevelFor(sector, index)"
+                :style="riskStyle(riskLevelFor(sector, index))"
+                class="partner-email-risk-select"
                 @change="handleRiskChange(sector, index, $event)"
               >
                 <option v-for="risk in riskLevels" :key="risk.label" :value="risk.label">
@@ -572,6 +574,12 @@ onBeforeUnmount(() => {
   color: rgba(232, 239, 248, 0.78);
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.partner-email-risk-select {
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 700 !important;
+  text-align: center;
 }
 
 .partner-email-media-editor {

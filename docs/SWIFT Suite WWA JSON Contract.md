@@ -507,3 +507,9 @@ Should store:
 * rendered official text
 * rendered social graphic metadata
 * timestamped product lifecycle
+
+## Future Enhancements
+
+### Direct Social Publishing
+
+The Partner Briefing Generator may later support direct publishing of approved social media graphics to official channels such as X/Twitter and Facebook Pages. CAC/NOAA authentication should identify the SWIFT user, while platform access tokens should remain server-side. A future workflow should include review/approval status, exact post text, exported PNG asset, alt text, platform response IDs, and an immutable audit log. For the beta prototype, social media output is limited to exported PNG graphics and reviewed copy.
