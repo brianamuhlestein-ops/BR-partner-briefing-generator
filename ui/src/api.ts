@@ -10,6 +10,7 @@ import type {
   SocialGraphicsExportResult,
   SocialGraphicsScene,
   SocialGraphicsTemplateId,
+  RuntimeContext,
 } from './types'
 
 const API_BASE = '/api/v1/partner-briefing'
@@ -43,6 +44,10 @@ export async function fetchBriefingTypes(): Promise<BriefingType[]> {
   return response.items
 }
 
+export async function fetchRuntimeNow(): Promise<RuntimeContext> {
+  return request<RuntimeContext>('/now', { cache: 'no-store' })
+}
+
 export async function fetchTemplate(briefingType: string): Promise<BriefingTemplateResponse> {
   const response = await request<ApiItem<BriefingTemplateResponse>>(`/templates/${briefingType}`)
   return response.item
@@ -52,6 +57,7 @@ export async function createDraft(payload: {
   briefing_type: string
   template_version: string
   sections?: Record<string, SectionValue>
+  issue_time_utc?: string
 }): Promise<BriefingDraft> {
   const response = await request<ApiItem<BriefingDraft>>('/drafts', {
     method: 'POST',
@@ -63,7 +69,7 @@ export async function createDraft(payload: {
 
 export async function updateDraft(
   draftId: string,
-  payload: { sections: Record<string, SectionValue> },
+  payload: { sections: Record<string, SectionValue>; issue_time_utc?: string },
 ): Promise<BriefingDraft> {
   const response = await request<ApiItem<BriefingDraft>>(`/drafts/${draftId}`, {
     method: 'PATCH',

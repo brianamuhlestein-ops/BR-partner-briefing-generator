@@ -28,6 +28,7 @@ from api.science.briefing_logic import (
     validate_draft_payload,
 )
 from api.social_graphics import build_export_artifacts, validate_social_graphics_scene
+from api.runtime import runtime_status
 
 
 SETTINGS = get_settings()
@@ -59,10 +60,19 @@ def require_social_graphics_export(export_id: str) -> dict:
 class HealthResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
         resp.media = {
-            "status": "ok",
+            "status": runtime_status()["status"],
             "service": get_settings()["service_name"],
             "timeUtc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "runtime": runtime_status(),
         }
+
+
+class RuntimeNowResource:
+    def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
+        status = runtime_status()
+        if status["status"] != "ok":
+            resp.status = falcon.HTTP_503
+        resp.media = status
 
 
 class BriefingTypesResource:
@@ -92,8 +102,12 @@ class DraftCollectionResource:
         validation = validate_draft_payload(payload, TEMPLATES_DIR)
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
+        try:
+            draft = create_draft_record(payload)
+        except (RuntimeError, ValueError) as exc:
+            raise falcon.HTTPBadRequest(description=str(exc)) from exc
         resp.status = falcon.HTTP_201
-        resp.media = item_response(create_draft_record(payload))
+        resp.media = item_response(draft)
 
 
 class DraftResource:

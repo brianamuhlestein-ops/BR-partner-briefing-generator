@@ -83,6 +83,7 @@ http://127.0.0.1:8089
 Routes:
 
 - `GET /health`
+- `GET /api/v1/partner-briefing/now`
 - `GET /api/v1/partner-briefing/briefing-types`
 - `GET /api/v1/partner-briefing/templates/{briefing_type}`
 - `GET /api/v1/partner-briefing/templates/{briefing_type}/versions/{version}`
@@ -156,6 +157,27 @@ Default local URLs:
 UI:  http://127.0.0.1:5179
 API: http://127.0.0.1:8089
 ```
+
+### Operational And Replay Time
+
+The API owns the authoritative clock. Operational mode uses server UTC:
+
+```powershell
+$env:PARTNER_BRIEFING_API_DATA_SOURCE = "operational"
+```
+
+Replay mode requires an explicit UTC timestamp and never falls back to live time:
+
+```powershell
+$env:PARTNER_BRIEFING_API_DATA_SOURCE = "replay"
+$env:PARTNER_BRIEFING_REPLAY_NOW_UTC = "2024-05-10T16:37:00Z"
+$env:PARTNER_BRIEFING_REPLAY_SCENARIO = "may_2024_geomagnetic_storm"
+docker compose up --build
+```
+
+`SWIFT_REPLAY_NOW_UTC` is supported as a suite-wide clock alias. Briefing drafts
+store the forecast issue-time snapshot and three derived UTC valid dates separately
+from their physical `created_at` and `updated_at` audit timestamps.
 
 The Vite dev server proxies `/api` to the API service configured in `ui/vite.config.ts`.
 

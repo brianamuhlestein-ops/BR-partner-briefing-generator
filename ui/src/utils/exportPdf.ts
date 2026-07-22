@@ -1,4 +1,6 @@
-export function exportElementToPdf(element: HTMLElement | null, title: string) {
+const PRINT_RESOURCE_TIMEOUT_MS = 5000
+
+export async function exportElementToPdf(element: HTMLElement | null, title: string) {
   if (!element) {
     return
   }
@@ -20,6 +22,7 @@ export function exportElementToPdf(element: HTMLElement | null, title: string) {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <base href="${escapeHtml(document.baseURI)}" />
         <title>${escapeHtml(title)}</title>
         ${styles}
         <style>
@@ -229,10 +232,57 @@ export function exportElementToPdf(element: HTMLElement | null, title: string) {
   printWindow.document.body.appendChild(clone)
   printWindow.document.close()
 
-  window.setTimeout(() => {
-    printWindow.focus()
-    printWindow.print()
-  }, 350)
+  await waitForPrintResources(printWindow)
+
+  if (printWindow.closed) {
+    return
+  }
+
+  printWindow.focus()
+  printWindow.print()
+}
+
+async function waitForPrintResources(printWindow: Window) {
+  const documentReady =
+    printWindow.document.readyState === 'complete'
+      ? Promise.resolve()
+      : new Promise<void>((resolve) => {
+          printWindow.addEventListener('load', () => resolve(), { once: true })
+        })
+
+  const stylesheetReady = Array.from(
+    printWindow.document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'),
+  ).map((stylesheet) => {
+    if (stylesheet.sheet) {
+      return Promise.resolve()
+    }
+    return new Promise<void>((resolve) => {
+      stylesheet.addEventListener('load', () => resolve(), { once: true })
+      stylesheet.addEventListener('error', () => resolve(), { once: true })
+    })
+  })
+
+  const imagesReady = Array.from(printWindow.document.images).map(async (image) => {
+    if (image.complete) {
+      return
+    }
+    try {
+      await image.decode()
+    } catch {
+      // A missing optional image should not block the rest of the PDF export.
+    }
+  })
+
+  const fontsReady = printWindow.document.fonts?.ready ?? Promise.resolve()
+  const resourcesReady = Promise.all([documentReady, fontsReady, ...stylesheetReady, ...imagesReady])
+  const timeout = new Promise<void>((resolve) => {
+    window.setTimeout(resolve, PRINT_RESOURCE_TIMEOUT_MS)
+  })
+
+  await Promise.race([resourcesReady, timeout])
+  await new Promise<void>((resolve) => {
+    printWindow.requestAnimationFrame(() => printWindow.requestAnimationFrame(() => resolve()))
+  })
 }
 
 function escapeHtml(value: string) {

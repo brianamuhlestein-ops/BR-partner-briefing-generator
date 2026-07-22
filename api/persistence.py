@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from api.config import get_settings, open_database
+from api.runtime import temporal_snapshot
 
 
 def _utc_now() -> str:
@@ -27,6 +28,20 @@ def initialize_storage() -> None:
             )
             """
         )
+        existing_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(drafts)").fetchall()
+        }
+        draft_columns = {
+            "issue_time_utc": "TEXT",
+            "valid_dates_json": "TEXT NOT NULL DEFAULT '[]'",
+            "runtime_mode": "TEXT NOT NULL DEFAULT 'operational'",
+            "replay_scenario": "TEXT",
+            "created_at": "TEXT",
+            "updated_at": "TEXT",
+        }
+        for column_name, definition in draft_columns.items():
+            if column_name not in existing_columns:
+                connection.execute(f"ALTER TABLE drafts ADD COLUMN {column_name} {definition}")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS generated_outputs (
@@ -73,6 +88,12 @@ def _row_to_draft(row: sqlite3.Row | None) -> dict | None:
         "template_version": row["template_version"],
         "sections": json.loads(row["sections_json"]),
         "status": row["status"],
+        "issue_time_utc": row["issue_time_utc"],
+        "valid_dates": json.loads(row["valid_dates_json"] or "[]"),
+        "runtime_mode": row["runtime_mode"],
+        "replay_scenario": row["replay_scenario"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
     }
 
 
@@ -104,22 +125,38 @@ def _row_to_social_graphics_export(row: sqlite3.Row | None) -> dict | None:
 
 
 def create_draft_record(payload: dict) -> dict:
+    temporal = temporal_snapshot(payload.get("issue_time_utc"))
+    now = _utc_now()
     draft = {
         "draft_id": str(uuid4()),
         "briefing_type": payload.get("briefing_type", "master"),
         "template_version": payload.get("template_version", "v1"),
         "sections": payload.get("sections", {}),
         "status": payload.get("status", "draft"),
+        **temporal,
+        "created_at": now,
+        "updated_at": now,
     }
     with open_database() as connection:
         connection.execute(
-            "INSERT INTO drafts (draft_id, briefing_type, template_version, sections_json, status) VALUES (?, ?, ?, ?, ?)",
+            """
+            INSERT INTO drafts
+            (draft_id, briefing_type, template_version, sections_json, status,
+             issue_time_utc, valid_dates_json, runtime_mode, replay_scenario, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
             (
                 draft["draft_id"],
                 draft["briefing_type"],
                 draft["template_version"],
                 json.dumps(draft["sections"]),
                 draft["status"],
+                draft["issue_time_utc"],
+                json.dumps(draft["valid_dates"]),
+                draft["runtime_mode"],
+                draft["replay_scenario"],
+                draft["created_at"],
+                draft["updated_at"],
             ),
         )
         connection.commit()
@@ -129,7 +166,11 @@ def create_draft_record(payload: dict) -> dict:
 def get_draft_record(draft_id: str) -> dict | None:
     with open_database() as connection:
         row = connection.execute(
-            "SELECT draft_id, briefing_type, template_version, sections_json, status FROM drafts WHERE draft_id = ?",
+            """
+            SELECT draft_id, briefing_type, template_version, sections_json, status,
+                   issue_time_utc, valid_dates_json, runtime_mode, replay_scenario, created_at, updated_at
+            FROM drafts WHERE draft_id = ?
+            """,
             (draft_id,),
         ).fetchone()
     return _row_to_draft(row)
@@ -139,17 +180,39 @@ def update_draft_record(draft_id: str, payload: dict) -> dict | None:
     current = get_draft_record(draft_id)
     if not current:
         return None
+    temporal = (
+        temporal_snapshot(payload["issue_time_utc"])
+        if "issue_time_utc" in payload
+        else {
+            "issue_time_utc": current["issue_time_utc"],
+            "valid_dates": current["valid_dates"],
+            "runtime_mode": current["runtime_mode"],
+            "replay_scenario": current["replay_scenario"],
+        }
+    )
     updated = {
         "draft_id": draft_id,
         "briefing_type": current["briefing_type"],
         "template_version": current["template_version"],
         "sections": payload.get("sections", current["sections"]),
         "status": payload.get("status", current["status"]),
+        **temporal,
+        "created_at": current["created_at"],
+        "updated_at": _utc_now(),
     }
     with open_database() as connection:
         connection.execute(
-            "UPDATE drafts SET sections_json = ?, status = ? WHERE draft_id = ?",
-            (json.dumps(updated["sections"]), updated["status"], draft_id),
+            """
+            UPDATE drafts
+            SET sections_json = ?, status = ?, issue_time_utc = ?, valid_dates_json = ?,
+                runtime_mode = ?, replay_scenario = ?, updated_at = ?
+            WHERE draft_id = ?
+            """,
+            (
+                json.dumps(updated["sections"]), updated["status"], updated["issue_time_utc"],
+                json.dumps(updated["valid_dates"]), updated["runtime_mode"],
+                updated["replay_scenario"], updated["updated_at"], draft_id,
+            ),
         )
         connection.commit()
     return updated

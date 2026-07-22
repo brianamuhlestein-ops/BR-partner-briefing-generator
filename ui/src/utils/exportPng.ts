@@ -48,7 +48,7 @@ function createExportClone(element: HTMLElement) {
   inlineComputedStyles(element, clone)
 
   clone
-    .querySelectorAll('.swift-social-image-upload')
+    .querySelectorAll('.swift-social-image-upload, .swift-social-image-fit-toggle')
     .forEach((node) => {
       ;(node as HTMLElement).style.display = 'none'
     })

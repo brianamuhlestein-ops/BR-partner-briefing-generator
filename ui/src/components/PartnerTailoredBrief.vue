@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import type { RuntimeContext } from '../types'
 import { exportElementToPdf } from '../utils/exportPdf'
+import { formatTailoredIssueTime, fromDatetimeLocal, toDatetimeLocal } from '../utils/briefingTime'
+
+const props = defineProps<{ runtimeNow: RuntimeContext | null }>()
 
 type TimingRow = {
   window: string
@@ -25,7 +29,6 @@ const sectorOptions = [
 ]
 
 const briefing = reactive({
-  issued: 'Fri May 10, 2024 | 1230 UTC',
   productTitle: 'Grid Operations Briefing',
   headline: 'Geomagnetic Disturbance Expected Today into Saturday',
   audience:
@@ -105,7 +108,25 @@ const briefing = reactive({
 
 const selectedSector = ref(sectorOptions[0]!)
 const pdfPreviewRef = ref<HTMLElement | null>(null)
+const issueTimeUtc = ref<string | null>(null)
+const issueTimeDisplay = computed(() => formatTailoredIssueTime(issueTimeUtc.value))
+const issueTimeInput = computed({
+  get: () => toDatetimeLocal(issueTimeUtc.value),
+  set: (value: string) => { issueTimeUtc.value = fromDatetimeLocal(value) },
+})
 let mediaId = 1
+
+watch(
+  () => props.runtimeNow?.now_utc,
+  (value) => {
+    if (!issueTimeUtc.value && value) issueTimeUtc.value = value
+  },
+  { immediate: true },
+)
+
+function resetIssueTime() {
+  issueTimeUtc.value = props.runtimeNow?.now_utc ?? null
+}
 
 function lines(value: string) {
   return value
@@ -191,9 +212,12 @@ function isTailoredSectorLocked(sector: string) {
         <section class="tailored-editor-section">
           <h3>Product Setup</h3>
           <label>
-            Issue Time
-            <input v-model="briefing.issued" type="text" />
+            Forecast Issue Time (UTC)
+            <input v-model="issueTimeInput" type="datetime-local" />
           </label>
+          <button type="button" @click="resetIssueTime">
+            Set to {{ runtimeNow?.data_source === 'replay' ? 'Replay' : 'Operational' }} Time
+          </button>
           <label>
             Product Title
             <input v-model="briefing.productTitle" type="text" />
@@ -373,7 +397,7 @@ function isTailoredSectorLocked(sector: string) {
         </div>
         <div class="tailored-meta">
           <strong>{{ briefing.productTitle }}</strong>
-          <span>{{ briefing.issued }}</span>
+          <span>{{ issueTimeDisplay }}</span>
         </div>
       </header>
 

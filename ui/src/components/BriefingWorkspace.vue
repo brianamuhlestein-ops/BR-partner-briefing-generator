@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import {
   createDraft,
   fetchBriefingTypes,
+  fetchRuntimeNow,
   updateDraft,
 } from '../api'
 import type {
@@ -15,6 +16,7 @@ import type {
   SectionValue,
   TemplateSection,
   WorkspaceTypeId,
+  RuntimeContext,
 } from '../types'
 import PartnerBriefing from './PartnerBriefing.vue'
 import PartnerEmailBriefing from './PartnerEmailBriefing.vue'
@@ -146,12 +148,19 @@ function buildDefaultTemplate(briefingType: string): BriefingTemplate {
 }
 
 function createLocalDraft(briefingType: string): BriefingDraft {
+  const now = new Date().toISOString()
   return {
     draft_id: `local-${briefingType}`,
     briefing_type: briefingType,
     template_version: 'local-ui',
     sections: {},
     status: 'draft',
+    issue_time_utc: now,
+    valid_dates: [],
+    runtime_mode: 'operational',
+    replay_scenario: null,
+    created_at: now,
+    updated_at: now,
   }
 }
 
@@ -305,6 +314,16 @@ const draft = ref<BriefingDraft | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const pdfMessage = ref('')
+const runtimeNow = ref<RuntimeContext | null>(null)
+const runtimeError = ref('')
+
+const runtimeBadgeText = computed(() => {
+  if (!runtimeNow.value) return 'CLOCK UNAVAILABLE'
+  if (runtimeNow.value.data_source === 'replay') {
+    return `REPLAY ${runtimeNow.value.now_utc?.replace('T', ' ').replace(':00Z', 'Z') ?? 'CLOCK?'}`
+  }
+  return 'OPERATIONAL UTC'
+})
 
 const isImpactRiskMode = computed(() => selectedType.value === 'impact-risk')
 const isPartnerMode = computed(() => selectedType.value === 'partner')
@@ -512,11 +531,18 @@ onMounted(async () => {
     }
   }
 
-  try {
-    briefingTypes.value = await fetchBriefingTypes()
-  } catch {
-    briefingTypes.value = []
+  const [runtimeResult, briefingTypesResult] = await Promise.allSettled([
+    fetchRuntimeNow(),
+    fetchBriefingTypes(),
+  ])
+  if (runtimeResult.status === 'fulfilled') {
+    runtimeNow.value = runtimeResult.value
+  } else {
+    runtimeError.value = runtimeResult.reason instanceof Error
+      ? runtimeResult.reason.message
+      : 'Runtime clock is unavailable.'
   }
+  briefingTypes.value = briefingTypesResult.status === 'fulfilled' ? briefingTypesResult.value : []
 
   if (
     availableBriefingTypes.value.length > 0 &&
@@ -536,7 +562,7 @@ onMounted(async () => {
         <div class="swift-mark" aria-hidden="true">
           <span>SWIFT</span>
         </div>
-        <div class="title-copy">
+      <div class="title-copy">
           <p class="eyebrow">NOAA Space Weather Prediction Center</p>
           <h1>{{ currentTitle }}</h1>
           <p class="mission-line">{{ currentSubtitle }}</p>
@@ -544,6 +570,11 @@ onMounted(async () => {
       </div>
 
       <div class="title-tools" aria-label="Application tools">
+        <span
+          class="runtime-mode-badge"
+          :class="{ 'runtime-mode-badge--replay': runtimeNow?.data_source === 'replay' }"
+          :title="runtimeError || runtimeNow?.clock_source"
+        >{{ runtimeBadgeText }}</span>
         <button
           v-for="action in titleActions"
           :key="action.label"
@@ -606,16 +637,18 @@ onMounted(async () => {
             <p v-else-if="isBriefingSchemaMode && pdfMessage" class="message workspace-alert">{{ pdfMessage }}</p>
             <p v-if="loading" class="message workspace-alert">Loading workspace...</p>
 
-            <PartnerBriefing v-if="isImpactRiskMode && !loading" />
-            <PartnerEmailBriefing v-else-if="isPartnerMode && !loading" />
-            <PartnerTailoredBrief v-else-if="isPartnerTailoredMode && !loading" />
-            <div v-else-if="isBlankSlateMode && !loading" class="blank-slate-panel">
+            <!-- Keep form-based briefing workspaces mounted so unsaved edits survive tab changes. -->
+            <PartnerBriefing v-show="isImpactRiskMode && !loading" />
+            <PartnerEmailBriefing v-show="isPartnerMode && !loading" :runtime-now="runtimeNow" />
+            <PartnerTailoredBrief v-show="isPartnerTailoredMode && !loading" :runtime-now="runtimeNow" />
+            <div v-if="isBlankSlateMode && !loading" class="blank-slate-panel">
               <span>{{ workspaceIntro.kicker }} workspace pending layout.</span>
             </div>
             <div v-else-if="isSocialGraphicsMode && !loading" class="social-media-stack">
               <SocialGraphicsWorkspace
                 mode="social"
                 presentation="social-tab"
+                :runtime-now="runtimeNow"
               />
             </div>
             <SchemaForm

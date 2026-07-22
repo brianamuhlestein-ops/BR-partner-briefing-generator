@@ -428,6 +428,26 @@ h1 {
   min-height: 0;
 }
 
+.runtime-mode-badge {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid rgba(111, 194, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(28, 108, 157, 0.2);
+  color: #d7efff;
+  font: 700 11px/1.1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.runtime-mode-badge--replay {
+  border-color: rgba(255, 183, 77, 0.7);
+  background: rgba(177, 94, 13, 0.24);
+  color: #ffd9a0;
+}
+
 .blank-slate-panel {
   display: grid;
   min-height: 220px;

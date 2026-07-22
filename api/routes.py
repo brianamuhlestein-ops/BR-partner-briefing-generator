@@ -8,6 +8,7 @@ from api.resources import (
     DraftCollectionResource,
     DraftResource,
     HealthResource,
+    RuntimeNowResource,
     PdfResource,
     PreviewResource,
     SocialGraphicsAssetResource,
@@ -23,6 +24,7 @@ PUBLIC_PREFIX = "/api/v1/partner-briefing"
 
 
 def _add_partner_briefing_routes(app: falcon.App, prefix: str) -> None:
+    app.add_route(f"{prefix}/now", RuntimeNowResource())
     app.add_route(f"{prefix}/briefing-types", BriefingTypesResource())
     app.add_route(f"{prefix}/templates/{{briefing_type}}", TemplateResource())
     app.add_route(

@@ -41,6 +41,26 @@ export type BriefingDraft = {
   template_version: string
   sections: Record<string, SectionValue>
   status: string
+  issue_time_utc: string
+  valid_dates: string[]
+  runtime_mode: 'operational' | 'replay'
+  replay_scenario: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type RuntimeContext = {
+  status: 'ok' | 'configuration_error'
+  now_utc: string | null
+  system_utc: string
+  data_source: 'operational' | 'replay'
+  source: 'operational' | 'replay'
+  clock_source: string
+  scenario: string | null
+  replay_now_env: string | null
+  invalid_replay_now_env: string[]
+  warnings: string[]
+  configuration_errors: string[]
 }
 
 export type ContextItem = {

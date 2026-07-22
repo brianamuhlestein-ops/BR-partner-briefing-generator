@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 
-import type { GraphicsWorkspaceMode, OpsToCommsRecommendation } from '../../types'
+import type { GraphicsWorkspaceMode, OpsToCommsRecommendation, RuntimeContext } from '../../types'
 import { exportElementToPng } from '../../utils/exportPng'
+import { formatIssueTime } from '../../utils/briefingTime'
 
 type SocialProductId =
   | 'swpc_brief'
@@ -42,10 +43,11 @@ type SectorSymbol = {
   aliases: string[]
 }
 
-defineProps<{
+const props = defineProps<{
   mode: GraphicsWorkspaceMode
   presentation?: 'default' | 'social-tab'
   recommendation?: OpsToCommsRecommendation | null
+  runtimeNow?: RuntimeContext | null
 }>()
 
 const sectorSymbols: SectorSymbol[] = [
@@ -101,7 +103,7 @@ const templates: SocialTemplate[] = [
     color: '#0065B3',
     headline: 'Space Weather Briefing',
     subheadline: 'Executive update',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'SWPC is monitoring space weather conditions and will continue to provide updates as forecast confidence or observed conditions change.',
     confidenceLabel: 'Status',
     confidenceValue: 'Monitoring',
@@ -121,7 +123,7 @@ const templates: SocialTemplate[] = [
     color: '#1E73BE',
     headline: 'Active Space Weather Conditions Expected This Week',
     subheadline: 'Planning outlook for May 6-12',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'Space weather activity may increase this week as solar activity and geomagnetic conditions remain under review.',
     confidenceLabel: 'Confidence',
     confidenceValue: 'Medium',
@@ -141,7 +143,7 @@ const templates: SocialTemplate[] = [
     color: '#0065B3',
     headline: 'CME Under Analysis',
     subheadline: 'Forecast confidence may change',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'SWPC is analyzing solar activity and possible Earth-directed impacts. Additional products may be issued if confidence increases.',
     confidenceLabel: 'Confidence',
     confidenceValue: 'Low to Medium',
@@ -161,7 +163,7 @@ const templates: SocialTemplate[] = [
     color: '#F4B000',
     headline: 'Significant Geomagnetic Activity Possible',
     subheadline: 'Friday into the weekend',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'A CME sequence may reach Earth and produce significant geomagnetic activity. Confidence and timing will be refined with new observations.',
     confidenceLabel: 'Confidence',
     confidenceValue: 'Medium to High',
@@ -181,7 +183,7 @@ const templates: SocialTemplate[] = [
     color: '#F28C28',
     headline: 'Lingering Geomagnetic Activity',
     subheadline: 'Elevated conditions continue',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'Elevated space weather conditions continue, but the primary warning-level concern has decreased.',
     confidenceLabel: 'Confidence',
     confidenceValue: 'Medium to High',
@@ -201,7 +203,7 @@ const templates: SocialTemplate[] = [
     color: '#D94A1E',
     headline: 'Significant Geomagnetic Activity Expected',
     subheadline: 'Friday into the weekend',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'Multiple CMEs are expected to reach Earth and cause significant geomagnetic activity. Severe intervals are possible if coupling is favorable.',
     confidenceLabel: 'Confidence',
     confidenceValue: 'Medium to High',
@@ -221,7 +223,7 @@ const templates: SocialTemplate[] = [
     color: '#B31B1B',
     headline: 'Strong Geomagnetic Conditions Reached',
     subheadline: 'Observed threshold reached',
-    issueTime: 'Observed Jul 09, 2026 2036 UTC',
+    issueTime: 'Observation time pending',
     summary: 'Observed geomagnetic conditions have reached an event-level alert threshold based on official monitoring.',
     confidenceLabel: 'Observed',
     confidenceValue: 'G3 at 2036 UTC',
@@ -241,7 +243,7 @@ const templates: SocialTemplate[] = [
     color: '#5C6B7A',
     headline: 'CME Analysis May Be Affected',
     subheadline: 'Coronagraph imagery degraded',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'A data availability issue may affect timeliness or confidence in solar event analysis. Official products remain valid unless updated.',
     confidenceLabel: 'Status',
     confidenceValue: 'Ongoing',
@@ -261,7 +263,7 @@ const templates: SocialTemplate[] = [
     color: '#0065B3',
     headline: 'Significant Space Weather Event Ongoing',
     subheadline: 'Mid-event recap',
-    issueTime: 'Issued Jul 09, 2026 2036 UTC',
+    issueTime: 'Issue time pending',
     summary: 'SWPC continues to monitor an ongoing space weather event. This graphic summarizes current status and observed conditions.',
     confidenceLabel: 'Status',
     confidenceValue: 'Warning in Effect',
@@ -279,6 +281,7 @@ const templates: SocialTemplate[] = [
 const selectedProductId = ref<SocialProductId>('swpc_brief')
 const uploadedImage = ref('')
 const uploadedImageName = ref('')
+const imageFit = ref<'fit' | 'fill'>('fit')
 const isUpdatedProduct = ref(false)
 const socialPreviewRef = ref<HTMLElement | null>(null)
 
@@ -301,12 +304,27 @@ const socialCardStyle = computed(() => ({
   '--product-rgb': hexToRgbTriplet(draft.color),
 }))
 
+function runtimeIssueLabel() {
+  const prefix = selectedProductId.value === 'observed_alert' ? 'Observed' : 'Issued'
+  return `${prefix} ${formatIssueTime(props.runtimeNow?.now_utc).replace('Issue time unavailable', 'time unavailable')}`
+}
+
 watch(selectedTemplate, (template) => {
   Object.assign(draft, template)
+  if (props.runtimeNow?.now_utc) draft.issueTime = runtimeIssueLabel()
   uploadedImage.value = ''
   uploadedImageName.value = ''
+  imageFit.value = 'fit'
   isUpdatedProduct.value = false
 })
+
+watch(
+  () => props.runtimeNow?.now_utc,
+  (value) => {
+    if (value) draft.issueTime = runtimeIssueLabel()
+  },
+  { immediate: true },
+)
 
 function lines(value: string) {
   return value
@@ -320,6 +338,7 @@ function handleImageUpload(event: Event) {
   const file = input?.files?.[0]
   uploadedImageName.value = file?.name ?? ''
   uploadedImage.value = ''
+  imageFit.value = 'fit'
 
   if (!file) {
     return
@@ -416,6 +435,10 @@ function exportSocialPng() {
         >
           {{ isUpdatedProduct ? updatedProductLabel : 'Updated' }}
         </button>
+      </div>
+
+      <div class="swift-social-product-actions">
+        <span class="swift-social-product-source">SWIFT WWA JSON driven</span>
         <button
           type="button"
           class="swift-social-product-button swift-social-export-button"
@@ -424,8 +447,6 @@ function exportSocialPng() {
           Export PNG
         </button>
       </div>
-
-      <span class="swift-social-product-source">SWIFT WWA JSON driven</span>
     </header>
 
     <div class="swift-social-grid">
@@ -570,9 +591,30 @@ function exportSocialPng() {
             </section>
 
             <section class="swift-social-image-frame">
-              <img v-if="uploadedImage" :src="uploadedImage" :alt="uploadedImageName || 'Uploaded social media image'" />
+              <img
+                v-if="uploadedImage"
+                :src="uploadedImage"
+                :alt="uploadedImageName || 'Uploaded social media image'"
+                :class="`swift-social-image--${imageFit}`"
+              />
               <div v-else>
                 <span>{{ draft.imagePlaceholder }}</span>
+              </div>
+              <div v-if="uploadedImage" class="swift-social-image-fit-toggle" aria-label="Image fit mode">
+                <button
+                  type="button"
+                  :class="{ 'swift-social-image-fit-toggle--active': imageFit === 'fit' }"
+                  @click="imageFit = 'fit'"
+                >
+                  Fit
+                </button>
+                <button
+                  type="button"
+                  :class="{ 'swift-social-image-fit-toggle--active': imageFit === 'fill' }"
+                  @click="imageFit = 'fill'"
+                >
+                  Fill
+                </button>
               </div>
               <label class="swift-social-image-upload">
                 Upload Image
@@ -626,6 +668,15 @@ function exportSocialPng() {
   min-width: 0;
 }
 
+.swift-social-product-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  min-width: max-content;
+}
+
 .swift-social-product-button,
 .swift-social-upload-button {
   border: 1px solid rgba(95, 199, 255, 0.24);
@@ -648,6 +699,9 @@ function exportSocialPng() {
   border-color: rgba(255, 229, 100, 0.38);
   background: rgba(255, 229, 100, 0.12);
   color: #fff0a8;
+  min-height: 40px;
+  padding: 0 16px;
+  white-space: nowrap;
 }
 
 .swift-social-upload-button {
@@ -928,7 +982,7 @@ function exportSocialPng() {
 .swift-social-message h1 {
   margin: 0;
   color: #002b5c;
-  font-size: 2.04rem;
+  font-size: 2.12rem;
   line-height: 1.05;
 }
 
@@ -941,13 +995,13 @@ function exportSocialPng() {
 
 .swift-social-subhead {
   color: var(--product-color);
-  font-size: 1.34rem;
+  font-size: 1.42rem;
   font-weight: 700;
 }
 
 .swift-social-time {
   color: #5c6b7a;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
 }
 
 .swift-social-message-divider {
@@ -958,7 +1012,7 @@ function exportSocialPng() {
 }
 
 .swift-social-summary {
-  font-size: 1.2rem;
+  font-size: 1.28rem;
   line-height: 1.18;
 }
 
@@ -976,18 +1030,18 @@ function exportSocialPng() {
 
 .swift-social-confidence span {
   color: #5c6b7a;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .swift-social-confidence strong {
   color: #002b5c;
-  font-size: 1.28rem;
+  font-size: 1.36rem;
 }
 
 .swift-social-confidence p {
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.18;
 }
 
@@ -1014,6 +1068,13 @@ function exportSocialPng() {
 .swift-social-image-frame img {
   width: 100%;
   height: 100%;
+}
+
+.swift-social-image--fit {
+  object-fit: contain;
+}
+
+.swift-social-image--fill {
   object-fit: cover;
 }
 
@@ -1025,6 +1086,40 @@ function exportSocialPng() {
   font-size: 0.86rem;
   font-weight: 700;
   text-align: center;
+}
+
+.swift-social-image-fit-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex !important;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(0, 43, 92, 0.22);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 18px rgba(0, 43, 92, 0.12);
+}
+
+.swift-social-image-fit-toggle button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid rgba(0, 43, 92, 0.14);
+  background: transparent;
+  color: #002b5c;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.swift-social-image-fit-toggle button:last-child {
+  border-right: 0;
+}
+
+.swift-social-image-fit-toggle--active {
+  background: #002b5c !important;
+  color: #ffffff !important;
 }
 
 .swift-social-image-upload {
@@ -1068,19 +1163,19 @@ function exportSocialPng() {
 .swift-social-know h2 {
   margin: 0 0 7px;
   color: #002b5c;
-  font-size: 1rem;
+  font-size: 1.08rem;
   text-transform: uppercase;
 }
 
 .swift-social-know ul {
   margin: 0;
   padding-left: 20px;
-  font-size: 0.88rem;
-  line-height: 1.24;
+  font-size: 0.96rem;
+  line-height: 1.32;
 }
 
 .swift-social-know li + li {
-  margin-top: 4px;
+  margin-top: 7px;
 }
 
 .swift-social-impact-strip {

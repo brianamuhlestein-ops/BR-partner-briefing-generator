@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import type { RuntimeContext } from '../types'
 import { exportElementToPdf } from '../utils/exportPdf'
+import { forecastDayLabels, formatIssueTime, fromDatetimeLocal, toDatetimeLocal } from '../utils/briefingTime'
+
+const props = defineProps<{ runtimeNow: RuntimeContext | null }>()
 
 type RiskLevel = 'Little to None' | 'Minor' | 'Moderate' | 'Major' | 'Extreme'
 
@@ -20,7 +24,6 @@ const sectors = [
   'Human Spaceflight',
   'Emergency Management',
 ]
-const days = ['Day 1\nApr 13 (Mon)', 'Day 2\nApr 14 (Tue)', 'Day 3\nApr 15 (Wed)']
 
 type MediaItem = {
   id: number
@@ -29,17 +32,7 @@ type MediaItem = {
   caption: string
 }
 
-function formatIssueTime(date: Date): string {
-  const month = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
-  const day = date.toLocaleString('en-US', { day: '2-digit', timeZone: 'UTC' })
-  const year = date.toLocaleString('en-US', { year: 'numeric', timeZone: 'UTC' })
-  const hour = date.getUTCHours().toString().padStart(2, '0')
-  const minute = date.getUTCMinutes().toString().padStart(2, '0')
-  return `${month} ${day}, ${year} ${hour}${minute} UTC`
-}
-
 const briefing = reactive({
-  dateTime: formatIssueTime(new Date()),
   headline: 'Elevated Geomagnetic Activity Possible Late Thursday into Friday',
   summary:
     'A high-speed solar wind stream from a coronal hole is expected to reach Earth late Thursday into Friday. This may lead to elevated geomagnetic activity, with G1-G2 (Minor to Moderate) storm levels possible, primarily on Friday. Conditions are expected to improve by Saturday. No significant solar flares are anticipated.',
@@ -74,8 +67,24 @@ const briefing = reactive({
 })
 
 let mediaId = 1
-let issueClock: number | undefined
 const pdfPreviewRef = ref<HTMLElement | null>(null)
+const issueTimeUtc = ref<string | null>(null)
+const issueTimeDisplay = computed(() => formatIssueTime(issueTimeUtc.value))
+const days = computed(() => forecastDayLabels(issueTimeUtc.value))
+const issueTimeInput = computed({
+  get: () => toDatetimeLocal(issueTimeUtc.value),
+  set: (value: string) => {
+    issueTimeUtc.value = fromDatetimeLocal(value)
+  },
+})
+
+watch(
+  () => props.runtimeNow?.now_utc,
+  (value) => {
+    if (!issueTimeUtc.value && value) issueTimeUtc.value = value
+  },
+  { immediate: true },
+)
 
 function lines(value: string): string[] {
   return value
@@ -109,8 +118,8 @@ function handleRiskChange(sector: string, index: number, event: Event) {
   sectorRisk[index] = value
 }
 
-function updateIssueTime() {
-  briefing.dateTime = formatIssueTime(new Date())
+function resetIssueTime() {
+  issueTimeUtc.value = props.runtimeNow?.now_utc ?? null
 }
 
 function addMediaItem() {
@@ -144,16 +153,6 @@ function exportBriefingPdf() {
   exportElementToPdf(pdfPreviewRef.value, 'Core Distribution Brief')
 }
 
-onMounted(() => {
-  updateIssueTime()
-  issueClock = window.setInterval(updateIssueTime, 30_000)
-})
-
-onBeforeUnmount(() => {
-  if (issueClock !== undefined) {
-    window.clearInterval(issueClock)
-  }
-})
 </script>
 
 <template>
@@ -208,9 +207,12 @@ onBeforeUnmount(() => {
         <section class="partner-email-input-section">
           <div class="partner-email-editor-heading">Briefing Header</div>
           <label>
-            Issue Time
-            <input :value="briefing.dateTime" type="text" readonly />
+            Forecast Issue Time (UTC)
+            <input v-model="issueTimeInput" type="datetime-local" />
           </label>
+          <button class="partner-add-media-button" type="button" @click="resetIssueTime">
+            Set to {{ runtimeNow?.data_source === 'replay' ? 'Replay' : 'Operational' }} Time
+          </button>
 
           <label>
             Headline
@@ -297,7 +299,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="partner-pdf-meta">
             <strong>Partner Briefing</strong>
-            <span>{{ briefing.dateTime }}</span>
+            <span>{{ issueTimeDisplay }}</span>
           </div>
         </header>
 
