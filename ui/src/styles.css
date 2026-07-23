@@ -443,9 +443,10 @@ h1 {
 }
 
 .runtime-mode-badge--replay {
-  border-color: rgba(255, 183, 77, 0.7);
-  background: rgba(177, 94, 13, 0.24);
-  color: #ffd9a0;
+  border-color: #ffe05c;
+  background: #ffe05c;
+  color: #111820;
+  box-shadow: 0 0 0 1px rgba(255, 224, 92, 0.16), 0 3px 12px rgba(255, 201, 51, 0.18);
 }
 
 .blank-slate-panel {

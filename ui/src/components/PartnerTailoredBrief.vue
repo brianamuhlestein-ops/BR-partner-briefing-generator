@@ -86,7 +86,7 @@ const briefing = reactive({
     },
     {
       window: 'After peak conditions',
-      forecast: 'Possible de-escalation to Advisory',
+      forecast: 'Possible de-escalation to Statement',
       meaning: 'Continue monitoring until conditions clearly decrease',
     },
   ] as TimingRow[],

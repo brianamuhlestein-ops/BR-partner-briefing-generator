@@ -1,0 +1,15 @@
+{
+  "type": "summary",
+  "created_on": "2024-05-16T1600Z",
+  "extended_on": null,
+  "expires_on": null,
+  "name": "Space Weather Summary Number 2",
+  "message": {
+    "event_overview": "The major space weather event associated with Active Region 3664 and multiple coronal mass ejection impacts from 1639 UTC Fri May 10 2024 through Sun May 12 2024 has ended. No additional significant geomagnetic impacts from this event are expected at 1600 UTC Thu May 16 2024.",
+    "what_has_occurred": "Active Region 3664 produced a series of major flares and multiple Earth-directed coronal mass ejections beginning Mon May 06 2024. As additional eruptions occurred and analysis improved, SWPC escalated its messaging from early awareness products to a formal Space Weather Warning. An Observed Space Weather Alert issued at 1647 UTC Fri May 10 2024 confirmed a sudden impulse at 1645 UTC Fri May 10 2024 following upstream shock detection at 1639 UTC Fri May 10 2024. Solar wind conditions became strongly enhanced, with very strong magnetic fields, sustained southward conditions, and speeds near 800 km/s. Geomagnetic activity subsequently reached G3, G4, and G5. G5 conditions were first observed at 2254 UTC Fri May 10 2024, with multiple G5 periods occurring into Sat May 11 2024. Solar particle storm conditions reached SP2 from Fri May 10 2024 into Sat May 11 2024, with elevated particle levels continuing into the recovery period. Active Region 3664 remained flare-productive as it approached the west limb, producing additional X-class and M-class flares.",
+    "current_status": "Solar wind conditions have weakened substantially from the peak of the storm, and geomagnetic activity has returned to routine monitoring levels. Active Region 3664 has rotated beyond the west limb, reducing the likelihood of additional Earth-directed impacts from this region.",
+    "impacts": "Operational concerns during the event included power-system voltage control and geomagnetically induced currents, HF communication degradation or intermittent loss at higher latitudes, increased GNSS uncertainty and degraded performance, increased low-Earth-orbit satellite drag, and particle-related concerns for aviation and satellite operations. Aurora was reported much farther south than usual.",
+    "additional_details": "All Watches, Warnings, and event-related Space Weather Statements associated with this event are no longer in effect. Partners may return to normal monitoring of SWPC products and sector-specific guidance. SWPC will issue new products if additional space weather activity develops.",
+    "next_summary": "This is the final Space Weather Summary for this event."
+  }
+}

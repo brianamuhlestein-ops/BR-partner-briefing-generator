@@ -1,0 +1,13 @@
+{
+  "type": "outlook",
+  "created_on": "2024-05-06T1500Z",
+  "extended_on": null,
+  "expires_on": null,
+  "name": "Space Weather Outlook",
+  "message": {
+    "day_one": "1500 UTC Mon May 06 2024 through 0000 UTC Tue May 07 2024 Solar activity is expected to remain elevated. SF2-SF3 solar flare activity is expected, with intermittent HF radio degradation on the sunlit side of Earth. Additional major flares are possible from the large, complex active regions on the visible disk. Periods of G1-G2 geomagnetic storming are possible. Potential effects include degraded HF communication at higher latitudes, increased GNSS uncertainty in disturbed ionospheric regions, increased low-Earth-orbit satellite drag, and expanded aurora visibility where darkness and local viewing conditions allow. SP1 or greater solar particle storm conditions are also possible if additional major flares occur.",
+    "days_two_through_three": "0000 UTC Tue May 07 2024 through 0000 UTC Thu May 09 2024 Solar flare activity remains the primary concern. SF2 activity is likely, and SF3 activity remains possible. Geomagnetic activity is expected to decrease from Mon May 06 2024 levels, although unsettled to active periods may continue.",
+    "days_four_through_seven": "0000 UTC Thu May 09 2024 through 0000 UTC Mon May 13 2024 Active Region 3664 remains large, complex, and capable of additional eruptions. Further Earth-directed coronal mass ejections cannot be ruled out, but confidence in any late-period Earth impacts remains low at issuance time.",
+    "partner_information_statement": "Partners should monitor SWPC updates through 0000 UTC Mon May 13 2024. A Space Weather Statement, Watch, or Warning may be issued if confidence increases for consequential geomagnetic, particle, or flare activity."
+  }
+}

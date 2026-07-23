@@ -1,0 +1,16 @@
+{
+  "type": "statement",
+  "created_on": "2024-05-08T0630Z",
+  "extended_on": null,
+  "expires_on": "2024-05-08T1800Z",
+  "name": "Space Weather Statement",
+  "message": {
+    "what": "A significant solar flare has occurred from Active Region 3664. Initial imagery indicates that a coronal mass ejection may have been produced.",
+    "where": "Worldwide and Earth's orbit.",
+    "when": "Analysis is underway at 0630 UTC Wed May 08 2024. If an Earth-directed component is confirmed, potential Earth impacts would not be expected before 1200 UTC Fri May 10 2024. Timing will be refined as imagery and model guidance become available.",
+    "confidence": "Low. No calibrated arrival probability is assigned while eruption analysis remains incomplete.",
+    "impacts": "If an Earth-directed coronal mass ejection is confirmed, geomagnetic activity could affect HF communication, satellite navigation, satellite operations, and power systems, particularly at higher latitudes.",
+    "additional_details": "Active Region 3664 remains large, complex, and capable of additional eruptions. No Space Weather Watch or Warning is in effect for this event at 0630 UTC Wed May 08 2024. A Watch may be issued if imagery and model guidance support G3 or greater conditions.",
+    "next_update": "No later than 1800 UTC Wed May 08 2024, or sooner if conditions change."
+  }
+}

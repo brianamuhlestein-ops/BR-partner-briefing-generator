@@ -1,0 +1,21 @@
+{
+  "type": "warning_update",
+  "created_on": "2024-05-11T1230Z",
+  "extended_on": null,
+  "expires_on": "2024-05-12T0030Z",
+  "name": "Space Weather Warning Update Number 2",
+  "message": {
+    "headline": "...SPACE WEATHER WARNING REMAINS IN EFFECT FOR ONGOING AND RENEWED MAJOR GEOMAGNETIC STORM THROUGH 1800 UTC SUN MAY 12...",
+    "what": "Warning-level geomagnetic storming is ongoing. Another series of coronal mass ejections is expected to produce renewed G3-G5 activity.",
+    "where": "Worldwide and Earth's orbit. Higher-latitude regions and locations with enhanced geoelectric susceptibility face the greatest potential effects.",
+    "observed": "G5 conditions have occurred, and geomagnetic storming remains in progress at 1230 UTC Sat May 11 2024.",
+    "changed": "There is an 80% chance of renewed coronal mass ejection impact between 0600 UTC Sun May 12 2024 and 1800 UTC Sun May 12 2024. Earliest Renewed Impact: 0600 UTC Sun May 12 2024 Most Likely Renewed Impact: 1200 UTC Sun May 12 2024 Latest Renewed Impact: 1800 UTC Sun May 12 2024",
+    "duration": "Minimum Duration After Impact: 12 hours Latest Expected End: Beyond 0000 UTC Mon May 13 2024",
+    "unchanged": "The existing Warning remains in effect, and partners should maintain heightened operations.",
+    "confidence": "There is a 60% chance that disturbed conditions will last at least 12 hours after renewed impact and a 15% chance that warning-level conditions will continue beyond 0000 UTC Mon May 13 2024. Exact storm strength and duration remain uncertain.",
+    "impacts": "Power systems may experience voltage-control issues, transformer stress, and isolated equipment trips. Atmospheric drag may lower satellite orbits and reduce tracking and orbit-prediction accuracy. HF communication, precision satellite navigation, and some satellite communications may be intermittently degraded, particularly at higher latitudes. Geomagnetically induced currents may affect pipeline monitoring and corrosion-control systems. Aurora may be visible much farther south than usual where darkness and local viewing conditions allow.",
+    "precautionary_preparedness_actions": "Partners should continue heightened operations, follow sector-specific procedures, and monitor SWPC updates and decision-support guidance through 0030 UTC Sun May 12 2024.",
+    "additional_details": "This update continues the existing Space Weather Warning. If conditions decrease below warning-level concern, future messaging may transition to a Space Weather Statement.",
+    "next_update": "No later than 0030 UTC Sun May 12 2024, or sooner if conditions change."
+  }
+}

@@ -49,9 +49,7 @@ function createExportClone(element: HTMLElement) {
 
   clone
     .querySelectorAll('.swift-social-image-upload, .swift-social-image-fit-toggle')
-    .forEach((node) => {
-      ;(node as HTMLElement).style.display = 'none'
-    })
+    .forEach((node) => node.remove())
 
   clone.style.width = `${Math.ceil(bounds.width)}px`
   clone.style.height = `${Math.ceil(bounds.height)}px`

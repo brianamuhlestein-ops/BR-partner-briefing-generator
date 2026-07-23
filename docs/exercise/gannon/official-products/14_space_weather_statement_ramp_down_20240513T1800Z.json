@@ -1,0 +1,17 @@
+{
+  "type": "statement",
+  "created_on": "2024-05-13T1800Z",
+  "extended_on": null,
+  "expires_on": "2024-05-14T0000Z",
+  "name": "Space Weather Statement",
+  "message": {
+    "what": "G1-G2 geomagnetic activity and elevated solar particle levels may continue as the significant space weather event subsides.",
+    "where": "Worldwide and Earth's orbit. Higher-latitude regions above 55 degrees remain the primary area of concern.",
+    "when": "There is a 60% chance that G1-G2 conditions will continue from 1800 UTC Mon May 13 2024 through 0000 UTC Tue May 14 2024. Earliest End: 0000 UTC Tue May 14 2024 Latest End: 1200 UTC Tue May 14 2024",
+    "duration": "Minimum Remaining Duration: 6 hours Maximum Remaining Duration: 18 hours",
+    "confidence": "There is a 30% chance that G1-G2 conditions will continue beyond 0000 UTC Tue May 14 2024 through 1200 UTC Tue May 14 2024. Confidence is high that G5 activity has ended.",
+    "impacts": "Power systems may continue to experience weak fluctuations, especially at higher latitudes. HF communication and GNSS performance may remain degraded at higher latitudes. Low-Earth-orbit satellites may continue to experience increased drag. Elevated particle levels may remain a concern for aviation, satellite, and other radiation-sensitive operations.",
+    "additional_details": "This Statement supplements the active Space Weather Warning; it does not end the Warning. The Warning remains in effect through 0000 UTC Tue May 14 2024 while SWPC confirms that conditions remain below G3. Partners may begin planning a transition from heightened operations to normal monitoring as sector-specific procedures allow.",
+    "next_update": "No later than 0000 UTC Tue May 14 2024, or sooner if conditions change."
+  }
+}

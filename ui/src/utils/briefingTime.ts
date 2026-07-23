@@ -9,6 +9,7 @@ export function formatIssueTime(value: string | null | undefined): string {
   if (!date) return 'Issue time unavailable'
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC',
+    weekday: 'short',
     month: 'short',
     day: '2-digit',
     year: 'numeric',
@@ -17,7 +18,7 @@ export function formatIssueTime(value: string | null | undefined): string {
     hour12: false,
   }).formatToParts(date)
   const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? ''
-  return `${get('month')} ${get('day')}, ${get('year')} ${get('hour')}${get('minute')} UTC`
+  return `${get('hour')}${get('minute')} UTC ${get('weekday')} ${get('month')} ${get('day')} ${get('year')}`
 }
 
 export function formatTailoredIssueTime(value: string | null | undefined): string {

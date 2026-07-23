@@ -1,0 +1,42 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 6,
+  "source_product_file": "../official-products/06_space_weather_warning_20240510T1230Z.json",
+  "product_id": "20240510T1230Z-SWPC-WARNING-AR3664-001",
+  "official_issue_time_utc": "2024-05-10T12:30:00Z",
+  "effective_time_utc": "2024-05-10T12:40:00Z",
+  "template_id": "warning",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER WARNING",
+      "headline": "G3–G4 Geomagnetic Storm Conditions Expected",
+      "subheadline": "G5 conditions are possible",
+      "summary": "Significant geomagnetic storm conditions are expected worldwide and in Earth's orbit. Higher-latitude regions face the greatest potential impacts.",
+      "confidence": {
+        "label": "Chance of G3+",
+        "value": "85%",
+        "detail": "This includes a 5% chance of G5 conditions through early Monday."
+      },
+      "what_we_know": [
+        "There is a 65% chance of storm onset between 1800 UTC Friday and 0000 UTC Saturday.",
+        "Possible onset ranges from 1200 UTC Friday to 0600 UTC Saturday.",
+        "Storm conditions may last 24 to 48 hours.",
+        "Additional CME influences may renew activity through early Monday."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
+      "footer": {
+        "left": "Next update by 0030 UTC Saturday, or sooner if conditions change.",
+        "center": "Prepare now and follow sector-specific procedures.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Forecast visualization for expected G3–G4 and possible G5 geomagnetic storm conditions.",
+        "fit": "fill"
+      }
+    }
+  }
+}

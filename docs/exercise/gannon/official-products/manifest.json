@@ -1,0 +1,102 @@
+{
+  "source": "Gannon Storm Products - Sequential - Revised.docx",
+  "product_count": 16,
+  "products": [
+    {
+      "file": "01_space_weather_outlook_20240506T1500Z.json",
+      "type": "outlook",
+      "created_on": "2024-05-06T1500Z",
+      "expires_on": null
+    },
+    {
+      "file": "02_space_weather_statement_eruption_analysis_20240508T0630Z.json",
+      "type": "statement",
+      "created_on": "2024-05-08T0630Z",
+      "expires_on": "2024-05-08T1800Z"
+    },
+    {
+      "file": "03_space_weather_statement_g1_g2_20240508T1600Z.json",
+      "type": "statement",
+      "created_on": "2024-05-08T1600Z",
+      "expires_on": "2024-05-09T1000Z"
+    },
+    {
+      "file": "04_space_weather_watch_20240509T0800Z.json",
+      "type": "watch",
+      "created_on": "2024-05-09T0800Z",
+      "expires_on": "2024-05-09T2000Z"
+    },
+    {
+      "file": "05_space_weather_notice_coronagraph_delay_20240509T1300Z.json",
+      "type": "notice",
+      "created_on": "2024-05-09T1300Z",
+      "expires_on": "2024-05-09T2000Z"
+    },
+    {
+      "file": "06_space_weather_warning_20240510T1230Z.json",
+      "type": "warning",
+      "created_on": "2024-05-10T1230Z",
+      "expires_on": "2024-05-11T0030Z"
+    },
+    {
+      "file": "07_observed_alert_sudden_impulse_20240510T1647Z.json",
+      "type": "alert",
+      "created_on": "2024-05-10T1647Z",
+      "expires_on": null
+    },
+    {
+      "file": "08_observed_alert_g3_20240510T1720Z.json",
+      "type": "alert",
+      "created_on": "2024-05-10T1720Z",
+      "expires_on": null
+    },
+    {
+      "file": "09_observed_alert_g5_20240510T2058Z.json",
+      "type": "alert",
+      "created_on": "2024-05-10T2058Z",
+      "expires_on": null
+    },
+    {
+      "file": "10_warning_update_1_20240511T0030Z.json",
+      "type": "warning_update",
+      "created_on": "2024-05-11T0030Z",
+      "expires_on": "2024-05-11T1230Z"
+    },
+    {
+      "file": "11_warning_update_2_20240511T1230Z.json",
+      "type": "warning_update",
+      "created_on": "2024-05-11T1230Z",
+      "expires_on": "2024-05-12T0030Z"
+    },
+    {
+      "file": "12_space_weather_notice_coronagraph_contamination_20240511T1400Z.json",
+      "type": "notice",
+      "created_on": "2024-05-11T1400Z",
+      "expires_on": "2024-05-12T0030Z"
+    },
+    {
+      "file": "13_space_weather_summary_1_20240511T1800Z.json",
+      "type": "summary",
+      "created_on": "2024-05-11T1800Z",
+      "expires_on": "2024-05-12T1800Z"
+    },
+    {
+      "file": "14_space_weather_statement_ramp_down_20240513T1800Z.json",
+      "type": "statement",
+      "created_on": "2024-05-13T1800Z",
+      "expires_on": "2024-05-14T0000Z"
+    },
+    {
+      "file": "15_space_weather_statement_all_clear_20240514T0000Z.json",
+      "type": "statement",
+      "created_on": "2024-05-14T0000Z",
+      "expires_on": "2024-05-16T1600Z"
+    },
+    {
+      "file": "16_space_weather_summary_2_final_20240516T1600Z.json",
+      "type": "summary",
+      "created_on": "2024-05-16T1600Z",
+      "expires_on": null
+    }
+  ]
+}

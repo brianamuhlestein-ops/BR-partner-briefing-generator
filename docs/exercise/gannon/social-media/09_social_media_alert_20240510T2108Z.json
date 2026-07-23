@@ -1,0 +1,42 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 9,
+  "source_product_file": "../official-products/09_observed_alert_g5_20240510T2058Z.json",
+  "product_id": "20240510T2058Z-SWPC-ALERT-G5-AR3664-001",
+  "official_issue_time_utc": "2024-05-10T20:58:00Z",
+  "effective_time_utc": "2024-05-10T21:08:00Z",
+  "template_id": "observed_alert",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "OBSERVED SPACE WEATHER ALERT",
+      "headline": "Extreme Geomagnetic Conditions Reached",
+      "subheadline": "G5 observed at 2058 UTC",
+      "summary": "Geomagnetic activity has reached the G5 (Extreme) level. Additional periods of severe to extreme storming remain possible while CME-driven conditions persist.",
+      "confidence": {
+        "label": "Observed Level",
+        "value": "G5 (Extreme)",
+        "detail": "During the 2100–2400 UTC observation period."
+      },
+      "what_we_know": [
+        "G5 conditions observed at 2058 UTC.",
+        "The active Warning remains in effect through 0600 UTC Mon May 13 2024.",
+        "Power, HF radio, GNSS, satellite, and aurora effects are possible.",
+        "This is the only G5 Observed Alert for this event."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
+      "footer": {
+        "left": "Follow sector-specific procedures for extreme geomagnetic activity.",
+        "center": "Warning remains in effect.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Operational visualization of observed G5 extreme geomagnetic storm conditions.",
+        "fit": "fill"
+      }
+    }
+  }
+}

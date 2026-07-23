@@ -4,13 +4,13 @@ import { computed, reactive, ref, watch } from 'vue'
 import type { GraphicsWorkspaceMode, OpsToCommsRecommendation, RuntimeContext } from '../../types'
 import { exportElementToPng } from '../../utils/exportPng'
 import { formatIssueTime } from '../../utils/briefingTime'
+import may2024Catalog from '../../data/may-2024-social-products.json'
 
 type SocialProductId =
   | 'swpc_brief'
   | 'outlook'
   | 'statement'
   | 'watch'
-  | 'advisory'
   | 'warning'
   | 'observed_alert'
   | 'notice'
@@ -34,6 +34,31 @@ type SocialTemplate = {
   footerCenter: string
   footerRight: string
   imagePlaceholder: string
+}
+
+type ExerciseSocialProduct = {
+  product_id: string
+  sequence: number
+  editorial_status: 'draft' | 'reviewed' | 'approved'
+  official_product: { type: string; title: string; issue_time_utc: string }
+  social: {
+    effective_time_utc: string
+    template_id: SocialProductId
+    headline: string
+    subheadline: string
+    summary: string
+    confidence_label: string
+    confidence_value: string
+    confidence_detail: string
+    what_we_know: string[]
+    impact_sectors: string[]
+    footer_left: string
+    footer_center: string
+    footer_right: string
+    visual_asset?: string
+    visual_alt_text?: string
+    visual_fit?: 'fit' | 'fill'
+  }
 }
 
 type SectorSymbol = {
@@ -140,7 +165,7 @@ const templates: SocialTemplate[] = [
     id: 'statement',
     label: 'Statement',
     badge: 'SPACE WEATHER STATEMENT',
-    color: '#0065B3',
+    color: '#F28C28',
     headline: 'CME Under Analysis',
     subheadline: 'Forecast confidence may change',
     issueTime: 'Issue time pending',
@@ -173,26 +198,6 @@ const templates: SocialTemplate[] = [
     impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aurora'],
     footerLeft: 'Watch will be updated at least every 12 hours.',
     footerCenter: 'Monitor SWPC updates as confidence changes.',
-    footerRight: 'spaceweather.gov',
-    imagePlaceholder: 'INSERT APPROPRIATE IMAGE HERE',
-  },
-  {
-    id: 'advisory',
-    label: 'Advisory',
-    badge: 'SPACE WEATHER ADVISORY',
-    color: '#F28C28',
-    headline: 'Lingering Geomagnetic Activity',
-    subheadline: 'Elevated conditions continue',
-    issueTime: 'Issue time pending',
-    summary: 'Elevated space weather conditions continue, but the primary warning-level concern has decreased.',
-    confidenceLabel: 'Confidence',
-    confidenceValue: 'Medium to High',
-    confidenceDetail: 'Conditions are expected to gradually decrease.',
-    whatWeKnow:
-      'Advisory-level conditions remain possible.\nResidual impacts may continue for susceptible systems.\nConditions are expected to decrease with time.\nPartners should continue routine monitoring.',
-    impactIcons: ['Power Grid', 'Communications & GNSS', 'Satellite', 'Aviation & Radiation'],
-    footerLeft: 'Advisory replaces the previous Warning.',
-    footerCenter: 'Continue monitoring SWPC products as conditions decrease.',
     footerRight: 'spaceweather.gov',
     imagePlaceholder: 'INSERT APPROPRIATE IMAGE HERE',
   },
@@ -279,14 +284,29 @@ const templates: SocialTemplate[] = [
 ]
 
 const selectedProductId = ref<SocialProductId>('swpc_brief')
+const selectedExerciseProductId = ref('')
 const uploadedImage = ref('')
 const uploadedImageName = ref('')
-const imageFit = ref<'fit' | 'fill'>('fit')
+const imageFit = ref<'fit' | 'fill'>('fill')
 const isUpdatedProduct = ref(false)
 const socialPreviewRef = ref<HTMLElement | null>(null)
 
 const selectedTemplate = computed(() => {
   return templates.find((template) => template.id === selectedProductId.value) ?? templates[0]!
+})
+const exerciseProducts = may2024Catalog.products as ExerciseSocialProduct[]
+const isMay2024Replay = computed(() => {
+  if (props.runtimeNow?.data_source !== 'replay') return false
+  if (props.runtimeNow.scenario === may2024Catalog.scenario.id) return true
+  const now = Date.parse(props.runtimeNow.now_utc ?? '')
+  const first = Date.parse(exerciseProducts[0]?.social.effective_time_utc ?? '')
+  const last = Date.parse(exerciseProducts[exerciseProducts.length - 1]?.social.effective_time_utc ?? '')
+  return Number.isFinite(now) && now >= first && now <= last + 7 * 24 * 60 * 60 * 1000
+})
+const availableExerciseProducts = computed(() => {
+  const now = Date.parse(props.runtimeNow?.now_utc ?? '')
+  if (!isMay2024Replay.value || !Number.isFinite(now)) return []
+  return exerciseProducts.filter((product) => Date.parse(product.social.effective_time_utc) <= now)
 })
 
 const draft = reactive({ ...selectedTemplate.value })
@@ -294,19 +314,27 @@ const draft = reactive({ ...selectedTemplate.value })
 const whatWeKnowLines = computed(() => lines(draft.whatWeKnow).slice(0, 5))
 const impactLabels = computed(() => draft.impactIcons.slice(0, 7))
 const impactSymbols = computed(() => impactLabels.value.map((label) => sectorSymbolFor(label)))
+const impactRowLabel = computed(() => selectedProductId.value === 'notice' ? 'Operational Impacts' : 'Potential Impacts')
 const updatedProductLabel = computed(() => `Updated ${selectedTemplate.value.label}`)
 const selectedSectorIds = computed(() => {
   return new Set(draft.impactIcons.map((label) => sectorSymbolFor(label).id))
 })
-const productBadgeIcon = computed(() => (selectedProductId.value === 'outlook' ? 'mdi-calendar-month' : ''))
+const productBadgeIcons = computed(() => {
+  if (selectedProductId.value === 'outlook') return ['mdi-calendar-month']
+  if (selectedProductId.value === 'statement') return ['mdi-file-document-outline', 'mdi-information-outline']
+  if (selectedProductId.value === 'watch') return ['mdi-bell-ring-outline']
+  if (selectedProductId.value === 'notice') return ['mdi-satellite-uplink']
+  if (selectedProductId.value === 'warning') return ['mdi-alert-outline']
+  if (selectedProductId.value === 'observed_alert') return ['mdi-pulse']
+  return []
+})
 const socialCardStyle = computed(() => ({
   '--product-color': draft.color,
   '--product-rgb': hexToRgbTriplet(draft.color),
 }))
 
 function runtimeIssueLabel() {
-  const prefix = selectedProductId.value === 'observed_alert' ? 'Observed' : 'Issued'
-  return `${prefix} ${formatIssueTime(props.runtimeNow?.now_utc).replace('Issue time unavailable', 'time unavailable')}`
+  return `Published ${formatIssueTime(props.runtimeNow?.now_utc).replace('Issue time unavailable', 'time unavailable')}`
 }
 
 watch(selectedTemplate, (template) => {
@@ -314,14 +342,56 @@ watch(selectedTemplate, (template) => {
   if (props.runtimeNow?.now_utc) draft.issueTime = runtimeIssueLabel()
   uploadedImage.value = ''
   uploadedImageName.value = ''
-  imageFit.value = 'fit'
+  imageFit.value = 'fill'
   isUpdatedProduct.value = false
-})
+}, { flush: 'sync' })
+
+function applyExerciseProduct(product: ExerciseSocialProduct) {
+  selectedExerciseProductId.value = product.product_id
+  selectedProductId.value = product.social.template_id
+  const baseTemplate = templates.find((template) => template.id === product.social.template_id) ?? templates[0]!
+  Object.assign(draft, baseTemplate, {
+    headline: product.social.headline,
+    subheadline: product.social.subheadline,
+    issueTime: `Published ${formatIssueTime(product.social.effective_time_utc)}`,
+    summary: product.social.summary,
+    confidenceLabel: product.social.confidence_label,
+    confidenceValue: product.social.confidence_value,
+    confidenceDetail: product.social.confidence_detail,
+    whatWeKnow: product.social.what_we_know.join('\n'),
+    impactIcons: [...product.social.impact_sectors],
+    footerLeft: product.social.footer_left,
+    footerCenter: product.social.footer_center,
+    footerRight: product.social.footer_right,
+  })
+  uploadedImage.value = product.social.visual_asset ?? ''
+  uploadedImageName.value = product.social.visual_alt_text ?? ''
+  imageFit.value = product.social.visual_fit ?? 'fill'
+  isUpdatedProduct.value = product.official_product.type.includes('update')
+}
+
+function selectExerciseProduct(event: Event) {
+  const productId = (event.target as HTMLSelectElement).value
+  const product = availableExerciseProducts.value.find((item) => item.product_id === productId)
+  if (product) applyExerciseProduct(product)
+}
+
+function selectBaseTemplate(templateId: SocialProductId) {
+  selectedExerciseProductId.value = ''
+  selectedProductId.value = templateId
+}
 
 watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
-    if (value) draft.issueTime = runtimeIssueLabel()
+    if (!value) return
+    if (isMay2024Replay.value) {
+      const available = availableExerciseProducts.value
+      const current = available[available.length - 1]
+      if (current) applyExerciseProduct(current)
+      return
+    }
+    draft.issueTime = runtimeIssueLabel()
   },
   { immediate: true },
 )
@@ -375,13 +445,18 @@ function hexToRgbTriplet(value: string) {
 
 function sectorSymbolFor(label: string) {
   const normalized = normalizeSectorLabel(label)
+  const noticeSymbols: Record<string, string> = {
+    'cme analysis': 'mdi-chart-timeline-variant',
+    'forecast timing': 'mdi-clock-outline',
+    'active watch': 'mdi-shield-check-outline',
+  }
   return (
     sectorSymbols.find((symbol) => {
       return symbol.aliases.some((alias) => normalizeSectorLabel(alias) === normalized)
     }) ?? {
       id: normalized || 'custom',
       label,
-      icon: 'mdi-alert-circle-outline',
+      icon: noticeSymbols[normalized] ?? 'mdi-alert-circle-outline',
       aliases: [label],
     }
   )
@@ -414,6 +489,22 @@ function exportSocialPng() {
 <template>
   <section class="swift-social-workspace">
     <header class="swift-social-product-row">
+      <div v-if="isMay2024Replay" class="swift-social-exercise-picker">
+        <label>
+          Exercise Graphic
+          <select :value="selectedExerciseProductId" @change="selectExerciseProduct">
+            <option v-if="availableExerciseProducts.length === 0" value="">No social product effective yet</option>
+            <option
+              v-for="product in availableExerciseProducts"
+              :key="product.product_id"
+              :value="product.product_id"
+            >
+              {{ product.sequence }}. {{ product.official_product.title }} — {{ product.social.effective_time_utc.slice(5, 16).replace('T', ' ') }}Z
+            </option>
+          </select>
+        </label>
+        <span>{{ availableExerciseProducts.length }} of {{ exerciseProducts.length }} products available</span>
+      </div>
       <div class="swift-social-product-buttons" aria-label="Social media product type">
         <button
           v-for="template in templates"
@@ -422,7 +513,7 @@ function exportSocialPng() {
           class="swift-social-product-button"
           :class="{ 'swift-social-product-button--active': selectedProductId === template.id }"
           :style="selectedProductId === template.id ? { borderColor: template.color } : undefined"
-          @click="selectedProductId = template.id"
+          @click="selectBaseTemplate(template.id)"
         >
           {{ template.label }}
         </button>
@@ -510,15 +601,15 @@ function exportSocialPng() {
           <textarea v-model="draft.summary" />
         </label>
         <label>
-          Confidence / Status Label
+          Confidence / Status Level / Observed Level
           <input v-model="draft.confidenceLabel" type="text" />
         </label>
         <label>
-          Confidence / Status Value
+          Card Value
           <input v-model="draft.confidenceValue" type="text" />
         </label>
         <label>
-          Confidence / Status Detail
+          Card Detail
           <textarea v-model="draft.confidenceDetail" class="swift-social-short-textarea" />
         </label>
       </aside>
@@ -547,7 +638,9 @@ function exportSocialPng() {
         <article ref="socialPreviewRef" class="swift-social-card" :style="socialCardStyle">
           <header class="swift-social-card-header">
             <div class="swift-social-brand">
-              <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+              <span class="swift-social-noaa-frame">
+                <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+              </span>
               <img src="/assets/visual-finder/logos/NWSlogo.png" alt="National Weather Service" />
               <div>
                 <span>National Weather Service</span>
@@ -558,7 +651,14 @@ function exportSocialPng() {
             <div class="swift-social-badge-stack">
               <div class="swift-social-badge">
                 <span>{{ draft.badge }}</span>
-                <i v-if="productBadgeIcon" class="mdi" :class="productBadgeIcon" aria-hidden="true"></i>
+                <span
+                  v-if="productBadgeIcons.length"
+                  class="swift-social-badge-icon"
+                  :class="{ 'swift-social-badge-icon--overlay': selectedProductId === 'statement' }"
+                  aria-hidden="true"
+                >
+                  <i v-for="icon in productBadgeIcons" :key="icon" class="mdi" :class="icon"></i>
+                </span>
               </div>
               <div v-if="isUpdatedProduct" class="swift-social-update-label">
                 {{ updatedProductLabel }}
@@ -625,7 +725,7 @@ function exportSocialPng() {
 
           <section class="swift-social-impact-row">
             <div class="swift-social-impact-strip">
-              <div class="swift-social-impact-label">Potential Impacts</div>
+              <div class="swift-social-impact-label">{{ impactRowLabel }}</div>
               <div v-for="symbol in impactSymbols" :key="`${symbol.id}-${symbol.label}`" class="swift-social-impact">
                 <span>
                   <i class="mdi" :class="symbol.icon" aria-hidden="true"></i>
@@ -655,10 +755,48 @@ function exportSocialPng() {
 
 .swift-social-product-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
   min-width: 0;
+}
+
+.swift-social-exercise-picker {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 183, 77, 0.38);
+  border-radius: 8px;
+  background: rgba(177, 94, 13, 0.12);
+}
+
+.swift-social-exercise-picker label {
+  display: grid;
+  flex: 1;
+  gap: 5px;
+  color: #ffd9a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.swift-social-exercise-picker select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 183, 77, 0.45);
+  border-radius: 6px;
+  background: #101a27;
+  color: #f5f8fc;
+}
+
+.swift-social-exercise-picker > span {
+  padding-bottom: 9px;
+  color: rgba(255, 226, 184, 0.72);
+  font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .swift-social-product-buttons {
@@ -696,12 +834,18 @@ function exportSocialPng() {
 }
 
 .swift-social-export-button {
-  border-color: rgba(255, 229, 100, 0.38);
-  background: rgba(255, 229, 100, 0.12);
-  color: #fff0a8;
+  border-color: #168447;
+  background: #168447;
+  color: #ffffff;
   min-height: 40px;
   padding: 0 16px;
   white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(22, 132, 71, 0.2);
+}
+
+.swift-social-export-button:hover {
+  border-color: #1da35a;
+  background: #1da35a;
 }
 
 .swift-social-upload-button {
@@ -879,6 +1023,8 @@ function exportSocialPng() {
 
 .swift-social-brand {
   display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
   gap: 8px;
   align-items: center;
   text-transform: uppercase;
@@ -892,9 +1038,24 @@ function exportSocialPng() {
   background: #ffffff;
 }
 
-.swift-social-brand img:first-child {
-  object-fit: cover;
-  padding: 0;
+.swift-social-noaa-frame {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.swift-social-noaa-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: scale(1.28);
+  object-fit: contain;
+  background: transparent;
 }
 
 .swift-social-brand div {
@@ -905,6 +1066,7 @@ function exportSocialPng() {
 .swift-social-brand strong {
   font-size: 1.62rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .swift-social-brand span {
@@ -914,13 +1076,20 @@ function exportSocialPng() {
 
 .swift-social-badge-stack {
   display: grid;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
+  flex: 0 0 330px;
   justify-items: end;
   gap: 5px;
 }
 
 .swift-social-badge {
   display: flex;
+  width: 330px;
   min-width: 330px;
+  max-width: 330px;
+  box-sizing: border-box;
   min-height: 62px;
   align-items: center;
   justify-content: center;
@@ -945,6 +1114,36 @@ function exportSocialPng() {
 .swift-social-badge .mdi::before {
   display: block;
   line-height: 1;
+}
+
+.swift-social-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swift-social-badge-icon--overlay {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+}
+
+.swift-social-badge-icon--overlay .mdi-file-document-outline {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  font-size: 2rem;
+}
+
+.swift-social-badge-icon--overlay .mdi-information-outline {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--product-color);
+  font-size: 1.15rem;
 }
 
 .swift-social-update-label {
