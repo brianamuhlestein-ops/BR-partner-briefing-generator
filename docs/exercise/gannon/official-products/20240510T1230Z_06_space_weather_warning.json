@@ -1,0 +1,18 @@
+{
+  "type": "warning",
+  "created_on": "2024-05-10T12:30Z",
+  "extended_on": null,
+  "expires_on": "2024-05-11T00:30Z",
+  "name": "Space Weather Warning",
+  "message": {
+    "what": "Geomagnetic storm (G3-G4) expected.",
+    "where": "Worldwide and Earth's orbit. Middle- and higher-latitude regions face the greatest potential effects.",
+    "when": "There is a 65% chance that storm onset will occur between 1800 UTC Fri May 10 2024 and 0000 UTC Sat May 11 2024. Earliest Storm Onset: 1200 UTC Fri May 10 2024 Latest Storm Onset: 0600 UTC Sat May 11 2024",
+    "duration": "Minimum Duration: 24 hours Maximum Duration: 48 hours",
+    "confidence": "There is an 85% chance of G3 or greater conditions, including a 5% chance of G5 conditions.",
+    "impacts": "Power systems may experience voltage-control issues, transformer stress, and isolated equipment trips. Atmospheric drag may lower satellite orbits and reduce the accuracy of tracking and orbit predictions. HF communication, precision satellite navigation, and some satellite communications may be intermittently degraded, particularly at higher latitudes. Geomagnetically induced currents may affect pipeline monitoring and corrosion-control systems. Aurora may be visible across much of the United States and potentially farther south where darkness and local viewing conditions allow.",
+    "precautionary_preparedness_actions": "Partners should prepare for significant geomagnetic activity, follow sector-specific procedures, and maintain heightened situational awareness through 0030 UTC Sat May 11 2024.",
+    "additional_details": "This Warning replaces the previous Space Weather Watch. Additional coronal mass ejection influences may produce renewed geomagnetic activity from 0000 UTC Sat May 11 2024 through 0600 UTC Mon May 13 2024.",
+    "next_update": "No later than 0030 UTC Sat May 11 2024, or sooner if conditions change."
+  }
+}

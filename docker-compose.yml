@@ -31,8 +31,8 @@ services:
   ui:
     image: ${BUILD_PATH:-swift-partner-briefing-generator}/ui:${UI_VERSION:-latest}
     build:
-      context: ui
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ui/Dockerfile
     ports:
       - "${EXTERNAL_UI_PORT:-5179}:80"
     tty: true

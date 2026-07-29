@@ -1,0 +1,21 @@
+{
+  "type": "warning_update",
+  "created_on": "2024-05-11T12:30Z",
+  "extended_on": "2024-05-11T12:30Z",
+  "expires_on": "2024-05-12T18:00Z",
+  "name": "Space Weather Warning Update Number 2",
+  "message": {
+    "headline": "...SPACE WEATHER WARNING EXTENDED DUE TO ONGOING AND POSSIBLE RENEWED MAJOR GEOMAGNETIC STORM THROUGH 1800 UTC SUN MAY 12...",
+    "what": "Major (G4-G5) geomagnetic storm remains possible.",
+    "where": "Worldwide and Earth's orbit. Middle- and higher-latitude regions are most likely to experience the greatest effects.",
+    "observed": "Geomagnetic storms are ongoing.",
+    "changed": "There is an 80% chance of renewed CME impact between 0600 UTC Sun May 12 and 1800 UTC Sun May 12. Most Likely Renewed Impact: 1200 UTC Sun May 12 Earliest Renewed Impact: 0600 UTC Sun May 12 Latest Renewed Impact: 1800 UTC Sun May 12",
+    "duration": "Shortest Duration: 12 hours Longest Duration: Beyond 0000 UTC Mon May 13",
+    "unchanged": "This update continues the existing Space Weather Warning.",
+    "confidence": "There is a 60% chance of G3 conditions following renewed impact and a 20% chance of G4.",
+    "impacts": "Power systems may experience voltage-control issues, transformer stress, and isolated equipment trips. Increased atmospheric drag may lower satellite orbits and reduce the accuracy of satellite tracking and orbit predictions. HF radio, precision satellite navigation, and some satellite communications may be intermittently degraded, particularly at middle and higher latitudes. Geomagnetically induced currents may also affect pipeline monitoring and corrosion-control systems. Aurora may be visible across much of the United States and potentially into some southern areas.",
+    "precautionary_preparedness_actions": "Partners should continue heightened operations, follow sector-specific procedures, and monitor SWPC updates and decision-support guidance through 1200 UTC Sun May 12.",
+    "additional_details": "Another series of coronal mass ejections may renew severe to extreme activity. This update continues the existing Space Weather Warning. If conditions decrease below warning-level concern, future products may transition to a Space Weather Advisory or Space Weather Statement.",
+    "next_update": "No later than 0030 UTC Sun May 12, or sooner if conditions change."
+  }
+}

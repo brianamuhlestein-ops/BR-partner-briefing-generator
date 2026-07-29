@@ -1,0 +1,16 @@
+{
+  "type": "alert",
+  "created_on": "2024-05-10T17:20Z",
+  "extended_on": null,
+  "expires_on": "2024-05-10T23:20Z",
+  "name": "Observed Space Weather Alert",
+  "message": {
+    "what": "Geomagnetic activity has reached the G3 (Strong) level.",
+    "observed": "G3 conditions were observed at 1720 UTC during the 1500-1800 UTC observation period.",
+    "basis": "This alert is based on 12/13 real-time observations from the official Kp magnetometer network available at the time of issuance.",
+    "current_status": "A Space Weather Warning remains in effect for significant geomagnetic activity. Major conditions remain possible.",
+    "future_alerts": "This is the first and only G3 Observed Space Weather Alert that will be issued for this event. A new Observed Space Weather Alert will be issued if conditions escalate to G4 or G5.",
+    "impacts": "Power systems may experience voltage irregularities or false alarms on some protection devices. HF radio communication may be intermittent at high latitudes. GNSS users may experience increased uncertainty or degraded performance in disturbed ionospheric regions. Low-Earth-orbit satellites may experience increased drag. Aurora may be visible farther south than usual if local sky conditions allow.",
+    "precautionary_preparedness_actions": "Partners should continue heightened monitoring and follow sector-specific procedures. Power grid, aviation, satellite, GNSS, and HF radio users should continue to monitor SWPC Warning Updates and decision-support guidance."
+  }
+}

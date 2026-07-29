@@ -288,6 +288,7 @@ const selectedExerciseProductId = ref('')
 const uploadedImage = ref('')
 const uploadedImageName = ref('')
 const imageFit = ref<'fit' | 'fill'>('fill')
+const imageAspectRatio = ref(1)
 const isUpdatedProduct = ref(false)
 const socialPreviewRef = ref<HTMLElement | null>(null)
 
@@ -419,6 +420,12 @@ function handleImageUpload(event: Event) {
     uploadedImage.value = typeof reader.result === 'string' ? reader.result : ''
   })
   reader.readAsDataURL(file)
+}
+
+function captureImageAspectRatio(event: Event) {
+  const image = event.target as HTMLImageElement | null
+  if (!image?.naturalWidth || !image.naturalHeight) return
+  imageAspectRatio.value = image.naturalWidth / image.naturalHeight
 }
 
 function normalizeSectorLabel(value: string) {
@@ -690,12 +697,20 @@ function exportSocialPng() {
               </div>
             </section>
 
-            <section class="swift-social-image-frame">
+            <section
+              class="swift-social-image-frame"
+              :class="[
+                `swift-social-image-frame--${imageFit}`,
+                { 'swift-social-image-frame--portrait': imageAspectRatio < 1 },
+              ]"
+              :style="{ '--image-aspect-ratio': imageAspectRatio }"
+            >
               <img
                 v-if="uploadedImage"
                 :src="uploadedImage"
                 :alt="uploadedImageName || 'Uploaded social media image'"
                 :class="`swift-social-image--${imageFit}`"
+                @load="captureImageAspectRatio"
               />
               <div v-else>
                 <span>{{ draft.imagePlaceholder }}</span>
@@ -1262,6 +1277,26 @@ function exportSocialPng() {
   overflow: hidden;
   border: 2px dashed #b8c7d8;
   background: #eaf3fb;
+}
+
+.swift-social-image-frame--fit {
+  width: 100%;
+  height: auto;
+  align-self: center;
+  justify-self: center;
+  aspect-ratio: var(--image-aspect-ratio);
+}
+
+.swift-social-image-frame--fit.swift-social-image-frame--portrait {
+  width: auto;
+  height: 100%;
+}
+
+.swift-social-image-frame--fill {
+  width: auto;
+  height: auto;
+  align-self: stretch;
+  justify-self: stretch;
 }
 
 .swift-social-image-frame img {

@@ -1,0 +1,16 @@
+{
+  "type": "alert",
+  "created_on": "2024-05-10T16:47Z",
+  "extended_on": null,
+  "expires_on": "2024-05-10T22:47Z",
+  "name": "Observed Space Weather Alert",
+  "message": {
+    "what": "A geomagnetic sudden impulse has been observed.",
+    "observed": "The sudden impulse was observed at 1645 UTC Fri May 10 2024 following detection of an interplanetary shock in the upstream solar wind at 1639 UTC Fri May 10 2024.",
+    "basis": "This alert is based solely on real-time upstream solar wind measurements available at 1647 UTC Fri May 10 2024.",
+    "current_status": "Solar wind conditions are becoming strongly enhanced following shock arrival. Geomagnetic activity is expected to increase as the disturbance moves past Earth. A Space Weather Warning remains in effect for G3-G5 conditions.",
+    "future_alerts": "This alert confirms arrival of a coronal mass ejection-driven disturbance. Additional Observed Space Weather Alerts will be issued when geomagnetic activity first reaches G3, G4, or G5.",
+    "impacts": "The sudden impulse may produce rapid magnetic-field changes and marks the beginning of potentially significant geomagnetic activity. Power grid, satellite, GNSS, HF radio, and other magnetically sensitive operations should prepare for worsening conditions.",
+    "precautionary_preparedness_actions": "Partners should begin heightened monitoring, follow sector-specific procedures, and monitor SWPC Warning Updates, Observed Space Weather Alerts, and decision-support guidance."
+  }
+}

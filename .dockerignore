@@ -15,7 +15,6 @@ logs/
 *.tmp
 *.bak
 
-ui/
 ui/node_modules/
 ui/dist/
 ui/.vite/
@@ -23,4 +22,3 @@ ui/.vite/
 generated/
 email_briefing.db
 graphics_library/
-docs/

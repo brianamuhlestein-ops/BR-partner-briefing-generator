@@ -1,0 +1,177 @@
+{
+  "schema_version": "swift_core_partner_briefing_catalog_v1",
+  "scenario": {
+    "id": "may_2024_geomagnetic_storm",
+    "label": "May 2024 Geomagnetic Storm Exercise",
+    "event_key": "AR3664"
+  },
+  "briefings": [
+    {
+      "id": "watch-20240509",
+      "label": "Core Brief - Space Weather Watch",
+      "product_type": "space_weather_watch",
+      "issue_time_utc": "2024-05-09T08:00:00Z",
+      "headline": "Geomagnetic Storm Possible Friday into the Weekend",
+      "summary": "A Space Weather Watch is in effect for possible G3-G4 geomagnetic storm conditions from 1200 UTC Friday, May 10, through 0600 UTC Monday, May 13. Forecast confidence increased overnight after analysis showed that two eruptions from the Sun may merge before reaching Earth. Ensemble guidance places the most likely arrival late Friday, with another possible disturbance Saturday that could strengthen or extend the storm. Current conditions remain below storm levels. A weaker disturbance may brush Earth Thursday, but it is not the main event covered by this Watch.",
+      "key_points": [
+        "There is a 70% chance that geomagnetic storming will begin between 1800 UTC Friday and 0600 UTC Saturday.",
+        "The earliest possible onset is 1200 UTC Friday with the latest onset of 0600 UTC Saturday.",
+        "The storm could last 12-48 hours.",
+        "Model runs 56381 and 56382 place the first disturbance near 2244 UTC and 2348 UTC Friday.",
+        "Run 56385 shows another possible disturbance near 0623 UTC Saturday. This could strengthen or prolong the storm.",
+        "The most likely modeled arrival is near 2347 UTC Friday, but the full range of guidance remains broad because several eruptions may interact on their way to Earth.",
+        "There is a 65% chance of G3 or greater conditions and a 20% chance of G4 or greater conditions.",
+        "Additional strong flares and eruptions could change the timing, strength, or duration of the event.",
+        "The arrival of a solar disturbance does not determine storm strength by itself. The magnetic field carried by the disturbance will be a major factor, and it cannot be measured reliably before arrival."
+      ],
+      "risk_outlook": {
+        "Power Grid": ["Minor", "Moderate", "Moderate"],
+        "Aviation and Radiation": ["Minor", "Moderate", "Moderate"],
+        "Satellite Operations": ["Minor", "Moderate", "Moderate"],
+        "Communications and Navigation": ["Minor", "Moderate", "Moderate"],
+        "Human Spaceflight": ["Minor", "Moderate", "Moderate"],
+        "Emergency Management": ["Minor", "Moderate", "Moderate"]
+      },
+      "risk_note": "These levels describe the overall readiness posture for each day. Actual impacts will depend on storm timing, strength, duration, location, and system vulnerability.",
+      "active_products": [
+        "Space Weather Watch: In effect for possible G3-G4 geomagnetic storm conditions from 1200 UTC Friday, May 10, through 0600 UTC Monday, May 13.",
+        "Space Weather Warning: Not in effect.",
+        "Next update: No later than 2000 UTC Thursday, May 9, or sooner if conditions change."
+      ],
+      "potential_impacts": [
+        "Power systems could experience voltage-control problems, transformer stress, and isolated equipment trips during the strongest periods.",
+        "Electric currents in the ground could affect power-grid equipment, pipeline monitoring, and corrosion-control systems.",
+        "Increased atmospheric drag could lower satellite orbits and make tracking and orbit predictions less accurate.",
+        "HF radio, satellite navigation, and some satellite communications could be disrupted, especially at higher latitudes.",
+        "Continued flare activity could cause additional radio blackouts on the sunlit side of Earth before the solar disturbances arrive.",
+        "Aurora may be visible across much of the United States where skies are dark and clear."
+      ],
+      "watch_next": [
+        "Updated G3 and G4 probabilities and possible issuance of a Space Weather Warning.",
+        "Partners should review response procedures and prepare for increased monitoring beginning Friday. Because several disturbances may arrive close together, readiness should continue through the weekend rather than focus on one predicted arrival time."
+      ],
+      "media": [
+        {
+          "asset": "core-brief-ensemble-56381-56382-56385.png",
+          "caption": "WSA-Enlil ensemble guidance for runs 56381, 56382, and 56385, showing the scenario arrival window, median arrival, timing spread, and modeled solar-wind speed."
+        }
+      ],
+      "information": [
+        "For current forecasts, alerts, and space weather information, visit www.spaceweather.gov.",
+        "Questions or requests for decision support may be directed to the Space Weather Prediction Center at swpc.customersupport@noaa.gov or (303) 497-0016.",
+        "You are receiving this email because you are a valued space weather partner."
+      ]
+    },
+    {
+      "id": "warning-20240510",
+      "label": "Core Brief - Space Weather Warning",
+      "product_type": "space_weather_warning",
+      "issue_time_utc": "2024-05-10T12:30:00Z",
+      "headline": "Significant Geomagnetic Storm Expected Beginning Today",
+      "summary": "Multiple solar disturbances are expected to reach Earth within a short period. Model guidance supports an initial arrival Friday, followed by additional disturbances that could strengthen or extend storm conditions through the weekend. Energetic-particle measurements from the ACE spacecraft were also rising and steepening by issuance. This is an early sign that the leading disturbance is approaching Earth. It increases confidence in arrival but does not indicate how strong the geomagnetic storm will become.",
+      "key_points": [
+        "There is a 65% chance that geomagnetic storming will begin between 1800 UTC Friday and 0000 UTC Saturday.",
+        "The earliest possible onset is 1200 UTC Friday. The latest expected onset is 0600 UTC Saturday.",
+        "There is an 85% chance of G3 or greater conditions, including a 5% chance of G5 conditions.",
+        "Storm conditions may last 24-48 hours.",
+        "Model runs 56381 and 56382 place the first arrivals near 2244 UTC and 2348 UTC Friday. Run 56385 adds another expected arrival near 0623 UTC Saturday. Run 56387 extends the sequence to near 0159 UTC Sunday. Together, the guidance indicates a series of disturbances rather than one short event.",
+        "Later arrivals could strengthen the initial storm or produce renewed activity through the weekend.",
+        "The ACE particle rise indicates that the first disturbance is approaching, but it cannot show the magnetic field carried by that disturbance.",
+        "That magnetic field will be a major factor in determining storm strength and cannot be measured reliably until the disturbance reaches upstream spacecraft."
+      ],
+      "risk_outlook": {
+        "Power Grid": ["High", "High", "High"],
+        "Aviation and Radiation": ["Moderate", "High", "Moderate"],
+        "Satellite Operations": ["High", "High", "High"],
+        "Communications and Navigation": ["High", "High", "High"],
+        "Human Spaceflight": ["Moderate", "High", "Moderate"],
+        "Emergency Management": ["Moderate", "High", "Moderate"]
+      },
+      "risk_note": "These levels describe the recommended readiness posture. Actual effects will depend on storm strength, duration, location, and the vulnerability of individual systems.",
+      "active_products": [
+        "Space Weather Warning: In effect for expected G3-G4 geomagnetic storm conditions through 0600 UTC Monday, May 13.",
+        "Previous Space Weather Watch: Replaced by this Warning.",
+        "Observed Space Weather Alert: Not issued for this event as of 1230 UTC Friday.",
+        "Next update: No later than 0030 UTC Saturday, May 11, or sooner if conditions change."
+      ],
+      "potential_impacts": [
+        "Power systems may experience voltage-control problems, transformer stress, and isolated equipment trips.",
+        "Electric currents in the ground may affect power-grid equipment, pipeline monitoring, and corrosion-control systems.",
+        "Increased atmospheric drag may lower satellite orbits and make tracking and orbit predictions less accurate.",
+        "HF radio, satellite navigation, and some satellite communications may be disrupted, particularly at higher latitudes.",
+        "Continued flare activity may cause additional radio blackouts on the sunlit side of Earth.",
+        "Aurora may be visible across much of the United States and potentially farther south where skies are dark and clear."
+      ],
+      "actions": [
+        "Put sector-specific response plans into effect where appropriate.",
+        "Prepare for rapid changes after the first disturbance reaches Earth.",
+        "Maintain heightened monitoring through the 0030 UTC Saturday update.",
+        "Remain prepared for additional or renewed activity through Sunday rather than focusing on one predicted arrival."
+      ],
+      "watch_next": [
+        "Whether the Saturday and Sunday disturbances strengthen or extend the initial storm.",
+        "Observed alerts confirming G3, G4, or G5 conditions.",
+        "Additional solar eruptions that could extend activity into Monday."
+      ],
+      "media": [
+        {
+          "asset": "core-brief-ensemble-56381-56382-56385-56387.png",
+          "caption": "WSA-Enlil ensemble guidance for runs 56381, 56382, 56385, and 56387, showing the extended sequence of possible Earth-arriving disturbances."
+        }
+      ],
+      "information": [
+        "For current forecasts, warnings, alerts, and space weather information, visit www.spaceweather.gov.",
+        "Questions or requests for decision support may be directed to the Space Weather Prediction Center at swpc.customersupport@noaa.gov or (303) 497-0016.",
+        "You are receiving this email because you are a valued space weather partner."
+      ]
+    },
+    {
+      "id": "statement-final-20240513",
+      "label": "Core Brief - Final Space Weather Statement",
+      "product_type": "space_weather_statement",
+      "issue_time_utc": "2024-05-13T00:00:00Z",
+      "headline": "Significant Space Weather Event Subsiding; Lingering Effects Possible Through Tuesday",
+      "summary": "The significant space weather event is subsiding. The Space Weather Warning has ended and has been replaced by a Space Weather Statement for possible lingering geomagnetic activity and elevated particle levels. SWPC will continue to issue standard forecasts, statements, and observed alerts if conditions warrant.",
+      "status_badge": "Last Brief",
+      "summary_callout": "This will conclude the Partner Email for this event.",
+      "key_points": [
+        "There is a 50% chance that lingering geomagnetic activity will continue between 1800 UTC Monday and 0000 UTC Tuesday.",
+        "The remaining activity could last 6-18 hours.",
+        "There is a 40% chance of G1 conditions and a 15% chance of G2 conditions.",
+        "Significant geomagnetic storm conditions are no longer expected.",
+        "Elevated solar particle levels may continue after the geomagnetic storm subsides.",
+        "Higher-latitude regions remain the primary area of concern for any lingering effects."
+      ],
+      "risk_outlook": {
+        "Power Grid": ["Minor", "Minor", "Little to None"],
+        "Aviation and Radiation": ["Minor", "Minor", "Little to None"],
+        "Satellite Operations": ["Minor", "Minor", "Little to None"],
+        "Communications and Navigation": ["Minor", "Minor", "Little to None"],
+        "Human Spaceflight": ["Minor", "Minor", "Little to None"],
+        "Emergency Management": ["Minor", "Minor", "Little to None"]
+      },
+      "active_products": [
+        "Space Weather Statement valid through 0000 UTC Tuesday, May 14.",
+        "Next operational update: No later than 0000 UTC Tuesday, May 14, or sooner if conditions change."
+      ],
+      "impacts_label": "Lingering Impacts",
+      "potential_impacts": [
+        "Power systems may continue to experience weak fluctuations, mainly at higher latitudes.",
+        "High-frequency radio and satellite navigation performance may remain degraded at higher latitudes.",
+        "Satellites in low Earth orbit may continue to experience increased atmospheric drag.",
+        "Elevated particle levels may remain a concern for aviation, satellite, human-spaceflight, and other radiation-sensitive operations.",
+        "Conditions should continue improving, although brief periods of renewed activity remain possible."
+      ],
+      "actions": [
+        "Maintain awareness of lingering particle levels and possible brief periods of G1-G2 activity.",
+        "Continue following SWPC's standard forecasts and alerts for any unexpected changes."
+      ],
+      "watch_next": [],
+      "information": [
+        "For current forecasts, statements, alerts, and space weather information, visit www.spaceweather.gov.",
+        "Questions or requests for decision support may be directed to the Space Weather Prediction Center at swpc.customersupport@noaa.gov or (303) 497-0016.",
+        "You are receiving this email because you are a valued space weather partner."
+      ]
+    }
+  ]
+}

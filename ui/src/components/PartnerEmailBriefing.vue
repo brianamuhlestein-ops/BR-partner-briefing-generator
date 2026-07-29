@@ -1,29 +1,36 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import type { RuntimeContext } from '../types'
+import coreBriefingCatalog from '../../../docs/exercise/gannon/core-briefings/may-2024-core-briefings.json'
 import { exportElementToPdf } from '../utils/exportPdf'
 import { forecastDayLabels, formatIssueTime, fromDatetimeLocal, toDatetimeLocal } from '../utils/briefingTime'
 
 const props = defineProps<{ runtimeNow: RuntimeContext | null }>()
 
-type RiskLevel = 'Little to None' | 'Minor' | 'Moderate' | 'Major' | 'Extreme'
+type RiskLevel = 'Little to None' | 'Minor' | 'Moderate' | 'High' | 'Extreme'
 
 const riskLevels: { label: RiskLevel; color: string; text: string }[] = [
   { label: 'Little to None', color: '#a8e6a1', text: '#102316' },
   { label: 'Minor', color: '#ffe564', text: '#111827' },
   { label: 'Moderate', color: '#ff9838', text: '#111827' },
-  { label: 'Major', color: '#e84f4f', text: '#ffffff' },
+  { label: 'High', color: '#e84f4f', text: '#ffffff' },
   { label: 'Extreme', color: '#a027d7', text: '#ffffff' },
 ]
 
 const sectors = [
   'Power Grid',
-  'Aviation & Radiation',
-  'Satellite',
-  'Communications & GNSS',
+  'Aviation and Radiation',
+  'Satellite Operations',
+  'Communications and Navigation',
   'Human Spaceflight',
   'Emergency Management',
 ]
+
+function emptyRiskOutlook(): Record<string, RiskLevel[]> {
+  return Object.fromEntries(
+    sectors.map((sector) => [sector, ['Little to None', 'Little to None', 'Little to None']]),
+  ) as Record<string, RiskLevel[]>
+}
 
 type MediaItem = {
   id: number
@@ -32,43 +39,138 @@ type MediaItem = {
   caption: string
 }
 
+type BriefingPreset = {
+  id: string
+  label: string
+  issueTimeUtc: string
+  headline: string
+  summary: string
+  statusBadge: string
+  summaryCallout: string
+  keyPoints: string
+  activeProducts: string
+  impacts: string
+  impactsLabel: string
+  actions: string
+  watchNext: string
+  watchLabel: string
+  info: string
+  riskNote: string
+  hasRiskOutlook: boolean
+  media: MediaItem[]
+  riskOutlook: Record<string, RiskLevel[]>
+}
+
+type BriefingMediaRecord = {
+  asset: string
+  caption: string
+}
+
+type CoreBriefingRecord = {
+  id: string
+  label: string
+  issue_time_utc: string
+  headline: string
+  summary: string
+  status_badge?: string
+  summary_callout?: string
+  key_points: string[]
+  active_products: string[]
+  potential_impacts: string[]
+  impacts_label?: string
+  actions?: string[]
+  watch_next: string[]
+  watch_label?: string
+  information: string[]
+  media?: BriefingMediaRecord[]
+  risk_note?: string
+  risk_outlook?: Record<string, RiskLevel[]>
+}
+
+const briefingImageAssets = import.meta.glob(
+  '../../../docs/exercise/gannon/email-briefing-graphics/*',
+  { eager: true, query: '?url', import: 'default' },
+) as Record<string, string>
+
+function briefingImageUrl(asset: string) {
+  return Object.entries(briefingImageAssets).find(([path]) => path.endsWith(`/${asset}`))?.[1] ?? ''
+}
+
+const briefingPresets: BriefingPreset[] = (coreBriefingCatalog.briefings as CoreBriefingRecord[]).map(
+  (record) => ({
+    id: record.id,
+    label: record.label,
+    issueTimeUtc: record.issue_time_utc,
+    headline: record.headline,
+    summary: record.summary,
+    statusBadge: record.status_badge ?? '',
+    summaryCallout: record.summary_callout ?? '',
+    keyPoints: record.key_points.join('\n'),
+    activeProducts: record.active_products.join('\n'),
+    impacts: record.potential_impacts.join('\n'),
+    impactsLabel: record.impacts_label ?? 'Potential Impacts',
+    actions: (record.actions ?? []).join('\n'),
+    watchNext: record.watch_next.join('\n'),
+    watchLabel: record.watch_label ?? 'What To Watch Next',
+    info: record.information.join('\n'),
+    riskNote: record.risk_note ?? '',
+    hasRiskOutlook: Boolean(record.risk_outlook),
+    media: (record.media ?? []).map((item, index) => ({
+      id: index + 1,
+      fileName: item.asset,
+      dataUrl: briefingImageUrl(item.asset),
+      caption: item.caption,
+    })),
+    riskOutlook: record.risk_outlook ?? emptyRiskOutlook(),
+  }),
+)
+
+const selectedPresetId = ref(briefingPresets[0]!.id)
+const isMay2024Replay = computed(() => {
+  if (props.runtimeNow?.data_source !== 'replay') return false
+  if (props.runtimeNow.scenario === 'may_2024_geomagnetic_storm') return true
+  const now = Date.parse(props.runtimeNow.now_utc ?? '')
+  return Number.isFinite(now)
+    && now >= Date.parse('2024-05-06T15:00:00Z')
+    && now <= Date.parse('2024-05-23T16:10:00Z')
+})
+const availableBriefingPresets = computed(() => {
+  const now = Date.parse(props.runtimeNow?.now_utc ?? '')
+  if (!isMay2024Replay.value) return briefingPresets
+  if (!Number.isFinite(now)) return []
+  return briefingPresets.filter((preset) => Date.parse(preset.issueTimeUtc) <= now)
+})
+
 const briefing = reactive({
-  headline: 'Elevated Geomagnetic Activity Possible Late Thursday into Friday',
+  headline: briefingPresets[0]!.headline,
   summary:
-    'A high-speed solar wind stream from a coronal hole is expected to reach Earth late Thursday into Friday. This may lead to elevated geomagnetic activity, with G1-G2 (Minor to Moderate) storm levels possible, primarily on Friday. Conditions are expected to improve by Saturday. No significant solar flares are anticipated.',
+    briefingPresets[0]!.summary,
+  statusBadge: briefingPresets[0]!.statusBadge,
+  summaryCallout: briefingPresets[0]!.summaryCallout,
+  showSummaryCallout: false,
   keyPoints:
-    'A high-speed solar wind stream is expected to reach Earth late Thursday into Friday.\nG1-G2 (Minor to Moderate) geomagnetic storm levels are possible, mainly on Friday.\nConfidence is moderate in the timing; low to moderate in the magnitude.\nSectors of interest: power grid, aviation, satellite, communications and GNSS, human spaceflight, and emergency management partners.\nConditions are expected to calm by Saturday.',
+    briefingPresets[0]!.keyPoints,
   activeProducts:
-    'Geomagnetic Storm Watch: 14 Apr 0000 UTC - 15 Apr 2359 UTC\nSpace Weather Summary: In Effect\nRadiation Storm Warning: None',
+    briefingPresets[0]!.activeProducts,
   impacts:
-    'Periods of voltage control issues and false alarms on the power grid.\nDegraded HF radio communications at higher latitudes, especially on polar routes.\nIncreased range error in GNSS positioning at higher latitudes.\nIncreased drag on low Earth orbit satellites may require maneuvering.\nAurora may be visible at higher latitudes in the Northern Hemisphere on Friday night.',
+    briefingPresets[0]!.impacts,
+  impactsLabel: briefingPresets[0]!.impactsLabel,
+  actions:
+    briefingPresets[0]!.actions,
   watchNext:
-    'Monitor updates for changes to timing and geomagnetic storm levels.\nCheck for additional watches or warnings as conditions evolve.\nFollow SWPC social media and website for the latest information.',
+    briefingPresets[0]!.watchNext,
+  watchLabel: briefingPresets[0]!.watchLabel,
   info:
-    'For the latest forecasts, alerts, and space weather information, visit www.spaceweather.gov.\nQuestions or to report impacts, contact SWPC at swpc.customersupport@noaa.gov or (303) 497-0016.\nYou are receiving this email because you are a valued space weather partner.',
-  media: [
-    {
-      id: 1,
-      fileName: '',
-      dataUrl: '',
-      caption: '',
-    },
-  ] as MediaItem[],
-  riskOutlook: Object.fromEntries(
-    sectors.map((sector) => [
-      sector,
-      sector === 'Aviation & Radiation' || sector === 'Human Spaceflight'
-        ? ['Little to None', 'Little to None', 'Minor']
-        : sector === 'Satellite'
-          ? ['Little to None', 'Minor', 'Minor']
-          : ['Little to None', 'Minor', 'Moderate'],
-    ]),
-  ) as Record<string, RiskLevel[]>,
+    briefingPresets[0]!.info,
+  riskNote: briefingPresets[0]!.riskNote,
+  hasRiskOutlook: briefingPresets[0]!.hasRiskOutlook,
+  media: structuredClone(briefingPresets[0]!.media),
+  riskOutlook: structuredClone(briefingPresets[0]!.riskOutlook),
 })
 
 let mediaId = 1
 const pdfPreviewRef = ref<HTMLElement | null>(null)
-const issueTimeUtc = ref<string | null>(null)
+const issueTimeUtc = ref<string | null>(briefingPresets[0]!.issueTimeUtc)
 const issueTimeDisplay = computed(() => formatIssueTime(issueTimeUtc.value))
 const days = computed(() => forecastDayLabels(issueTimeUtc.value))
 const issueTimeInput = computed({
@@ -81,7 +183,13 @@ const issueTimeInput = computed({
 watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
-    if (!issueTimeUtc.value && value) issueTimeUtc.value = value
+    if (!value) return
+    if (isMay2024Replay.value) {
+      const current = availableBriefingPresets.value[availableBriefingPresets.value.length - 1]
+      if (current) applyPreset(current)
+      return
+    }
+    if (!issueTimeUtc.value) issueTimeUtc.value = value
   },
   { immediate: true },
 )
@@ -122,6 +230,35 @@ function resetIssueTime() {
   issueTimeUtc.value = props.runtimeNow?.now_utc ?? null
 }
 
+function applyPreset(preset: BriefingPreset) {
+  selectedPresetId.value = preset.id
+  issueTimeUtc.value = preset.issueTimeUtc
+  briefing.headline = preset.headline
+  briefing.summary = preset.summary
+  briefing.statusBadge = preset.statusBadge
+  briefing.summaryCallout = preset.summaryCallout
+  briefing.showSummaryCallout = false
+  briefing.keyPoints = preset.keyPoints
+  briefing.activeProducts = preset.activeProducts
+  briefing.impacts = preset.impacts
+  briefing.impactsLabel = preset.impactsLabel
+  briefing.actions = preset.actions
+  briefing.watchNext = preset.watchNext
+  briefing.watchLabel = preset.watchLabel
+  briefing.info = preset.info
+  briefing.riskNote = preset.riskNote
+  briefing.hasRiskOutlook = preset.hasRiskOutlook
+  briefing.media = structuredClone(preset.media)
+  mediaId = Math.max(0, ...briefing.media.map((item) => item.id))
+  briefing.riskOutlook = structuredClone(preset.riskOutlook)
+}
+
+function selectExerciseBriefing(event: Event) {
+  const presetId = (event.target as HTMLSelectElement).value
+  const preset = availableBriefingPresets.value.find((item) => item.id === presetId)
+  if (preset) applyPreset(preset)
+}
+
 function addMediaItem() {
   mediaId += 1
   briefing.media.push({
@@ -157,6 +294,22 @@ function exportBriefingPdf() {
 
 <template>
   <section class="partner-email-briefing">
+    <div class="partner-exercise-picker">
+      <label>
+        Exercise Core Brief
+        <select :value="selectedPresetId" @change="selectExerciseBriefing">
+          <option v-if="availableBriefingPresets.length === 0" value="">No core briefing effective yet</option>
+          <option
+            v-for="preset in availableBriefingPresets"
+            :key="preset.id"
+            :value="preset.id"
+          >
+            {{ preset.label }} - {{ preset.issueTimeUtc.slice(5, 16).replace('T', ' ') }}Z
+          </option>
+        </select>
+      </label>
+      <span>{{ availableBriefingPresets.length }} of {{ briefingPresets.length }} briefings available</span>
+    </div>
     <div class="partner-email-workspace">
       <aside class="partner-email-editor partner-email-editor--forecast" aria-label="Core distribution forecast inputs">
         <div class="partner-email-column-heading">
@@ -172,7 +325,7 @@ function exportBriefingPdf() {
           </label>
         </section>
 
-        <details class="partner-email-input-section partner-email-risk-editor" open>
+        <details v-if="briefing.hasRiskOutlook" class="partner-email-input-section partner-email-risk-editor" open>
           <summary class="partner-email-editor-heading">Risk Outlook</summary>
           <div class="partner-email-risk-grid">
             <div class="partner-email-risk-head">Sector</div>
@@ -226,6 +379,16 @@ function exportBriefingPdf() {
             Forecaster-reviewed summary
             <textarea v-model="briefing.summary" />
           </label>
+          <button
+            v-if="briefing.summaryCallout"
+            type="button"
+            class="partner-last-brief-button"
+            :class="{ 'partner-last-brief-button--active': briefing.showSummaryCallout }"
+            :aria-pressed="briefing.showSummaryCallout"
+            @click="briefing.showSummaryCallout = !briefing.showSummaryCallout"
+          >
+            {{ briefing.statusBadge || 'Last Brief' }}
+          </button>
         </section>
 
         <section class="partner-email-input-section partner-email-review-section">
@@ -239,12 +402,17 @@ function exportBriefingPdf() {
         <details class="partner-email-input-section">
           <summary class="partner-email-editor-heading">Operational Narrative</summary>
           <label>
-            Potential Impacts
+            {{ briefing.impactsLabel }}
             <textarea v-model="briefing.impacts" />
           </label>
 
           <label>
-            What To Watch Next
+            What To Do Now
+            <textarea v-model="briefing.actions" />
+          </label>
+
+          <label v-if="lines(briefing.watchNext).length">
+            {{ briefing.watchLabel }}
             <textarea v-model="briefing.watchNext" />
           </label>
 
@@ -308,6 +476,10 @@ function exportBriefingPdf() {
           <p>{{ briefing.summary }}</p>
         </section>
 
+        <div v-if="briefing.showSummaryCallout && briefing.summaryCallout" class="partner-pdf-final-callout">
+          <strong>{{ briefing.summaryCallout }}</strong>
+        </div>
+
         <section class="partner-pdf-section">
           <h4>Key Points</h4>
           <ul>
@@ -315,7 +487,7 @@ function exportBriefingPdf() {
           </ul>
         </section>
 
-        <section class="partner-pdf-section">
+        <section v-if="briefing.hasRiskOutlook" class="partner-pdf-section">
           <h4>Space Weather Risk Outlook</h4>
           <table class="partner-pdf-risk-table">
             <thead>
@@ -340,6 +512,10 @@ function exportBriefingPdf() {
             </tbody>
           </table>
 
+          <p v-if="briefing.riskNote" class="partner-pdf-risk-note">
+            {{ briefing.riskNote }}
+          </p>
+
           <div class="partner-pdf-legend">
             <strong>Risk Levels:</strong>
             <span v-for="risk in riskLevels" :key="risk.label" :style="{ backgroundColor: risk.color, color: risk.text }">
@@ -356,14 +532,21 @@ function exportBriefingPdf() {
         </section>
 
         <section class="partner-pdf-section">
-          <h4>Potential Impacts</h4>
+          <h4>{{ briefing.impactsLabel }}</h4>
           <ul>
             <li v-for="item in lines(briefing.impacts)" :key="item">{{ item }}</li>
           </ul>
         </section>
 
-        <section class="partner-pdf-section">
-          <h4>What To Watch Next</h4>
+        <section v-if="lines(briefing.actions).length" class="partner-pdf-section">
+          <h4>What To Do Now</h4>
+          <ul>
+            <li v-for="item in lines(briefing.actions)" :key="item">{{ item }}</li>
+          </ul>
+        </section>
+
+        <section v-if="lines(briefing.watchNext).length" class="partner-pdf-section">
+          <h4>{{ briefing.watchLabel }}</h4>
           <ul>
             <li v-for="item in lines(briefing.watchNext)" :key="item">{{ item }}</li>
           </ul>
@@ -392,6 +575,44 @@ function exportBriefingPdf() {
 .partner-email-briefing {
   display: grid;
   gap: 14px;
+}
+
+.partner-exercise-picker {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 183, 77, 0.38);
+  border-radius: 8px;
+  background: rgba(177, 94, 13, 0.12);
+}
+
+.partner-exercise-picker label {
+  display: grid;
+  flex: 1;
+  gap: 5px;
+  color: #ffd9a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.partner-exercise-picker select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 183, 77, 0.45);
+  border-radius: 6px;
+  background: #101a27;
+  color: #f5f8fc;
+}
+
+.partner-exercise-picker > span {
+  padding-bottom: 9px;
+  color: rgba(255, 226, 184, 0.72);
+  font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .partner-email-workspace {
@@ -749,6 +970,35 @@ function exportBriefingPdf() {
   text-align: left;
 }
 
+.partner-pdf-final-callout {
+  display: grid;
+  justify-items: center;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.partner-last-brief-button {
+  justify-self: center;
+  min-height: 32px;
+  padding: 5px 14px;
+  border: 1px solid #238636;
+  border-radius: 999px;
+  background: rgba(45, 164, 78, 0.16);
+  color: #78dc91;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.partner-last-brief-button--active {
+  background: #2da44e;
+  color: #ffffff;
+}
+
+.partner-pdf-final-callout strong {
+  color: #1a7f37;
+  font-size: 0.78rem;
+}
+
 .partner-pdf-section {
   margin-top: 11px;
   padding-top: 8px;
@@ -794,6 +1044,12 @@ function exportBriefingPdf() {
   font-weight: 700;
 }
 
+.partner-pdf-risk-note {
+  margin: 7px 0 0;
+  color: #4b5b70;
+  font-size: 0.68rem;
+}
+
 .partner-pdf-legend {
   display: flex;
   gap: 4px;
@@ -818,16 +1074,23 @@ function exportBriefingPdf() {
   margin-top: 8px;
 }
 
+.partner-pdf-media-item {
+  display: grid;
+  justify-items: center;
+}
+
 .partner-pdf-media-item img {
   display: block;
-  max-width: 100%;
-  max-height: 260px;
+  width: min(100%, 660px);
+  height: auto;
+  max-height: 460px;
   object-fit: contain;
   margin: 0 auto 6px;
   border: 1px solid #cfd8e3;
 }
 
 .partner-pdf-media-item p {
+  width: min(100%, 660px);
   margin: 4px 0 0;
 }
 

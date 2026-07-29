@@ -52,7 +52,9 @@
         "what_we_know": ["Possible storm onset ranges from 1200 UTC Friday to 1200 UTC Sunday.", "If a storm begins, there is a 60% chance the peak reaches G2.", "If a storm begins, there is a 10% chance the peak reaches G3 or greater.", "Storm conditions may last 12 to 24 hours."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
         "footer_left": "Next update by 0400 UTC Thursday, or sooner if conditions change.", "footer_center": "No Watch or Warning is in effect.", "footer_right": "spaceweather.gov",
-        "visual_fit": "fill"
+        "visual_asset": "/assets/exercise/gannon/social-media/03-social_media_ensemble.png",
+        "visual_alt_text": "WSA-Enlil ensemble guidance chart showing modeled solar-wind disturbances and possible arrival timing.",
+        "visual_fit": "fit"
       }
     },
     {
@@ -160,12 +162,13 @@
       "official_product": { "type": "space_weather_warning_update", "title": "Warning Update Number 2", "issue_time_utc": "2024-05-11T12:30:00Z" },
       "social": {
         "effective_time_utc": "2024-05-11T12:40:00Z", "template_id": "warning",
-        "headline": "Severe Geomagnetic Activity Continues", "subheadline": "Warning Update Number 2",
-        "summary": "Significant geomagnetic activity continues and additional disturbed periods remain possible.",
-        "confidence_label": "Status", "confidence_value": "Warning in Effect", "confidence_detail": "Observed conditions and incoming solar-wind structures remain under review.",
-        "what_we_know": ["Severe geomagnetic activity has occurred.", "Additional disturbed intervals remain possible.", "Operational impacts may persist or recur.", "The Warning remains in effect."],
+        "headline": "Renewed Major Geomagnetic Activity Expected", "subheadline": "Warning Update Number 2",
+        "summary": "Major geomagnetic storm is ongoing. Another series of coronal mass ejections is expected to produce renewed G3–G5 activity.",
+        "confidence_label": "Confidence", "confidence_value": "High", "confidence_detail": "Most likely near 1200 UTC Sunday.",
+        "what_we_know": ["G5 conditions have occurred, and storming remains in progress as of 1230 UTC Saturday.", "Renewed storm impacts are expected between 0600 and 1800 UTC Sunday.", "There is a 60% chance disturbed conditions will last for an additional 12 hours after renewed impact."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
-        "footer_left": "Warning Update Number 2.", "footer_center": "Maintain monitoring and response posture.", "footer_right": "spaceweather.gov"
+        "footer_left": "Continue heightened operations and follow sector-specific procedures.", "footer_center": "Next update by 0030 UTC Sunday.", "footer_right": "spaceweather.gov",
+        "visual_fit": "fill"
       }
     },
     {
@@ -173,12 +176,15 @@
       "official_product": { "type": "space_weather_notice", "title": "Space Weather Notice", "issue_time_utc": "2024-05-11T14:00:00Z" },
       "social": {
         "effective_time_utc": "2024-05-11T14:10:00Z", "template_id": "notice",
-        "headline": "Forecast Data Status Updated", "subheadline": "Operational notice",
-        "summary": "SWPC has updated the status of forecast-support data during the ongoing event.",
-        "confidence_label": "Status", "confidence_value": "Updated", "confidence_detail": "Specific system status will be populated from the official WWA JSON.",
-        "what_we_know": ["The status of a forecast-support data source has changed.", "Event monitoring and forecast updates continue.", "Official hazard products remain in effect unless updated.", "Consult SWPC products for current status."],
-        "impact_sectors": ["Notice", "Time", "Status"],
-        "footer_left": "Operational status notice.", "footer_center": "Monitor SWPC products for changes.", "footer_right": "spaceweather.gov"
+        "headline": "CME Analysis May Be Limited", "subheadline": "Energetic particles degrading coronagraph imagery",
+        "summary": "Energetic particles from the ongoing solar particle storm are degrading coronagraph imagery used to identify and analyze coronal mass ejections.",
+        "confidence_label": "Status", "confidence_value": "Degraded", "confidence_detail": "This data-quality limitation does not change the active hazard assessment.",
+        "what_we_know": ["Energetic particles are degrading coronagraph imagery used for CME analysis.", "Confidence in expected CME arrival times, duration, and strength may be reduced.", "SWPC continues its assessment using available imagery, models, solar wind observations, and forecaster analysis.", "The active Space Weather Warning remains in effect."],
+        "impact_sectors": ["CME Analysis", "Forecast Confidence", "Active Warning"],
+        "footer_left": "Forecast updates continue using available data.", "footer_center": "Next Warning Update by 0030 UTC Sunday.", "footer_right": "spaceweather.gov",
+        "visual_asset": "/assets/exercise/gannon/social-media/12-social_media_notice_degraded_coronagraph.png",
+        "visual_alt_text": "SOHO LASCO C2 and C3 coronagraph imagery from May 11, 2024 showing energetic-particle streaking that degrades CME analysis.",
+        "visual_fit": "fill"
       }
     },
     {
@@ -186,12 +192,13 @@
       "official_product": { "type": "space_weather_summary", "title": "Space Weather Summary Number 1", "issue_time_utc": "2024-05-11T18:00:00Z" },
       "social": {
         "effective_time_utc": "2024-05-11T18:10:00Z", "template_id": "summary",
-        "headline": "Significant Space Weather Event Ongoing", "subheadline": "Mid-event recap",
-        "summary": "SWPC continues to monitor a significant geomagnetic event with observed activity and ongoing operational concern.",
-        "confidence_label": "Status", "confidence_value": "Warning in Effect", "confidence_detail": "Current status reflects active forecast and observed products.",
-        "what_we_know": ["The event remains ongoing.", "Significant geomagnetic conditions have been observed.", "Some operational areas may remain affected.", "Additional forecast and observed updates will follow."],
-        "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
-        "footer_left": "Space Weather Summary Number 1.", "footer_center": "Partners should monitor active products.", "footer_right": "spaceweather.gov"
+        "headline": "Significant Space Weather Event Ongoing", "subheadline": "Mid-Event Recap",
+        "summary": "Multiple coronal mass ejections reached Earth beginning Friday, producing G3–G5 geomagnetic storming. The event remains ongoing, with renewed CME impacts expected Sunday.",
+        "confidence_label": "Status", "confidence_value": "Ongoing", "confidence_detail": "The Space Weather Warning remains in effect through 1800 UTC Sunday.",
+        "what_we_know": ["Multiple CME impacts began at 1639 UTC Friday.", "Particle storm conditions reached SP2, and Active Region 3664 produced an X5.8 flare.", "Storming remains in progress; additional G5 periods are possible."],
+        "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation", "Aurora"],
+        "footer_left": "Warning remains in effect through 1800 UTC Sunday.", "footer_center": "Next summary by 1800 UTC Sunday.", "footer_right": "spaceweather.gov",
+        "visual_fit": "fill"
       }
     },
     {
@@ -199,12 +206,13 @@
       "official_product": { "type": "space_weather_statement", "title": "Space Weather Statement", "issue_time_utc": "2024-05-13T18:00:00Z" },
       "social": {
         "effective_time_utc": "2024-05-13T18:10:00Z", "template_id": "statement",
-        "headline": "Warning-Level Geomagnetic Event Has Ended", "subheadline": "Conditions have decreased",
-        "summary": "The primary warning-level geomagnetic event has ended, though residual activity may continue.",
-        "confidence_label": "Confidence", "confidence_value": "Medium to High", "confidence_detail": "Conditions are expected to continue decreasing with time.",
-        "what_we_know": ["The previous warning-level event has ended.", "Residual geomagnetic activity may continue.", "Most operational concerns are decreasing.", "Continue routine monitoring for updates."],
-        "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation & Radiation"],
-        "footer_left": "Warning-level event has ended.", "footer_center": "Continue routine monitoring.", "footer_right": "spaceweather.gov"
+        "headline": "Significant Geomagnetic Event Subsiding", "subheadline": "G1–G2 activity may continue",
+        "summary": "G1–G2 geomagnetic activity and elevated solar particle levels may continue as the significant space weather event subsides.",
+        "confidence_label": "Confidence", "confidence_value": "High", "confidence_detail": "Major geomagnetic storm has ended",
+        "what_we_know": ["There is a 60% chance G1–G2 conditions will continue through 0000 UTC Tuesday.", "There is a 30% chance G1–G2 conditions will continue beyond 0000 UTC Tuesday.", "Confidence is high that G5 activity has ended.", "Elevated particle levels may remain a concern for aviation and satellite operations."],
+        "impact_sectors": ["Satellite", "Communications & GNSS"],
+        "footer_left": "Partners may begin planning a transition to normal monitoring.", "footer_center": "Next update by 0000 UTC Tuesday.", "footer_right": "spaceweather.gov",
+        "visual_fit": "fill"
       }
     },
     {
@@ -212,12 +220,13 @@
       "official_product": { "type": "space_weather_statement", "title": "Space Weather Statement", "issue_time_utc": "2024-05-14T00:00:00Z" },
       "social": {
         "effective_time_utc": "2024-05-14T00:10:00Z", "template_id": "statement",
-        "headline": "Space Weather Conditions Continue to Ease", "subheadline": "Event-end update",
-        "summary": "Space weather conditions continue to decrease following the significant May 10–12 event.",
-        "confidence_label": "Status", "confidence_value": "Returning to Routine", "confidence_detail": "Residual effects remain possible but overall concern is decreasing.",
-        "what_we_know": ["Warning-level concern has ended.", "Residual activity is decreasing.", "Most affected sectors can return toward routine monitoring.", "A final event summary will follow."],
-        "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
-        "footer_left": "Event-end statement.", "footer_center": "Continue routine SWPC monitoring.", "footer_right": "spaceweather.gov"
+        "headline": "Warning-Level Space Weather Event Has Ended", "subheadline": "Conditions have decreased to lower-level concern",
+        "summary": "G3–G5 geomagnetic storm conditions have ended. G1–G2 activity and elevated solar particle levels may continue as the event subsides.",
+        "confidence_label": "Status", "confidence_value": "All Clear", "confidence_detail": "Warning is no longer in effect, return to routine monitoring.",
+        "what_we_know": ["Warning-level conditions officially ended 0600 UTC Monday.", "Renewed conditions are unlikely.", "Lower-level geomagnetic activity and elevated particle levels may continue."],
+        "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation & Radiation"],
+        "footer_left": "Return to normal monitoring as procedures allow.", "footer_center": "Final summary by 1600 UTC Thursday.", "footer_right": "spaceweather.gov",
+        "visual_fit": "fill"
       }
     },
     {
@@ -225,12 +234,13 @@
       "official_product": { "type": "space_weather_summary", "title": "Space Weather Summary Number 2", "issue_time_utc": "2024-05-16T16:00:00Z" },
       "social": {
         "effective_time_utc": "2024-05-16T16:10:00Z", "template_id": "summary",
-        "headline": "Historic Geomagnetic Storm Recap", "subheadline": "Review of the May 10–12 CME impacts",
-        "summary": "The May 10–12 event produced significant geomagnetic activity and widespread interest across operational sectors and the public.",
-        "confidence_label": "Status", "confidence_value": "Event Complete", "confidence_detail": "This is the final scheduled social summary for the exercise timeline.",
-        "what_we_know": ["The significant event has ended.", "Multiple CME influences contributed to the disturbance.", "Operational and public effects were reported across a broad area.", "SWPC has returned to routine event monitoring."],
+        "headline": "Historic Geomagnetic Storm Recap", "subheadline": "Review of the May 10–12 CME Impacts",
+        "summary": "The major space weather event associated with Active Region 3664 and multiple CME impacts has ended. No additional significant geomagnetic impacts from this event are expected.",
+        "confidence_label": "Status", "confidence_value": "Event Complete", "confidence_detail": "This is the final Space Weather Summary for this event.",
+        "what_we_know": ["Active Region 3664 produced major flares and multiple Earth-directed CMEs.", "Geomagnetic activity reached G3, G4, and G5, with multiple G5 periods.", "Solar particle storm conditions reached SP2 during the event.", "Solar wind and geomagnetic activity have returned to routine monitoring levels."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation & Radiation", "Aurora"],
-        "footer_left": "Space Weather Summary Number 2.", "footer_center": "Event complete; return to routine monitoring.", "footer_right": "spaceweather.gov"
+        "footer_left": "All event-related products are no longer in effect.", "footer_center": "Event complete; return to routine monitoring.", "footer_right": "spaceweather.gov",
+        "visual_fit": "fill"
       }
     }
   ]

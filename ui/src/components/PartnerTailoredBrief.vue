@@ -28,7 +28,7 @@ const sectorOptions = [
   'Emergency Management',
 ]
 
-const briefing = reactive({
+const initialBriefing = {
   productTitle: 'Grid Operations Briefing',
   headline: 'Geomagnetic Disturbance Expected Today into Saturday',
   audience:
@@ -104,11 +104,36 @@ const briefing = reactive({
       caption: '',
     },
   ] as MediaItem[],
+}
+
+const briefing = reactive(structuredClone(initialBriefing))
+const briefingPresets = [
+  {
+    id: 'warning-power-grid-20240510',
+    label: 'Focused Brief - Power Grid Warning',
+    issueTimeUtc: '2024-05-10T12:30:00Z',
+    content: initialBriefing,
+  },
+]
+const selectedPresetId = ref(briefingPresets[0]!.id)
+const isMay2024Replay = computed(() => {
+  if (props.runtimeNow?.data_source !== 'replay') return false
+  if (props.runtimeNow.scenario === 'may_2024_geomagnetic_storm') return true
+  const now = Date.parse(props.runtimeNow.now_utc ?? '')
+  return Number.isFinite(now)
+    && now >= Date.parse('2024-05-06T15:00:00Z')
+    && now <= Date.parse('2024-05-23T16:10:00Z')
+})
+const availableBriefingPresets = computed(() => {
+  const now = Date.parse(props.runtimeNow?.now_utc ?? '')
+  if (!isMay2024Replay.value) return briefingPresets
+  if (!Number.isFinite(now)) return []
+  return briefingPresets.filter((preset) => Date.parse(preset.issueTimeUtc) <= now)
 })
 
 const selectedSector = ref(sectorOptions[0]!)
 const pdfPreviewRef = ref<HTMLElement | null>(null)
-const issueTimeUtc = ref<string | null>(null)
+const issueTimeUtc = ref<string | null>(briefingPresets[0]!.issueTimeUtc)
 const issueTimeDisplay = computed(() => formatTailoredIssueTime(issueTimeUtc.value))
 const issueTimeInput = computed({
   get: () => toDatetimeLocal(issueTimeUtc.value),
@@ -119,13 +144,31 @@ let mediaId = 1
 watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
-    if (!issueTimeUtc.value && value) issueTimeUtc.value = value
+    if (!value) return
+    if (isMay2024Replay.value) {
+      const current = availableBriefingPresets.value[availableBriefingPresets.value.length - 1]
+      if (current) applyPreset(current)
+      return
+    }
+    if (!issueTimeUtc.value) issueTimeUtc.value = value
   },
   { immediate: true },
 )
 
 function resetIssueTime() {
   issueTimeUtc.value = props.runtimeNow?.now_utc ?? null
+}
+
+function applyPreset(preset: typeof briefingPresets[number]) {
+  selectedPresetId.value = preset.id
+  issueTimeUtc.value = preset.issueTimeUtc
+  Object.assign(briefing, structuredClone(preset.content))
+}
+
+function selectExerciseBriefing(event: Event) {
+  const presetId = (event.target as HTMLSelectElement).value
+  const preset = availableBriefingPresets.value.find((item) => item.id === presetId)
+  if (preset) applyPreset(preset)
 }
 
 function lines(value: string) {
@@ -185,6 +228,22 @@ function isTailoredSectorLocked(sector: string) {
 
 <template>
   <section class="tailored-brief">
+    <div class="tailored-exercise-picker">
+      <label>
+        Exercise Focused Brief
+        <select :value="selectedPresetId" @change="selectExerciseBriefing">
+          <option v-if="availableBriefingPresets.length === 0" value="">No focused briefing effective yet</option>
+          <option
+            v-for="preset in availableBriefingPresets"
+            :key="preset.id"
+            :value="preset.id"
+          >
+            {{ preset.label }} - {{ preset.issueTimeUtc.slice(5, 16).replace('T', ' ') }}Z
+          </option>
+        </select>
+      </label>
+      <span>{{ availableBriefingPresets.length }} of {{ briefingPresets.length }} briefings available</span>
+    </div>
     <div class="tailored-workspace">
       <nav class="tailored-sector-selector" aria-label="Partner tailored sectors">
         <button
@@ -511,6 +570,44 @@ function isTailoredSectorLocked(sector: string) {
   gap: 14px;
   align-items: start;
   min-width: 0;
+}
+
+.tailored-exercise-picker {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 183, 77, 0.38);
+  border-radius: 8px;
+  background: rgba(177, 94, 13, 0.12);
+}
+
+.tailored-exercise-picker label {
+  display: grid;
+  flex: 1;
+  gap: 5px;
+  color: #ffd9a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tailored-exercise-picker select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 183, 77, 0.45);
+  border-radius: 6px;
+  background: #101a27;
+  color: #f5f8fc;
+}
+
+.tailored-exercise-picker > span {
+  padding-bottom: 9px;
+  color: rgba(255, 226, 184, 0.72);
+  font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .tailored-sector-selector {

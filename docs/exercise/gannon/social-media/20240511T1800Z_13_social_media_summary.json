@@ -1,0 +1,41 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 13,
+  "source_product_file": "../official-products/20240511T1800Z_13_space_weather_summary_1.json",
+  "product_id": "20240511T1800Z-SWPC-SUMMARY-AR3664-001",
+  "official_issue_time_utc": "2024-05-11T18:00:00Z",
+  "effective_time_utc": "2024-05-11T18:10:00Z",
+  "template_id": "summary",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER SUMMARY",
+      "headline": "Significant Space Weather Event Ongoing",
+      "subheadline": "Mid-Event Recap",
+      "summary": "Multiple coronal mass ejections reached Earth beginning Friday, producing G3–G5 geomagnetic storming. The event remains ongoing, with renewed CME impacts expected Sunday.",
+      "confidence": {
+        "label": "Status",
+        "value": "Ongoing",
+        "detail": "The Space Weather Warning remains in effect through 1800 UTC Sunday."
+      },
+      "what_we_know": [
+        "Multiple CME impacts began at 1639 UTC Friday.",
+        "Particle storm conditions reached SP2, and Active Region 3664 produced an X5.8 flare.",
+        "Storming remains in progress; additional G5 periods are possible."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation", "Aurora"],
+      "footer": {
+        "left": "Warning remains in effect through 1800 UTC Sunday.",
+        "center": "Next summary by 1800 UTC Sunday.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Operational visualization summarizing the ongoing May 2024 space weather event.",
+        "fit": "fill"
+      }
+    }
+  }
+}

@@ -238,6 +238,7 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
     return
   }
 
+  printWindow.addEventListener('afterprint', () => printWindow.close(), { once: true })
   printWindow.focus()
   printWindow.print()
 }
@@ -280,8 +281,25 @@ async function waitForPrintResources(printWindow: Window) {
   })
 
   await Promise.race([resourcesReady, timeout])
+  await waitForPrintLayout(printWindow)
+}
+
+async function waitForPrintLayout(printWindow: Window) {
   await new Promise<void>((resolve) => {
-    printWindow.requestAnimationFrame(() => printWindow.requestAnimationFrame(() => resolve()))
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(fallback)
+      resolve()
+    }
+    const fallback = window.setTimeout(finish, 300)
+
+    try {
+      printWindow.requestAnimationFrame(() => printWindow.requestAnimationFrame(finish))
+    } catch {
+      finish()
+    }
   })
 }
 

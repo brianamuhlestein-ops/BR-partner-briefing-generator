@@ -1,0 +1,41 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 15,
+  "source_product_file": "../official-products/20240514T0000Z_15_space_weather_statement_all_clear.json",
+  "product_id": "20240514T0000Z-SWPC-STATEMENT-AR3664-004",
+  "official_issue_time_utc": "2024-05-14T00:00:00Z",
+  "effective_time_utc": "2024-05-14T00:10:00Z",
+  "template_id": "statement",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER STATEMENT",
+      "headline": "Warning-Level Space Weather Event Has Ended",
+      "subheadline": "Conditions have decreased to lower-level concern",
+      "summary": "G3–G5 geomagnetic storm conditions have ended. G1–G2 activity and elevated solar particle levels may continue as the event subsides.",
+      "confidence": {
+        "label": "Status",
+        "value": "All Clear",
+        "detail": "Warning is no longer in effect, return to routine monitoring."
+      },
+      "what_we_know": [
+        "Warning-level conditions officially ended 0600 UTC Monday.",
+        "Renewed conditions are unlikely.",
+        "Lower-level geomagnetic activity and elevated particle levels may continue."
+      ],
+      "impact_sectors": ["Satellite", "Communications & GNSS"],
+      "footer": {
+        "left": "Return to normal monitoring as procedures allow.",
+        "center": "Final summary by 1600 UTC Thursday.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Operational visualization indicating the warning-level space weather event has ended and residual activity is subsiding.",
+        "fit": "fill"
+      }
+    }
+  }
+}

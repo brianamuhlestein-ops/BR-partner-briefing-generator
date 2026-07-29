@@ -1,0 +1,42 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 16,
+  "source_product_file": "../official-products/20240516T1600Z_16_space_weather_summary_2_final.json",
+  "product_id": "20240516T1600Z-SWPC-SUMMARY-AR3664-002",
+  "official_issue_time_utc": "2024-05-16T16:00:00Z",
+  "effective_time_utc": "2024-05-16T16:10:00Z",
+  "template_id": "summary",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER SUMMARY",
+      "headline": "Historic Geomagnetic Storm Recap",
+      "subheadline": "Review of the May 10–12 CME Impacts",
+      "summary": "The major space weather event associated with Active Region 3664 and multiple CME impacts has ended. No additional significant geomagnetic impacts from this event are expected.",
+      "confidence": {
+        "label": "Status",
+        "value": "Event Complete",
+        "detail": "This is the final Space Weather Summary for this event."
+      },
+      "what_we_know": [
+        "Active Region 3664 produced major flares and multiple Earth-directed CMEs.",
+        "Geomagnetic activity reached G3, G4, and G5, with multiple G5 periods.",
+        "Solar particle storm conditions reached SP2 during the event.",
+        "Solar wind and geomagnetic activity have returned to routine monitoring levels."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation & Radiation", "Aurora"],
+      "footer": {
+        "left": "All event-related products are no longer in effect.",
+        "center": "Event complete; return to routine monitoring.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Operational visualization recapping the May 2024 historic geomagnetic storm and its impacts.",
+        "fit": "fill"
+      }
+    }
+  }
+}

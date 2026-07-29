@@ -1,0 +1,42 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 4,
+  "source_product_file": "../official-products/20240509T0800Z_04_space_weather_watch.json",
+  "product_id": "20240509T0800Z-SWPC-WATCH-AR3664-001",
+  "official_issue_time_utc": "2024-05-09T08:00:00Z",
+  "effective_time_utc": "2024-05-09T08:10:00Z",
+  "template_id": "watch",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER WATCH",
+      "headline": "G3–G4 Geomagnetic Storm Conditions Possible",
+      "subheadline": "Friday into Saturday",
+      "summary": "G3–G4 geomagnetic storm conditions are possible worldwide and in Earth's orbit. Higher-latitude regions face the greatest potential impacts.",
+      "confidence": {
+        "label": "Chance of Onset",
+        "value": "70%",
+        "detail": "Storm onset is most likely between 1800 UTC Friday and 0600 UTC Saturday."
+      },
+      "what_we_know": [
+        "There is a 65% chance of G3 or greater conditions through early Monday.",
+        "There is a 20% chance of G4 or greater conditions.",
+        "Storm conditions may last 12 to 48 hours.",
+        "Additional CME influences are possible beyond the primary onset window."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
+      "footer": {
+        "left": "Next update by 2000 UTC Thursday, or sooner if conditions change.",
+        "center": "Review sector procedures and monitor SWPC updates.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": null,
+        "runtime_asset": null,
+        "alt_text": "Forecast visualization for possible G3–G4 geomagnetic storm conditions.",
+        "fit": "fill"
+      }
+    }
+  }
+}

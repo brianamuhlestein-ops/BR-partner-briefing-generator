@@ -1,0 +1,21 @@
+{
+  "type": "warning_update",
+  "created_on": "2024-05-11T00:30Z",
+  "extended_on": null,
+  "expires_on": "2024-05-11T12:30Z",
+  "name": "Space Weather Warning Update Number 1",
+  "message": {
+    "what": "Major (G4-G5) geomagnetic storm is ongoing.",
+    "where": "Worldwide and Earth's orbit. Middle- and higher-latitude regions are most likely to experience the greatest effects.",
+    "observed": "G5 conditions were first observed at 2058 UTC Fri May 10 2024, and Warning-level activity remains ongoing.",
+    "changed": "There is a 75% chance of continued G3 or greater conditions through Saturday. There is a 45% chance of additional G4 periods, with a 20% chance of additional G5 periods.",
+    "unchanged": "The existing Space Weather Warning remains in effect. Additional solar disturbances may produce renewed periods of severe to extreme geomagnetic activity into Sunday.",
+    "when": "Warning-level geomagnetic activity is ongoing. There is a 75% chance of continued G3 or greater conditions through Saturday. Earliest Warning End: 1200 UTC Sat May 11 2024 Latest Warning End: 1200 UTC Sun May 12 2024",
+    "duration": "Shortest Remaining Duration: 12 hours Longest Remaining Duration: 36 hours",
+    "confidence": "There is a 45% chance of additional G4 periods, with a 20% chance of additional G5 periods.",
+    "impacts": "Power systems may experience voltage-control issues, transformer stress, and isolated equipment trips. Increased atmospheric drag may lower satellite orbits and reduce the accuracy of satellite tracking and orbit predictions. HF radio, precision satellite navigation, and some satellite communications may be intermittently degraded, particularly at middle and higher latitudes. Geomagnetically induced currents may also affect pipeline monitoring and corrosion-control systems. Aurora may be visible across much of the United States and potentially into some southern areas.",
+    "precautionary_preparedness_actions": "Partners should continue heightened operations, follow sector-specific procedures, and monitor SWPC updates and decision-support guidance.",
+    "additional_details": "G5 conditions were first observed at 2058 UTC Fri May 10 2024, and Warning-level activity remains ongoing. This update continues the existing Space Weather Warning. Additional solar disturbances may produce renewed periods of severe to extreme geomagnetic activity into Sunday.",
+    "next_update": "No later than 1230 UTC Sat May 11 2024, or sooner if conditions change."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "statement",
+  "created_on": "2024-05-08T16:00Z",
+  "extended_on": null,
+  "expires_on": "2024-05-09T10:00Z",
+  "name": "Space Weather Statement",
+  "message": {
+    "what": "Geomagnetic storm (G1-G2) likely.",
+    "where": "Worldwide and Earth's orbit. Higher-latitude regions are most likely to experience operational effects.",
+    "when": "There is a 50% chance that G1 or greater conditions will begin between 1800 UTC Fri May 10 2024 and 0600 UTC Sat May 11 2024. Earliest Storm Onset: 1200 UTC Fri May 10 2024 Latest Storm Onset: 1200 UTC Sun May 12 2024",
+    "duration": "Minimum Duration: 12 hours Maximum Duration: 24 hours",
+    "confidence": "There is a 60% chance that the peak will reach G2 and a 10% chance that it will reach G3 or greater.",
+    "impacts": "Power grids may experience small voltage changes or alarms. Increased drag may reduce the accuracy of low-Earth-orbit satellite predictions. Long-distance HF communication may fade at higher latitudes. Aurora may expand across more of the northern United States where darkness, clouds, and local viewing conditions allow.",
+    "additional_details": "Solar activity remains high. The forecast for elevated geomagnetic activity is based on two coronal mass ejections, but additional eruptions are possible. No Space Weather Watch or Warning is in effect at 1600 UTC Wed May 08 2024. A Watch may be issued if confidence increases for G3 or greater conditions. Partners and the public should continue to monitor SWPC products for updated information.",
+    "next_update": "No later than 1000 UTC Thu May 09 2024, or sooner if conditions change."
+  }
+}
