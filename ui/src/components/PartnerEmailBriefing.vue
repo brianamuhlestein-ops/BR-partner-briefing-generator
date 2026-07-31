@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { RuntimeContext } from '../types'
+import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../api'
 import coreBriefingCatalog from '../../../docs/exercise/gannon/core-briefings/may-2024-core-briefings.json'
 import { exportElementToPdf } from '../utils/exportPdf'
 import { forecastDayLabels, formatIssueTime, fromDatetimeLocal, toDatetimeLocal } from '../utils/briefingTime'
@@ -171,6 +172,9 @@ const briefing = reactive({
 let mediaId = 1
 const pdfPreviewRef = ref<HTMLElement | null>(null)
 const issueTimeUtc = ref<string | null>(briefingPresets[0]!.issueTimeUtc)
+const isSaving = ref(false)
+const saveStatus = ref('Not saved')
+const hasRestoredSavedDocument = ref(false)
 const issueTimeDisplay = computed(() => formatIssueTime(issueTimeUtc.value))
 const days = computed(() => forecastDayLabels(issueTimeUtc.value))
 const issueTimeInput = computed({
@@ -184,6 +188,7 @@ watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
     if (!value) return
+    if (hasRestoredSavedDocument.value) return
     if (isMay2024Replay.value) {
       const current = availableBriefingPresets.value[availableBriefingPresets.value.length - 1]
       if (current) applyPreset(current)
@@ -289,6 +294,51 @@ function handleMediaUpload(item: MediaItem, event: Event) {
 function exportBriefingPdf() {
   exportElementToPdf(pdfPreviewRef.value, 'Core Distribution Brief')
 }
+
+async function loadSavedBriefingJson() {
+  try {
+    const saved = await fetchEmailBriefingDocument<{
+      selectedPresetId: string
+      issueTimeUtc: string | null
+      briefing: typeof briefing
+    }>('core')
+    if (!saved) return
+    hasRestoredSavedDocument.value = true
+    selectedPresetId.value = saved.document.selectedPresetId
+    issueTimeUtc.value = saved.document.issueTimeUtc
+    Object.assign(briefing, saved.document.briefing)
+    briefing.media = briefing.media.map((item) => ({
+      ...item,
+      dataUrl: item.dataUrl.startsWith('data:')
+        ? item.dataUrl
+        : briefingImageUrl(item.fileName) || item.dataUrl,
+    }))
+    mediaId = Math.max(0, ...briefing.media.map((item) => item.id))
+    saveStatus.value = `Loaded ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to load saved JSON'
+  }
+}
+
+async function saveBriefingJson() {
+  isSaving.value = true
+  saveStatus.value = 'Saving...'
+  try {
+    const saved = await saveEmailBriefingDocument('core', {
+      selectedPresetId: selectedPresetId.value,
+      issueTimeUtc: issueTimeUtc.value,
+      briefing: JSON.parse(JSON.stringify(briefing)),
+    })
+    hasRestoredSavedDocument.value = true
+    saveStatus.value = `Saved ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to save JSON'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+onMounted(loadSavedBriefingJson)
 
 </script>
 
@@ -449,9 +499,20 @@ function exportBriefingPdf() {
             <h2>Preview</h2>
             <span>Generated product</span>
           </div>
-          <button class="partner-export-button" type="button" @click="exportBriefingPdf">
-            Export PDF
-          </button>
+          <div class="partner-preview-actions">
+            <span class="partner-save-status" role="status">{{ saveStatus }}</span>
+            <button
+              class="partner-save-button"
+              type="button"
+              :disabled="isSaving"
+              @click="saveBriefingJson"
+            >
+              {{ isSaving ? 'Saving...' : 'Save JSON' }}
+            </button>
+            <button class="partner-export-button" type="button" @click="exportBriefingPdf">
+              Export PDF
+            </button>
+          </div>
         </div>
 
         <article ref="pdfPreviewRef" class="partner-pdf-preview" aria-label="Partner briefing PDF preview">
@@ -664,6 +725,33 @@ function exportBriefingPdf() {
   gap: 8px;
   min-width: 0;
   justify-items: center;
+}
+
+.partner-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.partner-save-status {
+  max-width: 220px;
+  color: rgba(232, 239, 248, 0.58) !important;
+  font-size: 0.66rem !important;
+  text-align: right;
+  white-space: normal;
+}
+
+.partner-save-button {
+  border: 1px solid rgba(255, 229, 100, 0.48);
+  background: rgba(255, 229, 100, 0.13);
+  color: #fff0a8;
+  font-weight: 500;
+}
+
+.partner-save-button:disabled {
+  opacity: 0.58;
 }
 
 .partner-export-button {

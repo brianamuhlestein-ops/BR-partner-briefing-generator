@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { RuntimeContext } from '../types'
+import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../api'
 import { exportElementToPdf } from '../utils/exportPdf'
 import { formatTailoredIssueTime, fromDatetimeLocal, toDatetimeLocal } from '../utils/briefingTime'
 
 const props = defineProps<{ runtimeNow: RuntimeContext | null }>()
-
-type TimingRow = {
-  window: string
-  forecast: string
-  meaning: string
-}
 
 type MediaItem = {
   id: number
@@ -19,14 +14,10 @@ type MediaItem = {
   caption: string
 }
 
-const sectorOptions = [
-  'Power Grid',
-  'Aviation & Radiation',
-  'Satellite',
-  'Communications & GNSS',
-  'Human Spaceflight',
-  'Emergency Management',
-]
+const geoelectricGraphicUrl = new URL(
+  '../../../docs/exercise/gannon/email-briefing-graphics/Predicted_geoelectric_Map_CONUS_kp_9o_med.png',
+  import.meta.url,
+).href
 
 const initialBriefing = {
   productTitle: 'Grid Operations Briefing',
@@ -35,32 +26,11 @@ const initialBriefing = {
     'This briefing is tailored for reliability coordinators, balancing authorities, transmission operators, ISOs/RTOs, and operational coordination groups.',
   overview:
     'A train of CMEs is expected to reach Earth today into Saturday. Significant geomagnetic activity is expected, and warning-level conditions may persist through the weekend. Current analysis continues to show an 80-90% chance that two or more CMEs will impact Earth. G3 to G4 geomagnetic conditions are expected, with a 50-60% chance of G5 conditions.',
-  probabilities: [
-    {
-      level: 'Probability of G3',
-      subtitle: 'Strong geomagnetic storming',
-      probability: '80-90%',
-      tone: 'moderate',
-      bullets:
-        'G3 conditions are expected during the event window.\nHeightened monitoring is warranted for susceptible systems.\nRegional response may vary with local ground conductivity and system posture.',
-    },
-    {
-      level: 'Probability of G4',
-      subtitle: 'Severe geomagnetic storming',
-      probability: '50-60%',
-      tone: 'high',
-      bullets:
-        'Severe intervals are possible if CME coupling is favorable.\nVoltage alarms, voltage control issues, or GIC response may become more likely.\nSustained storming would increase operational concern.',
-    },
-    {
-      level: 'Probability of G5',
-      subtitle: 'Extreme geomagnetic storming',
-      probability: '20-30%',
-      tone: 'extreme',
-      bullets:
-        'Extreme conditions remain possible but less likely.\nConcern increases if multiple CME structures arrive close together.\nUse observed SWPC alerts and local indicators to reassess readiness.',
-    },
-  ],
+  geoelectricTitle: 'Modeled Regional Geoelectric-Field Response',
+  geoelectricCaption:
+    'Modeled peak geoelectric-field response for a Kp 9 scenario. Actual local response may differ.',
+  geoelectricGuidance:
+    'Brighter colors indicate areas of greater modeled geoelectric-field response.\nRegional geology and ground conductivity can cause response to vary substantially over short distances.\nUse this guidance with local GIC, transformer, voltage, and alarm indicators; it is not a prediction of specific equipment impacts.',
   durationConcern:
     'With multiple CMEs expected to arrive, elevated geomagnetic activity could persist for 24 to 48 hours. There is a 70-80% chance of disturbed conditions lasting 24 hours or longer, and a 50-60% chance of disturbed conditions lasting 48 hours or longer.',
   confidence:
@@ -68,28 +38,6 @@ const initialBriefing = {
   nextUpdate:
     'SWPC will continue issuing Warning Updates at least every 12 hours while the Warning remains in effect, or sooner if observations, impacts, or forecast guidance change.',
   footer: 'For additional information, monitor spaceweather.gov and SWPC decision-support guidance.',
-  timingRows: [
-    {
-      window: 'Fri afternoon-Fri evening UTC',
-      forecast: '60-70% chance of initial CME arrival',
-      meaning: 'Begin heightened monitoring if not already active',
-    },
-    {
-      window: 'Fri night-early Sat UTC',
-      forecast: '20-30% chance of later arrival',
-      meaning: 'Maintain readiness through the overnight period',
-    },
-    {
-      window: 'Sat into Sun',
-      forecast: 'Additional CME influences likely',
-      meaning: 'Prepare for prolonged or repeated disturbance periods',
-    },
-    {
-      window: 'After peak conditions',
-      forecast: 'Possible de-escalation to Statement',
-      meaning: 'Continue monitoring until conditions clearly decrease',
-    },
-  ] as TimingRow[],
   impacts:
     'Voltage alarms or voltage control issues.\nIncreased geomagnetically induced current potential.\nWeak to moderate power system fluctuations.\nGreater concern if severe storming is sustained over multiple hours.\nPossible repeated periods of enhanced geomagnetic activity as additional CME structures arrive.',
   watchItems:
@@ -131,9 +79,11 @@ const availableBriefingPresets = computed(() => {
   return briefingPresets.filter((preset) => Date.parse(preset.issueTimeUtc) <= now)
 })
 
-const selectedSector = ref(sectorOptions[0]!)
 const pdfPreviewRef = ref<HTMLElement | null>(null)
 const issueTimeUtc = ref<string | null>(briefingPresets[0]!.issueTimeUtc)
+const isSaving = ref(false)
+const saveStatus = ref('Not saved')
+const hasRestoredSavedDocument = ref(false)
 const issueTimeDisplay = computed(() => formatTailoredIssueTime(issueTimeUtc.value))
 const issueTimeInput = computed({
   get: () => toDatetimeLocal(issueTimeUtc.value),
@@ -145,6 +95,7 @@ watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
     if (!value) return
+    if (hasRestoredSavedDocument.value) return
     if (isMay2024Replay.value) {
       const current = availableBriefingPresets.value[availableBriefingPresets.value.length - 1]
       if (current) applyPreset(current)
@@ -178,18 +129,6 @@ function lines(value: string) {
     .filter(Boolean)
 }
 
-function addTimingRow() {
-  briefing.timingRows.push({
-    window: '',
-    forecast: '',
-    meaning: '',
-  })
-}
-
-function removeTimingRow(index: number) {
-  briefing.timingRows.splice(index, 1)
-}
-
 function addMediaItem() {
   mediaId += 1
   briefing.media.push({
@@ -221,9 +160,49 @@ function exportBriefingPdf() {
   exportElementToPdf(pdfPreviewRef.value, 'Partner Tailored Brief')
 }
 
-function isTailoredSectorLocked(sector: string) {
-  return sector !== 'Power Grid'
+async function loadSavedBriefingJson() {
+  try {
+    const saved = await fetchEmailBriefingDocument<{
+      selectedPresetId: string
+      issueTimeUtc: string | null
+      briefing: typeof briefing
+    }>('tailored')
+    if (!saved) return
+    hasRestoredSavedDocument.value = true
+    selectedPresetId.value = saved.document.selectedPresetId
+    issueTimeUtc.value = saved.document.issueTimeUtc
+    const savedBriefing = { ...saved.document.briefing } as typeof briefing & {
+      timingRows?: unknown
+    }
+    delete savedBriefing.timingRows
+    Object.assign(briefing, savedBriefing)
+    mediaId = Math.max(0, ...briefing.media.map((item) => item.id))
+    saveStatus.value = `Loaded ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to load saved JSON'
+  }
 }
+
+async function saveBriefingJson() {
+  isSaving.value = true
+  saveStatus.value = 'Saving...'
+  try {
+    const saved = await saveEmailBriefingDocument('tailored', {
+      selectedPresetId: selectedPresetId.value,
+      issueTimeUtc: issueTimeUtc.value,
+      briefing: JSON.parse(JSON.stringify(briefing)),
+    })
+    hasRestoredSavedDocument.value = true
+    saveStatus.value = `Saved ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to save JSON'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+onMounted(loadSavedBriefingJson)
+
 </script>
 
 <template>
@@ -245,27 +224,10 @@ function isTailoredSectorLocked(sector: string) {
       <span>{{ availableBriefingPresets.length }} of {{ briefingPresets.length }} briefings available</span>
     </div>
     <div class="tailored-workspace">
-      <nav class="tailored-sector-selector" aria-label="Partner tailored sectors">
-        <button
-          v-for="sector in sectorOptions"
-          :key="sector"
-          type="button"
-          class="tailored-sector-button"
-          :class="{
-            'tailored-sector-button--active': selectedSector === sector,
-            'tailored-sector-button--locked': isTailoredSectorLocked(sector),
-          }"
-          :disabled="isTailoredSectorLocked(sector)"
-          @click="selectedSector = sector"
-        >
-          {{ sector }}
-        </button>
-      </nav>
-
       <aside class="tailored-editor tailored-editor--forecast" aria-label="Forecast inputs">
         <div class="tailored-column-heading">
           <h2>Forecast</h2>
-          <span>{{ selectedSector }}</span>
+          <span>Power Grid</span>
         </div>
 
         <section class="tailored-editor-section">
@@ -283,62 +245,22 @@ function isTailoredSectorLocked(sector: string) {
           </label>
         </section>
 
-        <details class="tailored-editor-section">
-          <summary>G-Scale Probabilities</summary>
-          <div class="tailored-probability-editor">
-            <div
-              v-for="card in briefing.probabilities"
-              :key="card.level"
-              class="tailored-probability-editor-card"
-            >
-              <label>
-                Label
-                <input v-model="card.level" type="text" />
-              </label>
-              <label>
-                Subtitle
-                <input v-model="card.subtitle" type="text" />
-              </label>
-              <label>
-                Probability
-                <input v-model="card.probability" type="text" />
-              </label>
-              <label>
-                Forecast Notes
-                <textarea v-model="card.bullets" />
-              </label>
-            </div>
-          </div>
+        <details class="tailored-editor-section" open>
+          <summary>Geoelectric Model</summary>
+          <label>
+            Section Title
+            <input v-model="briefing.geoelectricTitle" type="text" />
+          </label>
+          <label>
+            Map Caption
+            <textarea v-model="briefing.geoelectricCaption" class="tailored-short-textarea" />
+          </label>
+          <label>
+            Partner Interpretation
+            <textarea v-model="briefing.geoelectricGuidance" />
+          </label>
         </details>
 
-        <details class="tailored-editor-section">
-          <summary>Timing</summary>
-          <div class="tailored-timing-editor">
-            <div v-for="(row, index) in briefing.timingRows" :key="index" class="tailored-timing-row">
-              <label>
-                Timing Window
-                <input v-model="row.window" type="text" />
-              </label>
-              <label>
-                Forecast Message
-                <input v-model="row.forecast" type="text" />
-              </label>
-              <label>
-                Operational Meaning
-                <input v-model="row.meaning" type="text" />
-              </label>
-              <button
-                v-if="briefing.timingRows.length > 1"
-                class="tailored-remove-button"
-                type="button"
-                @click="removeTimingRow(index)"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-          <button class="tailored-add-button" type="button" @click="addTimingRow">Add Timing Row</button>
-        </details>
 
         <section class="tailored-editor-section">
           <h3>Products / Updates</h3>
@@ -438,9 +360,20 @@ function isTailoredSectorLocked(sector: string) {
             <h2>Preview</h2>
             <span>Generated product</span>
           </div>
-          <button class="tailored-export-button" type="button" @click="exportBriefingPdf">
-            Export PDF
-          </button>
+          <div class="tailored-preview-actions">
+            <span class="tailored-save-status" role="status">{{ saveStatus }}</span>
+            <button
+              class="tailored-save-button"
+              type="button"
+              :disabled="isSaving"
+              @click="saveBriefingJson"
+            >
+              {{ isSaving ? 'Saving...' : 'Save JSON' }}
+            </button>
+            <button class="tailored-export-button" type="button" @click="exportBriefingPdf">
+              Export PDF
+            </button>
+          </div>
         </div>
 
       <article ref="pdfPreviewRef" class="tailored-brief-page" aria-label="Grid operations tailored briefing">
@@ -469,43 +402,20 @@ function isTailoredSectorLocked(sector: string) {
         <p>{{ briefing.overview }}</p>
       </section>
 
-      <section class="tailored-section">
-        <h3>Storm-Level Probability</h3>
-        <div class="tailored-probability-grid">
-          <article
-            v-for="card in briefing.probabilities"
-            :key="card.level"
-            class="tailored-probability-card"
-            :class="`tailored-probability-card--${card.tone}`"
-          >
-            <h4>{{ card.level }}</h4>
-            <strong>{{ card.subtitle }}</strong>
+      <section class="tailored-section tailored-geoelectric-section">
+        <h3>{{ briefing.geoelectricTitle }}</h3>
+        <div class="tailored-geoelectric-layout">
+          <figure class="tailored-geoelectric-figure">
+            <img :src="geoelectricGraphicUrl" alt="Modeled geoelectric-field response across the contiguous United States" />
+            <figcaption>{{ briefing.geoelectricCaption }}</figcaption>
+          </figure>
+          <aside class="tailored-geoelectric-guidance">
+            <h4>How to use this guidance</h4>
             <ul>
-              <li v-for="item in lines(card.bullets)" :key="item">{{ item }}</li>
+              <li v-for="item in lines(briefing.geoelectricGuidance)" :key="item">{{ item }}</li>
             </ul>
-            <div class="tailored-probability-value">{{ card.probability }}</div>
-          </article>
+          </aside>
         </div>
-      </section>
-
-      <section class="tailored-section">
-        <h3>Key Timing</h3>
-        <table class="tailored-table">
-          <thead>
-            <tr>
-              <th>Timing Window</th>
-              <th>Forecast Message</th>
-              <th>Operational Meaning</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in briefing.timingRows" :key="`${row.window}-${row.forecast}`">
-              <td>{{ row.window }}</td>
-              <td>{{ row.forecast }}</td>
-              <td>{{ row.meaning }}</td>
-            </tr>
-          </tbody>
-        </table>
       </section>
 
       <section class="tailored-section">
@@ -650,7 +560,7 @@ function isTailoredSectorLocked(sector: string) {
 
 .tailored-workspace {
   display: grid;
-  grid-template-columns: minmax(150px, 180px) repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
   min-width: 0;
@@ -708,11 +618,42 @@ function isTailoredSectorLocked(sector: string) {
   align-items: center;
 }
 
+.tailored-preview-actions {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.tailored-save-status {
+  grid-column: 1 / -1;
+  justify-self: end;
+  max-width: 220px;
+  color: rgba(232, 239, 248, 0.58) !important;
+  font-size: 0.66rem !important;
+  text-align: right;
+  white-space: normal !important;
+}
+
+.tailored-save-button {
+  border: 1px solid rgba(255, 229, 100, 0.48);
+  background: rgba(255, 229, 100, 0.13);
+  color: #fff0a8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tailored-save-button:disabled {
+  opacity: 0.58;
+}
+
 .tailored-export-button {
   border: 1px solid rgba(95, 199, 255, 0.32);
   background: rgba(95, 199, 255, 0.12);
   color: #d9efff;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .tailored-editor-section {
@@ -1046,6 +987,64 @@ function isTailoredSectorLocked(sector: string) {
   border-collapse: collapse;
 }
 
+.tailored-geoelectric-section {
+  padding-top: 9px;
+}
+
+.tailored-geoelectric-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(180px, 0.85fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.tailored-geoelectric-figure {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+}
+
+.tailored-geoelectric-figure img {
+  display: block;
+  width: 100%;
+  max-height: 255px;
+  object-fit: contain;
+  border: 1px solid #c6d3df;
+  background: #f5f8fb;
+}
+
+.tailored-geoelectric-figure figcaption {
+  color: #536174;
+  font-size: 0.62rem;
+  font-style: italic;
+  line-height: 1.25;
+}
+
+.tailored-geoelectric-guidance {
+  padding: 9px 10px;
+  border-left: 3px solid #0b4f8a;
+  background: #edf5fb;
+}
+
+.tailored-geoelectric-guidance h4 {
+  margin: 0 0 5px;
+  color: #0b4f8a;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+}
+
+.tailored-geoelectric-guidance ul {
+  margin: 0;
+  padding-left: 14px;
+  font-size: 0.63rem;
+  line-height: 1.3;
+}
+
+.tailored-geoelectric-guidance li + li {
+  margin-top: 5px;
+}
+
 .tailored-probability-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1192,7 +1191,8 @@ function isTailoredSectorLocked(sector: string) {
 
 @media (max-width: 800px) {
   .tailored-grid,
-  .tailored-probability-grid {
+  .tailored-probability-grid,
+  .tailored-geoelectric-layout {
     grid-template-columns: 1fr;
   }
 

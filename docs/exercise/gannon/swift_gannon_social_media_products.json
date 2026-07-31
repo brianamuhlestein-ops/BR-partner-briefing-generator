@@ -316,8 +316,8 @@
                           "social_media":  {
                                                "badge":  "OBSERVED SPACE WEATHER ALERT",
                                                "headline":  "CME Arrival Confirmed",
-                                               "subheadline":  "Geomagnetic sudden impulse observed",
-                                               "summary":  "A geomagnetic sudden impulse confirms the arrival of a coronal mass ejection. Solar wind conditions are becoming strongly enhanced and geomagnetic activity is expected to increase.",
+                                               "subheadline":  "Shock arrival observed",
+                                               "summary":  "A sudden shock confirms the arrival of a coronal mass ejection. Solar wind conditions are becoming strongly enhanced and geomagnetic activity is expected to increase.",
                                                "confidence":  {
                                                                   "label":  "Observed",
                                                                   "value":  "1645 UTC",

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { GraphicsWorkspaceMode, OpsToCommsRecommendation, RuntimeContext } from '../../types'
+import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../../api'
 import { exportElementToPng } from '../../utils/exportPng'
 import { formatIssueTime } from '../../utils/briefingTime'
 import may2024Catalog from '../../data/may-2024-social-products.json'
@@ -55,10 +56,24 @@ type ExerciseSocialProduct = {
     footer_left: string
     footer_center: string
     footer_right: string
+    media_number?: number
     visual_asset?: string
     visual_alt_text?: string
     visual_fit?: 'fit' | 'fill'
   }
+}
+
+const exerciseMediaAssets = import.meta.glob(
+  '../../../../docs/exercise/gannon/social-media/media/*.{png,jpg,jpeg,webp}',
+  { eager: true, query: '?url', import: 'default' },
+) as Record<string, string>
+
+function numberedMediaAsset(mediaNumber: number): string {
+  const prefix = `${String(mediaNumber).padStart(2, '0')}-`
+  return Object.entries(exerciseMediaAssets).find(([path]) => {
+    const fileName = path.split('/').pop() ?? ''
+    return fileName.startsWith(prefix)
+  })?.[1] ?? ''
 }
 
 type SectorSymbol = {
@@ -291,6 +306,9 @@ const imageFit = ref<'fit' | 'fill'>('fill')
 const imageAspectRatio = ref(1)
 const isUpdatedProduct = ref(false)
 const socialPreviewRef = ref<HTMLElement | null>(null)
+const isSaving = ref(false)
+const saveStatus = ref('Not saved')
+const hasRestoredSavedDocument = ref(false)
 
 const selectedTemplate = computed(() => {
   return templates.find((template) => template.id === selectedProductId.value) ?? templates[0]!
@@ -365,7 +383,9 @@ function applyExerciseProduct(product: ExerciseSocialProduct) {
     footerCenter: product.social.footer_center,
     footerRight: product.social.footer_right,
   })
-  uploadedImage.value = product.social.visual_asset ?? ''
+  uploadedImage.value = numberedMediaAsset(product.social.media_number ?? product.sequence)
+    || product.social.visual_asset
+    || ''
   uploadedImageName.value = product.social.visual_alt_text ?? ''
   imageFit.value = product.social.visual_fit ?? 'fill'
   isUpdatedProduct.value = product.official_product.type.includes('update')
@@ -386,6 +406,7 @@ watch(
   () => props.runtimeNow?.now_utc,
   (value) => {
     if (!value) return
+    if (hasRestoredSavedDocument.value) return
     if (isMay2024Replay.value) {
       const available = availableExerciseProducts.value
       const current = available[available.length - 1]
@@ -491,6 +512,64 @@ function toggleSector(symbol: SectorSymbol, event: Event) {
 function exportSocialPng() {
   exportElementToPng(socialPreviewRef.value, `${draft.label}-${draft.headline}`)
 }
+
+async function loadSavedSocialJson() {
+  try {
+    const saved = await fetchEmailBriefingDocument<{
+      selectedProductId: SocialProductId
+      selectedExerciseProductId: string
+      draft: SocialTemplate
+      uploadedImage: string
+      uploadedImageName: string
+      imageFit: 'fit' | 'fill'
+      isUpdatedProduct: boolean
+    }>('social')
+    if (!saved) return
+    hasRestoredSavedDocument.value = true
+    selectedProductId.value = saved.document.selectedProductId
+    selectedExerciseProductId.value = saved.document.selectedExerciseProductId
+    Object.assign(draft, saved.document.draft)
+    const selectedProduct = exerciseProducts.find(
+      (product) => product.product_id === saved.document.selectedExerciseProductId,
+    )
+    uploadedImage.value = saved.document.uploadedImage.startsWith('data:')
+      ? saved.document.uploadedImage
+      : selectedProduct
+        ? numberedMediaAsset(selectedProduct.social.media_number ?? selectedProduct.sequence)
+          || saved.document.uploadedImage
+        : saved.document.uploadedImage
+    uploadedImageName.value = saved.document.uploadedImageName
+    imageFit.value = saved.document.imageFit
+    isUpdatedProduct.value = saved.document.isUpdatedProduct
+    saveStatus.value = `Loaded ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to load saved JSON'
+  }
+}
+
+async function saveSocialJson() {
+  isSaving.value = true
+  saveStatus.value = 'Saving...'
+  try {
+    const saved = await saveEmailBriefingDocument('social', {
+      selectedProductId: selectedProductId.value,
+      selectedExerciseProductId: selectedExerciseProductId.value,
+      draft: JSON.parse(JSON.stringify(draft)),
+      uploadedImage: uploadedImage.value,
+      uploadedImageName: uploadedImageName.value,
+      imageFit: imageFit.value,
+      isUpdatedProduct: isUpdatedProduct.value,
+    })
+    hasRestoredSavedDocument.value = true
+    saveStatus.value = `Saved ${new Date(saved.updated_at).toLocaleString()}`
+  } catch (error) {
+    saveStatus.value = error instanceof Error ? error.message : 'Unable to save JSON'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+onMounted(loadSavedSocialJson)
 </script>
 
 <template>
@@ -536,7 +615,15 @@ function exportSocialPng() {
       </div>
 
       <div class="swift-social-product-actions">
-        <span class="swift-social-product-source">SWIFT WWA JSON driven</span>
+        <span class="swift-social-save-status" role="status">{{ saveStatus }}</span>
+        <button
+          type="button"
+          class="swift-social-product-button swift-social-save-button"
+          :disabled="isSaving"
+          @click="saveSocialJson"
+        >
+          {{ isSaving ? 'Saving...' : 'Save JSON' }}
+        </button>
         <button
           type="button"
           class="swift-social-product-button swift-social-export-button"
@@ -830,6 +917,15 @@ function exportSocialPng() {
   min-width: max-content;
 }
 
+.swift-social-save-status {
+  max-width: 190px;
+  color: rgba(232, 239, 248, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: right;
+  white-space: normal;
+}
+
 .swift-social-product-button,
 .swift-social-upload-button {
   border: 1px solid rgba(95, 199, 255, 0.24);
@@ -846,6 +942,20 @@ function exportSocialPng() {
 
 .swift-social-update-button {
   min-width: 96px;
+}
+
+.swift-social-save-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-color: rgba(255, 229, 100, 0.48);
+  background: rgba(255, 229, 100, 0.13);
+  color: #fff0a8;
+  white-space: nowrap;
+}
+
+.swift-social-save-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 .swift-social-export-button {

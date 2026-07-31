@@ -7,6 +7,7 @@ from api.resources import (
     DeriveResource,
     DraftCollectionResource,
     DraftResource,
+    EmailBriefingDocumentResource,
     HealthResource,
     RuntimeNowResource,
     PdfResource,
@@ -33,6 +34,10 @@ def _add_partner_briefing_routes(app: falcon.App, prefix: str) -> None:
     )
     app.add_route(f"{prefix}/drafts", DraftCollectionResource())
     app.add_route(f"{prefix}/drafts/{{draft_id}}", DraftResource())
+    app.add_route(
+        f"{prefix}/email-briefings/{{briefing_kind}}",
+        EmailBriefingDocumentResource(),
+    )
     app.add_route(f"{prefix}/drafts/{{draft_id}}/derive", DeriveResource())
     app.add_route(f"{prefix}/drafts/{{draft_id}}/preview", PreviewResource())
     app.add_route(f"{prefix}/drafts/{{draft_id}}/pdf", PdfResource())

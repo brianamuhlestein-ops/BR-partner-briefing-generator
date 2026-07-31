@@ -13,6 +13,7 @@ COPY ui/src src
 COPY ui/public public
 COPY docs/exercise/gannon/core-briefings ../docs/exercise/gannon/core-briefings
 COPY docs/exercise/gannon/email-briefing-graphics ../docs/exercise/gannon/email-briefing-graphics
+COPY docs/exercise/gannon/social-media ../docs/exercise/gannon/social-media
 
 RUN npm run build
 

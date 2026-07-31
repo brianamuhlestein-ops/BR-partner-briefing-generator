@@ -32,10 +32,11 @@
         "right": "spaceweather.gov"
       },
       "visual": {
-        "asset": "media/03-social_media_ensemble.png",
-        "runtime_asset": "/assets/exercise/gannon/social-media/03-social_media_ensemble.png",
-        "alt_text": "WSA-Enlil ensemble guidance chart showing modeled solar-wind disturbances and possible arrival timing.",
-        "fit": "fit"
+        "media_number": 3,
+        "asset": "media/03-G1-G2.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/03-G1-G2.png",
+        "alt_text": "Social media graphic for the G1-G2 geomagnetic storm statement.",
+        "fit": "fill"
       }
     }
   }

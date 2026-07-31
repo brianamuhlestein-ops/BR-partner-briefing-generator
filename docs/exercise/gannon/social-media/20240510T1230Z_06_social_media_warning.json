@@ -32,8 +32,9 @@
         "right": "spaceweather.gov"
       },
       "visual": {
-        "asset": null,
-        "runtime_asset": null,
+        "media_number": 6,
+        "asset": "media/06-Warning.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/06-Warning.png",
         "alt_text": "Forecast visualization for expected G3–G4 and possible G5 geomagnetic storm conditions.",
         "fit": "fill"
       }

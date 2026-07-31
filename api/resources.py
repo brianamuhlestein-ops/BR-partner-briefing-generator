@@ -9,9 +9,11 @@ from api.persistence import (
     create_draft_record,
     create_social_graphics_draft_record,
     get_draft_record,
+    get_email_briefing_document,
     get_social_graphics_draft_record,
     get_social_graphics_export_record,
     save_generated_output,
+    save_email_briefing_document,
     save_social_graphics_export_record,
     update_draft_record,
     update_social_graphics_draft_record,
@@ -126,6 +128,35 @@ class DraftResource:
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
         resp.media = item_response(update_draft_record(draft_id, payload))
+
+
+class EmailBriefingDocumentResource:
+    _allowed_kinds = {"core", "tailored", "social"}
+
+    def _validate_kind(self, briefing_kind: str) -> None:
+        if briefing_kind not in self._allowed_kinds:
+            raise falcon.HTTPBadRequest(
+                description=f"Unsupported email briefing kind '{briefing_kind}'."
+            )
+
+    def on_get(self, req: falcon.Request, resp: falcon.Response, briefing_kind: str) -> None:
+        self._validate_kind(briefing_kind)
+        document = get_email_briefing_document(briefing_kind)
+        if document is None:
+            raise falcon.HTTPNotFound(
+                description=f"Saved email briefing '{briefing_kind}' was not found."
+            )
+        resp.media = item_response(document)
+
+    def on_put(self, req: falcon.Request, resp: falcon.Response, briefing_kind: str) -> None:
+        self._validate_kind(briefing_kind)
+        payload = read_json(req, allow_empty=False)
+        document = payload.get("document")
+        if not isinstance(document, dict):
+            raise falcon.HTTPBadRequest(
+                description="Email briefing payload requires a JSON object named 'document'."
+            )
+        resp.media = item_response(save_email_briefing_document(briefing_kind, document))
 
 
 class DeriveResource:

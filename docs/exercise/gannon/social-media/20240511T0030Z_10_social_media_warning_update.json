@@ -32,8 +32,9 @@
         "right": "spaceweather.gov"
       },
       "visual": {
-        "asset": null,
-        "runtime_asset": null,
+        "media_number": 10,
+        "asset": "media/10-Warning-Update1.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/10-Warning-Update1.png",
         "alt_text": "Operational visualization for ongoing G3–G5 geomagnetic storm conditions.",
         "fit": "fill"
       }

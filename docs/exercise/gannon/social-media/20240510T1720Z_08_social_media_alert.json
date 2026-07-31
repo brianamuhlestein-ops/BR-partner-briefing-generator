@@ -32,8 +32,9 @@
         "right": "spaceweather.gov"
       },
       "visual": {
-        "asset": null,
-        "runtime_asset": null,
+        "media_number": 8,
+        "asset": "media/08-Observed-G3.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/08-Observed-G3.png",
         "alt_text": "Observation graphic for G3 Strong geomagnetic storm conditions.",
         "fit": "fill"
       }

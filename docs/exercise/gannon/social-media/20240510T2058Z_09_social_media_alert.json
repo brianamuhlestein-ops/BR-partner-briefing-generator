@@ -32,8 +32,9 @@
         "right": "spaceweather.gov"
       },
       "visual": {
-        "asset": null,
-        "runtime_asset": null,
+        "media_number": 9,
+        "asset": "media/09-Observed-G5.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/09-Observed-G5.png",
         "alt_text": "Operational visualization of observed G5 extreme geomagnetic storm conditions.",
         "fit": "fill"
       }

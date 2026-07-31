@@ -52,7 +52,8 @@
         "what_we_know": ["Possible storm onset ranges from 1200 UTC Friday to 1200 UTC Sunday.", "If a storm begins, there is a 60% chance the peak reaches G2.", "If a storm begins, there is a 10% chance the peak reaches G3 or greater.", "Storm conditions may last 12 to 24 hours."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
         "footer_left": "Next update by 0400 UTC Thursday, or sooner if conditions change.", "footer_center": "No Watch or Warning is in effect.", "footer_right": "spaceweather.gov",
-        "visual_asset": "/assets/exercise/gannon/social-media/03-social_media_ensemble.png",
+        "media_number": 3,
+        "visual_asset": "/assets/exercise/gannon/social-media/03-G1-G2.png",
         "visual_alt_text": "WSA-Enlil ensemble guidance chart showing modeled solar-wind disturbances and possible arrival timing.",
         "visual_fit": "fit"
       }
@@ -68,6 +69,8 @@
         "what_we_know": ["There is a 65% chance of G3 or greater conditions through early Monday.", "There is a 20% chance of G4 or greater conditions.", "Storm conditions may last 12 to 48 hours.", "Additional CME influences are possible beyond the primary onset window."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
         "footer_left": "Next update by 2000 UTC Thursday, or sooner if conditions change.", "footer_center": "Review sector procedures and monitor SWPC updates.", "footer_right": "spaceweather.gov",
+        "media_number": 4,
+        "visual_asset": "/assets/exercise/gannon/social-media/04-Watch.png",
         "visual_fit": "fill"
       }
     },
@@ -98,6 +101,8 @@
         "what_we_know": ["There is a 65% chance of storm onset between 1800 UTC Friday and 0000 UTC Saturday.", "Possible onset ranges from 1200 UTC Friday to 0600 UTC Saturday.", "Storm conditions may last 24 to 48 hours.", "Additional CME influences may renew activity through early Monday."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
         "footer_left": "Next update by 0030 UTC Saturday, or sooner if conditions change.", "footer_center": "Prepare now and follow sector-specific procedures.", "footer_right": "spaceweather.gov",
+        "media_number": 6,
+        "visual_asset": "/assets/exercise/gannon/social-media/06-Warning.png",
         "visual_fit": "fill"
       }
     },
@@ -106,8 +111,11 @@
       "official_product": { "type": "observed_space_weather_alert", "title": "Observed Space Weather Alert", "issue_time_utc": "2024-05-10T16:47:00Z" },
       "social": {
         "effective_time_utc": "2024-05-10T16:57:00Z", "template_id": "observed_alert",
-        "headline": "CME Arrival Confirmed", "subheadline": "Geomagnetic sudden impulse observed",
-        "summary": "A geomagnetic sudden impulse confirms the arrival of a coronal mass ejection. Solar wind conditions are becoming strongly enhanced and geomagnetic activity is expected to increase.",
+        "media_number": 7,
+        "visual_asset": "/assets/exercise/gannon/social-media/07-shock-observed.png",
+        "visual_alt_text": "Observed shock-arrival social media graphic confirming a CME-driven disturbance at Earth.",
+        "headline": "CME Arrival Confirmed", "subheadline": "Shock arrival observed",
+        "summary": "A sudden shock confirms the arrival of a coronal mass ejection. Solar wind conditions are becoming strongly enhanced and geomagnetic activity is expected to increase.",
         "confidence_label": "Observed", "confidence_value": "1645 UTC", "confidence_detail": "An upstream interplanetary shock was detected at 1639 UTC Friday.",
         "what_we_know": ["A CME has reached Earth.", "Rapid magnetic-field changes may occur as conditions intensify.", "A Warning remains in effect for G3–G5 conditions.", "Additional alerts will follow when activity first reaches G3, G4, or G5."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management"],
@@ -126,6 +134,9 @@
         "what_we_know": ["G3 conditions observed at 1720 UTC.", "The active Warning remains in effect through 0600 UTC Mon May 13 2024.", "Additional CME arrivals may produce severe or extreme conditions.", "Another alert will be issued only if conditions escalate to G4 or G5."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
         "footer_left": "Continue heightened monitoring and follow sector procedures.", "footer_center": "Warning remains in effect.", "footer_right": "spaceweather.gov",
+        "media_number": 8,
+        "visual_asset": "/assets/exercise/gannon/social-media/08-Observed-G3.png",
+        "visual_alt_text": "Observed G3 Strong geomagnetic storm social media graphic.",
         "visual_fit": "fill"
       }
     },
@@ -134,6 +145,9 @@
       "official_product": { "type": "observed_space_weather_alert", "title": "Observed Space Weather Alert", "issue_time_utc": "2024-05-10T20:58:00Z" },
       "social": {
         "effective_time_utc": "2024-05-10T21:08:00Z", "template_id": "observed_alert",
+        "media_number": 9,
+        "visual_asset": "/assets/exercise/gannon/social-media/09-Observed-G5.png",
+        "visual_alt_text": "Observed G5 Extreme geomagnetic storm social media graphic.",
         "headline": "Extreme Geomagnetic Conditions Reached", "subheadline": "G5 observed at 2058 UTC",
         "summary": "Geomagnetic activity has reached the G5 (Extreme) level. Additional periods of severe to extreme storming remain possible while CME-driven conditions persist.",
         "confidence_label": "Observed Level", "confidence_value": "G5 (Extreme)", "confidence_detail": "During the 2100–2400 UTC observation period.",
@@ -154,6 +168,8 @@
         "what_we_know": ["G5 conditions observed at 2058 UTC Friday.", "Warning-level activity remains ongoing as of 0030 UTC Saturday.", "There is a 45% chance of additional G4 or greater periods through 0000 UTC Sunday."],
         "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aurora"],
         "footer_left": "Continue heightened operations and follow sector-specific procedures.", "footer_center": "Next update by 1230 UTC Saturday.", "footer_right": "spaceweather.gov",
+        "media_number": 10,
+        "visual_asset": "/assets/exercise/gannon/social-media/10-Warning-Update1.png",
         "visual_fit": "fill"
       }
     },

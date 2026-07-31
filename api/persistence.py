@@ -76,6 +76,15 @@ def initialize_storage() -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS email_briefing_documents (
+                briefing_kind TEXT PRIMARY KEY,
+                document_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
         connection.commit()
 
 
@@ -216,6 +225,46 @@ def update_draft_record(draft_id: str, payload: dict) -> dict | None:
         )
         connection.commit()
     return updated
+
+
+def get_email_briefing_document(briefing_kind: str) -> dict | None:
+    with open_database() as connection:
+        row = connection.execute(
+            """
+            SELECT briefing_kind, document_json, updated_at
+            FROM email_briefing_documents
+            WHERE briefing_kind = ?
+            """,
+            (briefing_kind,),
+        ).fetchone()
+    if row is None:
+        return None
+    return {
+        "briefing_kind": row["briefing_kind"],
+        "document": json.loads(row["document_json"]),
+        "updated_at": row["updated_at"],
+    }
+
+
+def save_email_briefing_document(briefing_kind: str, document: dict) -> dict:
+    updated_at = _utc_now()
+    with open_database() as connection:
+        connection.execute(
+            """
+            INSERT INTO email_briefing_documents (briefing_kind, document_json, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(briefing_kind) DO UPDATE SET
+                document_json = excluded.document_json,
+                updated_at = excluded.updated_at
+            """,
+            (briefing_kind, json.dumps(document), updated_at),
+        )
+        connection.commit()
+    return {
+        "briefing_kind": briefing_kind,
+        "document": document,
+        "updated_at": updated_at,
+    }
 
 
 def save_generated_output(draft_id: str, output: dict) -> dict:

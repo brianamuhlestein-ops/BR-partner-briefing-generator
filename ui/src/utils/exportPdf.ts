@@ -210,6 +210,36 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
             gap: 14px !important;
           }
 
+          .tailored-geoelectric-layout {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1.65fr) minmax(180px, 0.85fr) !important;
+            gap: 10px !important;
+            align-items: stretch !important;
+          }
+
+          .tailored-geoelectric-figure {
+            display: grid !important;
+            grid-template-rows: auto auto !important;
+            align-content: start !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+          }
+
+          .tailored-geoelectric-figure img {
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: 255px !important;
+            margin: 0 !important;
+            object-fit: contain !important;
+            object-position: left top !important;
+          }
+
+          .tailored-geoelectric-guidance {
+            min-width: 0 !important;
+            margin: 0 !important;
+          }
+
           .tailored-footer {
             margin-top: 10px !important;
             padding-top: 8px !important;
@@ -219,6 +249,7 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
           .partner-pdf-section,
           .tailored-masthead,
           .tailored-section,
+          .tailored-geoelectric-layout,
           .tailored-probability-card {
             break-inside: avoid;
             page-break-inside: avoid;
