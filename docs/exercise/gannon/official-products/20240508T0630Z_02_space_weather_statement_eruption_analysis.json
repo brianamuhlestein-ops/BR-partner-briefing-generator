@@ -5,11 +5,12 @@
   "expires_on": "2024-05-08T18:00Z",
   "name": "Space Weather Statement",
   "message": {
-    "what": "A significant solar flare occurred early this morning from a large, complex active region. A coronal mass ejection may have been produced.",
+    "headline": "...SOLAR ERUPTION UNDER ANALYSIS...",
+    "what": "A significant solar flare occurred early this morning from a large, complex active region. Initial observations suggest the flare may have produced a coronal mass ejection (CME), which could result in geomagnetic storms if confirmed.",
     "where": "Worldwide and Earth's orbit.",
     "when": "Potential Earth impacts are possible later this week. Timing remains uncertain while imagery and model analysis continue.",
-    "confidence": "Low. Early imagery and the location of the eruption suggest an Earth-directed component is possible.",
-    "impacts": "If an Earth-directed coronal mass ejection is confirmed, geomagnetic activity could affect HF communications, satellite navigation, satellite operations, and power systems, particularly at high latitudes.",
+    "confidence": "Low. Early imagery and the location of the eruption suggest an Earth-directed trajectory is possible.",
+    "impacts": "If an Earth-directed coronal mass ejection is confirmed, geomagnetic activity could affect HF communications, satellite navigation, satellite operations, and electric power systems, particularly at high latitudes.",
     "additional_details": "No Space Weather Watch or Warning is in effect for this event at this time. A Space Weather Watch may be issued if additional imagery and model guidance indicate possible significant impacts to Earth.",
     "next_update": "No later than 1800 UTC Wed May 08 2024, or sooner if conditions change."
   }

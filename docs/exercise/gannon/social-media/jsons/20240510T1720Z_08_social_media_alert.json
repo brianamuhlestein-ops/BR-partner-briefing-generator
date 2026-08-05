@@ -1,0 +1,43 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 8,
+  "source_product_file": "../official-products/20240510T1720Z_08_observed_alert_g3.json",
+  "product_id": "20240510T1720Z-SWPC-ALERT-G3-AR3664-001",
+  "official_issue_time_utc": "2024-05-10T17:20:00Z",
+  "effective_time_utc": "2024-05-10T17:30:00Z",
+  "template_id": "observed_alert",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "OBSERVED SPACE WEATHER ALERT",
+      "headline": "Strong Geomagnetic Conditions Reached",
+      "subheadline": "Geomagnetic activity is intensifying",
+      "summary": "Geomagnetic activity has reached the G3 (Strong) level. Severe or extreme conditions remain possible as additional coronal mass ejections reach Earth.",
+      "confidence": {
+        "label": "Observed Level",
+        "value": "G3 (Strong)",
+        "detail": "During the 1500–1800 UTC observation period."
+      },
+      "what_we_know": [
+        "G3 conditions observed at 1720 UTC.",
+        "The active Warning remains in effect through 0600 UTC Mon May 13 2024.",
+        "Additional CME arrivals may produce severe or extreme conditions.",
+        "Another alert will be issued only if conditions escalate to G4 or G5."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Emergency Management", "Aurora"],
+      "footer": {
+        "left": "Continue heightened monitoring and follow sector procedures.",
+        "center": "Warning remains in effect.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "media_number": 8,
+        "asset": "media/08-Observed-G3.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/08-Observed-G3.png",
+        "alt_text": "Observation graphic for G3 Strong geomagnetic storm conditions.",
+        "fit": "fill"
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 1,
+  "source_product_file": "../official-products/20240506T1500Z_01_space_weather_outlook.json",
+  "product_id": "20240506T1500Z-SWPC-OUTLOOK-AR3664-001",
+  "official_issue_time_utc": "2024-05-06T15:00:00Z",
+  "effective_time_utc": "2024-05-06T15:10:00Z",
+  "template_id": "outlook",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER OUTLOOK",
+      "headline": "Active Space Weather Week Expected",
+      "subheadline": "May 6–May 12, 2024",
+      "summary": "Elevated solar activity is expected this week, with multiple opportunities for strong flares and possible Earth-directed CMEs.",
+      "confidence": {
+        "label": "Confidence",
+        "value": "Medium",
+        "detail": "An increase in activity is likely this week, but the timing and impacts of any Earth-directed CME remain uncertain."
+      },
+      "what_we_know": [
+        "Several active regions are producing flares.",
+        "Strong flares are likely, and major flares remain possible.",
+        "Additional Earth-directed CMEs are possible.",
+        "Impacts are possible, but timing and severity are not yet certain."
+      ],
+      "impact_sectors": [
+        "Power Grid",
+        "Communications & GNSS",
+        "Satellite",
+        "Aurora"
+      ],
+      "footer": {
+        "left": "SWPC will continue to monitor the situation and issue updates as needed.",
+        "center": "Outlooks are issued once weekly on Mondays.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": "media/01-social_media_outlook_graphic.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/01-social_media_outlook_graphic.png",
+        "alt_text": "Two-panel solar image showing active regions on the Sun on May 6, 2024.",
+        "fit": "fill"
+      }
+    }
+  }
+}

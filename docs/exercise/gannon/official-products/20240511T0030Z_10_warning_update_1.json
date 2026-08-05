@@ -5,11 +5,9 @@
   "expires_on": "2024-05-11T12:30Z",
   "name": "Space Weather Warning Update Number 1",
   "message": {
+    "headline": "...SPACE WEATHER WARNING REMAINS IN EFFECT FOR MAJOR GEOMAGNETIC STORM CONDITIONS THROUGH 1200 UTC SUN MAY 12...",
     "what": "Major (G4-G5) geomagnetic storm is ongoing.",
     "where": "Worldwide and Earth's orbit. Middle- and higher-latitude regions are most likely to experience the greatest effects.",
-    "observed": "G5 conditions were first observed at 2058 UTC Fri May 10 2024, and Warning-level activity remains ongoing.",
-    "changed": "There is a 75% chance of continued G3 or greater conditions through Saturday. There is a 45% chance of additional G4 periods, with a 20% chance of additional G5 periods.",
-    "unchanged": "The existing Space Weather Warning remains in effect. Additional solar disturbances may produce renewed periods of severe to extreme geomagnetic activity into Sunday.",
     "when": "Warning-level geomagnetic activity is ongoing. There is a 75% chance of continued G3 or greater conditions through Saturday. Earliest Warning End: 1200 UTC Sat May 11 2024 Latest Warning End: 1200 UTC Sun May 12 2024",
     "duration": "Shortest Remaining Duration: 12 hours Longest Remaining Duration: 36 hours",
     "confidence": "There is a 45% chance of additional G4 periods, with a 20% chance of additional G5 periods.",

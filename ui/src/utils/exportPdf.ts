@@ -31,10 +31,13 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
             margin: 0.25in;
           }
 
+          :root,
           html,
           body {
             margin: 0;
             background: #ffffff !important;
+            background-image: none !important;
+            color-scheme: light !important;
             print-color-adjust: exact;
             -webkit-print-color-adjust: exact;
           }
@@ -62,25 +65,34 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
           .partner-pdf-masthead {
             display: flex !important;
             margin: 0 -10px 12px !important;
-            padding: 9px 12px !important;
+            padding: 6px 12px !important;
             gap: 12px !important;
             align-items: center !important;
           }
 
-          .partner-pdf-brand img {
-            width: 38px !important;
-            height: 38px !important;
+          .partner-pdf-brand > img,
+          .partner-pdf-noaa-frame {
+            width: 46px !important;
+            height: 46px !important;
+            flex: 0 0 46px !important;
+          }
+
+          .partner-pdf-noaa-frame img {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            transform: scale(1.28) !important;
           }
 
           .partner-pdf-brand strong,
           .partner-pdf-meta strong {
-            font-size: 14px !important;
+            font-size: 15px !important;
           }
 
           .partner-pdf-brand span,
           .partner-pdf-brand div > div,
           .partner-pdf-meta span {
-            font-size: 8px !important;
+            font-size: 8.5px !important;
           }
 
           .partner-pdf-title h3 {
@@ -107,7 +119,7 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
           .tailored-masthead {
             display: flex !important;
             margin: 0 -8px 12px !important;
-            padding: 8px 12px !important;
+            padding: 6px 12px !important;
             gap: 12px !important;
             align-items: center !important;
             justify-content: space-between !important;
@@ -119,18 +131,27 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
             align-items: center !important;
           }
 
-          .tailored-brand img {
-            width: 34px !important;
-            height: 34px !important;
+          .tailored-brand > img,
+          .tailored-noaa-frame {
+            width: 46px !important;
+            height: 46px !important;
+            flex: 0 0 46px !important;
+          }
+
+          .tailored-noaa-frame img {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            transform: scale(1.28) !important;
           }
 
           .tailored-brand strong {
-            font-size: 13px !important;
+            font-size: 15px !important;
           }
 
           .tailored-brand span,
           .tailored-brand div > div {
-            font-size: 7.5px !important;
+            font-size: 8.5px !important;
           }
 
           .tailored-meta {
@@ -212,7 +233,7 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
 
           .tailored-geoelectric-layout {
             display: grid !important;
-            grid-template-columns: minmax(0, 1.65fr) minmax(180px, 0.85fr) !important;
+            grid-template-columns: minmax(0, 1fr) !important;
             gap: 10px !important;
             align-items: stretch !important;
           }
@@ -225,14 +246,21 @@ export async function exportElementToPdf(element: HTMLElement | null, title: str
             margin: 0 !important;
           }
 
-          .tailored-geoelectric-figure img {
+          .tailored-geoelectric-maps {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 6px !important;
+            min-width: 0 !important;
+          }
+
+          .tailored-geoelectric-maps img {
             display: block !important;
             width: 100% !important;
-            height: auto !important;
+            height: 100% !important;
             max-height: 255px !important;
             margin: 0 !important;
             object-fit: contain !important;
-            object-position: left top !important;
+            object-position: center top !important;
           }
 
           .tailored-geoelectric-guidance {

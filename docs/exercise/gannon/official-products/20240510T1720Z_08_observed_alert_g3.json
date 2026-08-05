@@ -5,6 +5,7 @@
   "expires_on": "2024-05-10T23:20Z",
   "name": "Observed Space Weather Alert",
   "message": {
+    "headline": "...GEOMAGNETIC STORM CONDITIONS OBSERVED...",
     "what": "Geomagnetic activity has reached the G3 (Strong) level.",
     "observed": "G3 conditions were observed at 1720 UTC during the 1500-1800 UTC observation period.",
     "basis": "This alert is based on 12/13 real-time observations from the official Kp magnetometer network available at the time of issuance.",

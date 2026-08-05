@@ -15,3 +15,8 @@ dist-ssr/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+.env
+# Python/runtime state
+__pycache__/
+*.py[cod]
+email_briefing.db

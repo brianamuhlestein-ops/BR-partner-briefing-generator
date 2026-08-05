@@ -1,0 +1,16 @@
+{
+  "type": "statement",
+  "created_on": "2024-05-13T12:00Z",
+  "extended_on": null,
+  "expires_on": "2024-05-14T00:00Z",
+  "name": "Space Weather Statement",
+  "message": {
+    "headline": "...WARNING-LEVEL SPACE WEATHER CONDITIONS HAVE ENDED...",
+    "what": "Major (G4-G5) geomagnetic storm conditions have ended. Minor geomagnetic activity and elevated solar particle levels may continue as the event subsides.",
+    "where": "Worldwide and Earth's orbit. Higher-latitude regions remain the primary area of concern for residual effects.",
+    "when": "Warning-level conditions ended by 0600 UTC Sun May 12 2024.",
+    "current_status": "Solar wind conditions remain disturbed, but the geomagnetic response has weakened substantially from peak levels. Current guidance does not support renewed warning-level conditions through 1200 UTC Tue May 14 2024.",
+    "impacts": "Residual effects may continue, especially at higher latitudes and for sensitive operations. Power systems may experience weak fluctuations. HF communication and GNSS performance may remain degraded at higher latitudes. Low-Earth-orbit satellites may continue to experience increased drag. Elevated particle levels may remain a concern for aviation, satellite, and other radiation-sensitive operations.",
+    "additional_details": "The Space Weather Warning is no longer in effect. Partners may return to normal monitoring as sector-specific and local procedures allow. SWPC will continue monitoring the Sun and near-Earth space environment while residual activity subsides."
+  }
+}

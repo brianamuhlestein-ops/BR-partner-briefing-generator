@@ -5,6 +5,7 @@
   "expires_on": "2024-05-09T20:00Z",
   "name": "Space Weather Watch",
   "message": {
+    "headline": "...SPACE WEATHER WATCH IN EFFECT FOR GEOMAGNETIC STORM CONDITIONS FROM 1200 UTC FRI MAY 10 2024 THROUGH 0600 UTC MON MAY 13 2024...",
     "what": "Geomagnetic storm (G3-G4) possible.",
     "where": "Worldwide and Earth's orbit. Higher-latitude regions face the greatest potential impacts.",
     "when": "There is a 70% chance that storm onset will occur between 1800 UTC Fri May 10 2024 and 0600 UTC Sat May 11 2024. Earliest Storm Onset: 1200 UTC Fri May 10 2024 Latest Storm Onset: 0600 UTC Sat May 11 2024",

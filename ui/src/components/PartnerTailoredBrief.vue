@@ -19,6 +19,16 @@ const geoelectricGraphicUrl = new URL(
   import.meta.url,
 ).href
 
+const geoelectricMaximumGraphicUrl = new URL(
+  '../../../docs/exercise/gannon/email-briefing-graphics/Predicted_geoelectric_Map_CONUS_kp_9o_max.png',
+  import.meta.url,
+).href
+
+const geoelectricCaption =
+  "Map on the left represents the most-likely values and the map on the right represents the maximum possible values, based on climatological frequencies of geoelectric fields during storm's periods of the predicted kp value."
+const legacyGeoelectricCaption =
+  'Modeled peak geoelectric-field response for a Kp 9 scenario. Actual local response may differ.'
+
 const initialBriefing = {
   productTitle: 'Grid Operations Briefing',
   headline: 'Geomagnetic Disturbance Expected Today into Saturday',
@@ -27,8 +37,7 @@ const initialBriefing = {
   overview:
     'A train of CMEs is expected to reach Earth today into Saturday. Significant geomagnetic activity is expected, and warning-level conditions may persist through the weekend. Current analysis continues to show an 80-90% chance that two or more CMEs will impact Earth. G3 to G4 geomagnetic conditions are expected, with a 50-60% chance of G5 conditions.',
   geoelectricTitle: 'Modeled Regional Geoelectric-Field Response',
-  geoelectricCaption:
-    'Modeled peak geoelectric-field response for a Kp 9 scenario. Actual local response may differ.',
+  geoelectricCaption,
   geoelectricGuidance:
     'Brighter colors indicate areas of greater modeled geoelectric-field response.\nRegional geology and ground conductivity can cause response to vary substantially over short distances.\nUse this guidance with local GIC, transformer, voltage, and alarm indicators; it is not a prediction of specific equipment impacts.',
   durationConcern:
@@ -175,6 +184,9 @@ async function loadSavedBriefingJson() {
       timingRows?: unknown
     }
     delete savedBriefing.timingRows
+    if (savedBriefing.geoelectricCaption === legacyGeoelectricCaption) {
+      savedBriefing.geoelectricCaption = geoelectricCaption
+    }
     Object.assign(briefing, savedBriefing)
     mediaId = Math.max(0, ...briefing.media.map((item) => item.id))
     saveStatus.value = `Loaded ${new Date(saved.updated_at).toLocaleString()}`
@@ -302,18 +314,14 @@ onMounted(loadSavedBriefingJson)
         </section>
 
         <section class="tailored-editor-section tailored-review-section">
-          <h3>Confidence and Uncertainty</h3>
+          <h3>Forecast Concerns &amp; Uncertainty</h3>
           <label>
-            Forecaster-reviewed confidence language
-            <textarea v-model="briefing.confidence" />
-          </label>
-        </section>
-
-        <section class="tailored-editor-section tailored-review-section">
-          <h3>Duration Concern</h3>
-          <label>
-            Forecaster-reviewed duration language
+            Duration concern
             <textarea v-model="briefing.durationConcern" />
+          </label>
+          <label>
+            Confidence and uncertainty
+            <textarea v-model="briefing.confidence" />
           </label>
         </section>
 
@@ -379,7 +387,9 @@ onMounted(loadSavedBriefingJson)
       <article ref="pdfPreviewRef" class="tailored-brief-page" aria-label="Grid operations tailored briefing">
       <header class="tailored-masthead">
         <div class="tailored-brand">
-          <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+          <span class="tailored-noaa-frame">
+            <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+          </span>
           <img src="/assets/visual-finder/logos/NWSlogo.png" alt="National Weather Service" />
           <div>
             <div>National Weather Service</div>
@@ -406,11 +416,14 @@ onMounted(loadSavedBriefingJson)
         <h3>{{ briefing.geoelectricTitle }}</h3>
         <div class="tailored-geoelectric-layout">
           <figure class="tailored-geoelectric-figure">
-            <img :src="geoelectricGraphicUrl" alt="Modeled geoelectric-field response across the contiguous United States" />
+            <div class="tailored-geoelectric-maps">
+              <img :src="geoelectricGraphicUrl" alt="Most-likely geoelectric-field values across the contiguous United States" />
+              <img :src="geoelectricMaximumGraphicUrl" alt="Maximum possible geoelectric-field values across the contiguous United States" />
+            </div>
             <figcaption>{{ briefing.geoelectricCaption }}</figcaption>
           </figure>
           <aside class="tailored-geoelectric-guidance">
-            <h4>How to use this guidance</h4>
+            <h4>How to use this tool</h4>
             <ul>
               <li v-for="item in lines(briefing.geoelectricGuidance)" :key="item">{{ item }}</li>
             </ul>
@@ -419,13 +432,11 @@ onMounted(loadSavedBriefingJson)
       </section>
 
       <section class="tailored-section">
-        <h3>Duration Concern</h3>
-        <p>{{ briefing.durationConcern }}</p>
-      </section>
-
-      <section class="tailored-section">
-        <h3>Confidence and Uncertainty</h3>
-        <p>{{ briefing.confidence }}</p>
+        <h3>Forecast Concerns &amp; Uncertainty</h3>
+        <ul class="tailored-forecast-concerns">
+          <li>{{ briefing.durationConcern }}</li>
+          <li>{{ briefing.confidence }}</li>
+        </ul>
       </section>
 
       <section class="tailored-section tailored-grid">
@@ -886,39 +897,61 @@ onMounted(loadSavedBriefingJson)
   gap: 18px;
   align-items: center;
   margin: 0 -8px 14px;
-  padding: 14px 16px;
+  padding: 7px 16px;
   background: linear-gradient(90deg, #001b3f, #003e7e);
   color: #ffffff;
 }
 
 .tailored-brand {
   display: flex;
-  gap: 7px;
+  gap: 8px;
   align-items: center;
   text-transform: uppercase;
 }
 
-.tailored-brand img {
-  width: 36px;
-  height: 36px;
+.tailored-brand > img,
+.tailored-noaa-frame {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+}
+
+.tailored-brand > img {
   object-fit: contain;
   background: #ffffff;
   border-radius: 50%;
 }
 
+.tailored-noaa-frame {
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.tailored-noaa-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  transform: scale(1.28);
+}
+
 .tailored-brand div {
   display: grid;
+  gap: 1px;
   line-height: 1.05;
 }
 
 .tailored-brand strong {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .tailored-brand span,
 .tailored-brand div > div {
-  font-size: 0.48rem;
+  font-size: 0.55rem;
 }
 
 .tailored-meta {
@@ -993,7 +1026,7 @@ onMounted(loadSavedBriefingJson)
 
 .tailored-geoelectric-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(180px, 0.85fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   align-items: stretch;
 }
@@ -1005,10 +1038,19 @@ onMounted(loadSavedBriefingJson)
   margin: 0;
 }
 
-.tailored-geoelectric-figure img {
+.tailored-geoelectric-maps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.tailored-geoelectric-maps img {
   display: block;
   width: 100%;
+  height: 100%;
   max-height: 255px;
+  box-sizing: border-box;
   object-fit: contain;
   border: 1px solid #c6d3df;
   background: #f5f8fb;
@@ -1042,6 +1084,10 @@ onMounted(loadSavedBriefingJson)
 }
 
 .tailored-geoelectric-guidance li + li {
+  margin-top: 5px;
+}
+
+.tailored-forecast-concerns li + li {
   margin-top: 5px;
 }
 

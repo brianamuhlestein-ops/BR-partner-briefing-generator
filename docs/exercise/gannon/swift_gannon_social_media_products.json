@@ -542,8 +542,8 @@
                                                               "right":  "spaceweather.gov"
                                                           },
                                                "visual":  {
-                                                              "asset":  null,
-                                                              "runtime_asset":  null,
+                                                              "asset":  "media/11-Warning-Update2.png",
+                                                              "runtime_asset":  "/assets/exercise/gannon/social-media/11-Warning-Update2.png",
                                                               "alt_text":  "Operational visualization for ongoing and renewed G3â€“G5 geomagnetic storm conditions.",
                                                               "fit":  "fill"
                                                           }
@@ -625,7 +625,7 @@
                                                               },
                                                "what_we_know":  [
                                                                     "Multiple CME impacts began at 1639 UTC Friday.",
-                                                                    "Particle storm conditions reached SP2, and Active Region 3664 produced an X5.8 flare.",
+                                                                    "Particle storm conditions reached P2, and Active Region 3664 produced an X5.8 flare.",
                                                                     "Storming remains in progress; additional G5 periods are possible."
                                                                 ],
                                                "impact_sectors":  [
@@ -641,8 +641,8 @@
                                                               "right":  "spaceweather.gov"
                                                           },
                                                "visual":  {
-                                                              "asset":  null,
-                                                              "runtime_asset":  null,
+                                                              "asset":  "media/13-Summary1.png",
+                                                              "runtime_asset":  "/assets/exercise/gannon/social-media/13-Summary1.png",
                                                               "alt_text":  "Operational visualization summarizing the ongoing May 2024 space weather event.",
                                                               "fit":  "fill"
                                                           }
@@ -652,7 +652,7 @@
     {
         "schema_version":  "swift_social_media_product_v1",
         "sequence":  14,
-        "source_product_file":  "../official-products/20240513T1800Z_14_space_weather_statement_ramp_down.json",
+        "source_product_file":  "../official-products/20240513T0000Z_14_space_weather_statement_ramp_down.json",
         "product_id":  "20240513T1800Z-SWPC-STATEMENT-AR3664-003",
         "official_issue_time_utc":  "2024-05-13T18:00:00Z",
         "effective_time_utc":  "2024-05-13T18:10:00Z",
@@ -679,20 +679,15 @@
                                                                     "Confidence is high that G5 activity has ended.",
                                                                     "Elevated particle levels may remain a concern for aviation and satellite operations."
                                                                 ],
-                                               "impact_sectors":  [
-                                                                      "Power Grid",
-                                                                      "Communications \u0026 GNSS",
-                                                                      "Satellite",
-                                                                      "Aviation \u0026 Radiation"
-                                                                  ],
+                                               "impact_sectors":  ["Power Grid", "Communications \u0026 GNSS", "Satellite", "Aviation \u0026 Radiation"],
                                                "footer":  {
                                                               "left":  "Partners may begin planning a transition to normal monitoring.",
                                                               "center":  "Next update by 0000 UTC Tuesday.",
                                                               "right":  "spaceweather.gov"
                                                           },
                                                "visual":  {
-                                                              "asset":  null,
-                                                              "runtime_asset":  null,
+                                                              "asset":  "media/14-Statement2.png",
+                                                              "runtime_asset":  "/assets/exercise/gannon/social-media/14-Statement2.png",
                                                               "alt_text":  "Operational visualization for subsiding geomagnetic activity and elevated solar particle levels.",
                                                               "fit":  "fill"
                                                           }
@@ -702,53 +697,6 @@
     {
         "schema_version":  "swift_social_media_product_v1",
         "sequence":  15,
-        "source_product_file":  "../official-products/20240514T0000Z_15_space_weather_statement_all_clear.json",
-        "product_id":  "20240514T0000Z-SWPC-STATEMENT-AR3664-004",
-        "official_issue_time_utc":  "2024-05-14T00:00:00Z",
-        "effective_time_utc":  "2024-05-14T00:10:00Z",
-        "template_id":  "statement",
-        "editorial_status":  "draft",
-        "audience":  [
-                         "general_public",
-                         "operational_partners"
-                     ],
-        "rendering":  {
-                          "social_media":  {
-                                               "badge":  "SPACE WEATHER STATEMENT",
-                                               "headline":  "Warning-Level Space Weather Event Has Ended",
-                                               "subheadline":  "Conditions have decreased to lower-level concern",
-                                               "summary":  "G3â€“G5 geomagnetic storm conditions have ended. G1â€“G2 activity and elevated solar particle levels may continue as the event subsides.",
-                                               "confidence":  {
-                                                                  "label":  "Status",
-                                                                  "value":  "All Clear",
-                                                                  "detail":  "Warning is no longer in effect, return to routine monitoring."
-                                                              },
-                                               "what_we_know":  [
-                                                                    "Warning-level conditions officially ended 0600 UTC Monday.",
-                                                                    "Renewed conditions are unlikely.",
-                                                                    "Lower-level geomagnetic activity and elevated particle levels may continue."
-                                                                ],
-                                               "impact_sectors":  [
-                                                                      "Satellite",
-                                                                      "Communications \u0026 GNSS"
-                                                                  ],
-                                               "footer":  {
-                                                              "left":  "Return to normal monitoring as procedures allow.",
-                                                              "center":  "Final summary by 1600 UTC Thursday.",
-                                                              "right":  "spaceweather.gov"
-                                                          },
-                                               "visual":  {
-                                                              "asset":  null,
-                                                              "runtime_asset":  null,
-                                                              "alt_text":  "Operational visualization indicating the warning-level space weather event has ended and residual activity is subsiding.",
-                                                              "fit":  "fill"
-                                                          }
-                                           }
-                      }
-    },
-    {
-        "schema_version":  "swift_social_media_product_v1",
-        "sequence":  16,
         "source_product_file":  "../official-products/20240516T1600Z_16_space_weather_summary_2_final.json",
         "product_id":  "20240516T1600Z-SWPC-SUMMARY-AR3664-002",
         "official_issue_time_utc":  "2024-05-16T16:00:00Z",
@@ -789,9 +737,9 @@
                                                               "right":  "spaceweather.gov"
                                                           },
                                                "visual":  {
-                                                              "asset":  null,
-                                                              "runtime_asset":  null,
-                                                              "alt_text":  "Operational visualization recapping the May 2024 historic geomagnetic storm and its impacts.",
+                                                              "asset":  "media/15-northern-lights.jpg",
+                                                              "runtime_asset":  "/assets/exercise/gannon/social-media/15-northern-lights.jpg",
+                                                              "alt_text":  "Northern lights illuminating the night sky during the May 2024 geomagnetic storm.",
                                                               "fit":  "fill"
                                                           }
                                            }

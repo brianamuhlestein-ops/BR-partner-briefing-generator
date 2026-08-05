@@ -1,0 +1,42 @@
+{
+  "schema_version": "swift_social_media_product_v1",
+  "sequence": 14,
+  "source_product_file": "../official-products/20240513T0000Z_14_space_weather_statement_ramp_down.json",
+  "product_id": "20240513T1800Z-SWPC-STATEMENT-AR3664-003",
+  "official_issue_time_utc": "2024-05-13T18:00:00Z",
+  "effective_time_utc": "2024-05-13T18:10:00Z",
+  "template_id": "statement",
+  "editorial_status": "draft",
+  "audience": ["general_public", "operational_partners"],
+  "rendering": {
+    "social_media": {
+      "badge": "SPACE WEATHER STATEMENT",
+      "headline": "Significant Geomagnetic Event Subsiding",
+      "subheadline": "G1–G2 activity may continue",
+      "summary": "G1–G2 geomagnetic activity and elevated solar particle levels may continue as the significant space weather event subsides.",
+      "confidence": {
+        "label": "Confidence",
+        "value": "High",
+        "detail": "Major geomagnetic storm has ended"
+      },
+      "what_we_know": [
+        "There is a 60% chance G1–G2 conditions will continue through 0000 UTC Tuesday.",
+        "There is a 30% chance G1–G2 conditions will continue beyond 0000 UTC Tuesday.",
+        "Confidence is high that G5 activity has ended.",
+        "Elevated particle levels may remain a concern for aviation and satellite operations."
+      ],
+      "impact_sectors": ["Power Grid", "Communications & GNSS", "Satellite", "Aviation & Radiation"],
+      "footer": {
+        "left": "Partners may begin planning a transition to normal monitoring.",
+        "center": "Next update by 0000 UTC Tuesday.",
+        "right": "spaceweather.gov"
+      },
+      "visual": {
+        "asset": "media/14-Statement2.png",
+        "runtime_asset": "/assets/exercise/gannon/social-media/14-Statement2.png",
+        "alt_text": "Operational visualization for subsiding geomagnetic activity and elevated solar particle levels.",
+        "fit": "fill"
+      }
+    }
+  }
+}

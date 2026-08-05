@@ -518,7 +518,9 @@ onMounted(loadSavedBriefingJson)
         <article ref="pdfPreviewRef" class="partner-pdf-preview" aria-label="Partner briefing PDF preview">
         <header class="partner-pdf-masthead">
           <div class="partner-pdf-brand">
-            <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+            <span class="partner-pdf-noaa-frame">
+              <img src="/assets/visual-finder/logos/noaa-emblem-rgb-withspace-2022.png" alt="NOAA" />
+            </span>
             <img src="/assets/visual-finder/logos/NWSlogo.png" alt="National Weather Service" />
             <div>
               <div>National Weather Service</div>
@@ -985,39 +987,61 @@ onMounted(loadSavedBriefingJson)
   gap: 18px;
   align-items: center;
   margin: 0 -8px 14px;
-  padding: 14px 16px;
+  padding: 7px 16px;
   background: linear-gradient(90deg, #001b3f, #003e7e);
   color: #ffffff;
 }
 
 .partner-pdf-brand {
   display: flex;
-  gap: 7px;
+  gap: 8px;
   align-items: center;
   text-transform: uppercase;
 }
 
-.partner-pdf-brand img {
-  width: 36px;
-  height: 36px;
+.partner-pdf-brand > img,
+.partner-pdf-noaa-frame {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+}
+
+.partner-pdf-brand > img {
   object-fit: contain;
   background: #ffffff;
   border-radius: 50%;
 }
 
+.partner-pdf-noaa-frame {
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.partner-pdf-noaa-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  transform: scale(1.28);
+}
+
 .partner-pdf-brand div {
   display: grid;
+  gap: 1px;
   line-height: 1.05;
 }
 
 .partner-pdf-brand strong {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .partner-pdf-brand span,
 .partner-pdf-brand div > div {
-  font-size: 0.48rem;
+  font-size: 0.55rem;
 }
 
 .partner-pdf-meta {

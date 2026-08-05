@@ -5,6 +5,7 @@
   "expires_on": "2024-05-09T20:00Z",
   "name": "Space Weather Notice",
   "message": {
+    "headline": "...CORONAGRAPH IMAGERY AVAILABILITY AFFECTING CORONAL MASS EJECTION ANALYSIS...",
     "what": "Coronagraph imagery needed for additional coronal mass ejection analysis has not updated since 0905 UTC Thu. SWPC is continuing to analyze recent eruptions using the imagery and guidance available at 1300 UTC Thu May 09 2024.",
     "impacts": "Confidence in the exact arrival timing, duration, and strength of potential coronal mass ejection impacts may be reduced until additional imagery becomes available. The overall forecast continues to support elevated to significant geomagnetic activity from 1200 UTC Fri May 10 2024 into Sat May 11 2024.",
     "additional_details": "The active Space Weather Watch remains in effect. This Notice describes a forecast-data limitation and does not change the hazard assessment.",

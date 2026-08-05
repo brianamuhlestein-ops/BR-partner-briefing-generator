@@ -5,6 +5,7 @@
   "expires_on": "2024-05-11T02:58Z",
   "name": "Observed Space Weather Alert",
   "message": {
+    "headline": "...MAJOR GEOMAGNETIC STORM CONDITIONS OBSERVED...",
     "what": "Geomagnetic activity has reached the G5 (Extreme) level.",
     "observed": "G5 conditions were observed at 2058 UTC during the 2100-2400 UTC observation period.",
     "basis": "This alert is based on 12/13 real-time observations from the official Kp magnetometer network available at the time of issuance.",

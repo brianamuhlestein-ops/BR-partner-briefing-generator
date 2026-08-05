@@ -5,6 +5,7 @@
   "expires_on": "2024-05-10T22:47Z",
   "name": "Observed Space Weather Alert",
   "message": {
+    "headline": "...SUDDEN IMPULSE OBSERVED FOLLOWING CORONAL MASS EJECTION ARRIVAL...",
     "what": "A geomagnetic sudden impulse has been observed.",
     "observed": "The sudden impulse was observed at 1645 UTC Fri May 10 2024 following detection of an interplanetary shock in the upstream solar wind at 1639 UTC Fri May 10 2024.",
     "basis": "This alert is based solely on real-time upstream solar wind measurements available at 1647 UTC Fri May 10 2024.",

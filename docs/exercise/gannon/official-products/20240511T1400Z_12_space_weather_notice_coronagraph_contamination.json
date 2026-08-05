@@ -5,6 +5,7 @@
   "expires_on": "2024-05-12T00:30Z",
   "name": "Space Weather Notice",
   "message": {
+    "headline": "...ONGOING SOLAR PARTICLE STORM AFFECTING CORONAGRAPH IMAGERY...",
     "what": "Energetic particles from the ongoing solar particle storm are degrading coronagraph imagery used to identify and analyze coronal mass ejections. SWPC is continuing to assess solar activity using available imagery, model guidance, solar wind observations, and forecaster analysis.",
     "impacts": "Degraded imagery may limit analysis of additional coronal mass ejections and reduce confidence in their expected arrival times, duration, and potential strength. Imagery quality will be reassessed as particle levels change and additional data become available.",
     "additional_details": "The active Space Weather Warning remains in effect. G3-G5 activity remains possible while coronal mass ejection-driven conditions persist. This Notice describes a data-quality limitation and does not change the active hazard assessment.",
