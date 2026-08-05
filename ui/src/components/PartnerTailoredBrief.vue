@@ -1219,9 +1219,9 @@ onMounted(loadSavedBriefingJson)
   font-weight: 700;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1600px) {
   .tailored-workspace {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tailored-sector-selector {
@@ -1230,9 +1230,26 @@ onMounted(loadSavedBriefingJson)
 
   .tailored-preview-column,
   .tailored-brief-page {
+    grid-column: 1 / -1;
     justify-self: center;
   }
 
+}
+
+@media (max-width: 980px) {
+  .tailored-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .tailored-preview-column,
+  .tailored-brief-page {
+    grid-column: auto;
+  }
+
+  .tailored-preview-actions {
+    grid-template-columns: 1fr;
+    justify-items: end;
+  }
 }
 
 @media (max-width: 800px) {

@@ -1,16 +1,16 @@
 # Partner Briefing Generator
 
-Partner Briefing Generator is a SWIFT briefing and communications prototype for turning operational space-weather context into partner-ready products. It combines a Falcon API, a Vue/Vuetify workspace, SQLite-backed draft storage, reusable briefing templates, and a social-graphics export workflow.
+Partner Briefing Generator is a SWIFT briefing and communications prototype for turning operational space-weather context into partner-ready products. It combines a Falcon API, a Vue/Vuetify workspace, SQLite-backed briefing storage, replay fixtures, and client-side PDF/social-graphics export workflows.
 
 ## Current Purpose
 
 The app is intended to support:
 
-- master briefing authoring for partner communication workflows
-- derived downstream briefing types for discussion, ICAO, and staff products
-- active alert and ICAO advisory context panels
-- social graphic composition using reusable visual templates and asset libraries
-- PNG export variants for landscape, square, and portrait communications formats
+- IDSS impact and risk evaluation by partner sector
+- core distribution and partner-tailored briefing authoring
+- replay-aware May 2024 exercise briefings and media products
+- social graphic composition from reviewed product JSON
+- client-side PDF and PNG preview/export
 
 ## Stack
 
@@ -28,7 +28,7 @@ Frontend:
 - TypeScript
 - Vite
 - Vuetify
-- Konva / vue-konva for social graphics composition
+- HTML/CSS social-product composition with html2canvas PNG export
 - MDI icon font
 
 ## Repository Layout
@@ -199,7 +199,7 @@ The current API context feeds are placeholders:
 - active SWPC alerts are represented by placeholder records
 - active ICAO advisories are represented by placeholder records
 
-Reference material lives under `docs/`, including STPI report material and SWIFT IDSS sector threshold tables. Visual assets live under `graphics_library/` and `ui/public/assets/visual-finder/`.
+Reference material lives under `docs/`, including STPI report material, SWIFT IDSS sector threshold tables, and the authoritative Gannon replay fixture. Runtime branding assets live under `ui/public/assets/visual-finder/logos/`.
 
 ## Current Maturity
 
@@ -217,7 +217,7 @@ Known gaps:
 
 - PDF generation is scaffolded but not implemented.
 - Active alert and ICAO advisory context are placeholder data.
-- No automated tests were found in this repo.
+- Runtime clock and interface-density tests cover replay configuration and persisted responsive presentation behavior.
 - Runtime SQLite and generated assets should be treated as local artifacts, not source-controlled product data.
 
 Development guidance for keeping the Falcon API aligned with the SWIFT

@@ -5,22 +5,21 @@ export async function exportElementToPng(element: HTMLElement | null, fileName: 
     return
   }
 
-  const { stage, clone } = createExportClone(element)
+  const { stage, clone, width, height } = createExportClone(element)
   document.body.appendChild(stage)
 
   try {
     await waitForImages(clone)
 
-    const bounds = clone.getBoundingClientRect()
     const canvas = await html2canvas(clone, {
       backgroundColor: '#ffffff',
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      width: Math.ceil(bounds.width),
-      height: Math.ceil(bounds.height),
-      windowWidth: Math.ceil(bounds.width),
-      windowHeight: Math.ceil(bounds.height),
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
       scrollX: 0,
       scrollY: 0,
     })
@@ -43,7 +42,8 @@ function sanitizeFileName(value: string) {
 }
 
 function createExportClone(element: HTMLElement) {
-  const bounds = element.getBoundingClientRect()
+  const width = positiveInteger(element.dataset.exportWidth) ?? Math.ceil(element.offsetWidth)
+  const height = positiveInteger(element.dataset.exportHeight) ?? Math.ceil(element.offsetHeight)
   const clone = element.cloneNode(true) as HTMLElement
   inlineComputedStyles(element, clone)
 
@@ -51,8 +51,8 @@ function createExportClone(element: HTMLElement) {
     .querySelectorAll('.swift-social-image-upload, .swift-social-image-fit-toggle')
     .forEach((node) => node.remove())
 
-  clone.style.width = `${Math.ceil(bounds.width)}px`
-  clone.style.height = `${Math.ceil(bounds.height)}px`
+  clone.style.width = `${width}px`
+  clone.style.height = `${height}px`
   clone.style.maxWidth = 'none'
   clone.style.boxShadow = 'none'
   clone.style.transform = 'none'
@@ -61,13 +61,27 @@ function createExportClone(element: HTMLElement) {
   stage.style.position = 'fixed'
   stage.style.left = '-10000px'
   stage.style.top = '0'
-  stage.style.width = `${Math.ceil(bounds.width)}px`
-  stage.style.height = `${Math.ceil(bounds.height)}px`
+  stage.style.width = `${width}px`
+  stage.style.height = `${height}px`
   stage.style.overflow = 'hidden'
   stage.style.background = '#ffffff'
+  stage.style.zoom = String(1 / currentPresentationZoom())
   stage.appendChild(clone)
 
-  return { stage, clone }
+  return { stage, clone, width, height }
+}
+
+function positiveInteger(value: string | undefined): number | null {
+  const parsed = Number.parseInt(value ?? '', 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
+function currentPresentationZoom(): number {
+  const value = window
+    .getComputedStyle(document.documentElement)
+    .getPropertyValue('--app-presentation-zoom')
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
 function inlineComputedStyles(source: Element, target: Element) {

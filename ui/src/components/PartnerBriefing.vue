@@ -493,7 +493,12 @@ function cellStyle(impact: number, likelihood: number) {
 .partner-sector-toggle {
   display: flex;
   flex-wrap: wrap;
+  align-items: stretch;
+  align-content: flex-start;
   gap: 10px;
+  width: fit-content;
+  height: auto !important;
+  min-height: 0 !important;
   justify-content: center;
   justify-self: center;
   max-width: 100%;
@@ -505,6 +510,7 @@ function cellStyle(impact: number, likelihood: number) {
 
 .partner-sector-toggle :deep(.v-btn) {
   flex: 0 1 auto;
+  height: auto !important;
   min-height: 34px;
   padding-inline: 16px;
   color: rgba(231, 236, 244, 0.78) !important;
@@ -914,7 +920,7 @@ function cellStyle(impact: number, likelihood: number) {
   font-weight: 500;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .partner-sector-topline {
     grid-template-columns: 1fr;
   }

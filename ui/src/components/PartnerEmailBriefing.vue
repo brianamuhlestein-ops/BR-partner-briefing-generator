@@ -1206,18 +1206,31 @@ onMounted(loadSavedBriefingJson)
   margin: 4px 0 0;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1600px) {
+  .partner-email-workspace {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .partner-preview-column,
+  .partner-pdf-preview {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .partner-email-column-heading--preview {
+    width: 100%;
+  }
+}
+
+@media (max-width: 980px) {
   .partner-email-workspace {
     grid-template-columns: 1fr;
   }
 
   .partner-preview-column,
   .partner-pdf-preview {
+    grid-column: auto;
     justify-self: stretch;
-  }
-
-  .partner-email-column-heading--preview {
-    width: 100%;
   }
 }
 

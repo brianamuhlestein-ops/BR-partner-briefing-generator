@@ -61,11 +61,12 @@ def require_social_graphics_export(export_id: str) -> dict:
 
 class HealthResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response) -> None:
+        runtime = runtime_status()
         resp.media = {
-            "status": runtime_status()["status"],
+            "status": runtime["status"],
             "service": get_settings()["service_name"],
             "timeUtc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "runtime": runtime_status(),
+            "runtime": runtime,
         }
 
 

@@ -1,9 +1,11 @@
 import { createApp } from 'vue'
-import VueKonva from 'vue-konva'
 
 import '@mdi/font/css/materialdesignicons.css'
 import './styles.css'
 import App from './App.vue'
+import { initializeUiDensity } from './utils/uiDensity'
 import vuetify from './vuetify'
 
-createApp(App).use(VueKonva).use(vuetify).mount('#app')
+initializeUiDensity()
+
+createApp(App).use(vuetify).mount('#app')

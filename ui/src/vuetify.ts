@@ -34,5 +34,14 @@ export default createVuetify({
     VCard: {
       elevation: 0,
     },
+    VBtn: {
+      density: 'compact',
+    },
+    VChip: {
+      density: 'compact',
+    },
+    VTabs: {
+      density: 'compact',
+    },
   },
 })

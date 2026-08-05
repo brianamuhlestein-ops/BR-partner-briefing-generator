@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
-import type { GraphicsWorkspaceMode, OpsToCommsRecommendation, RuntimeContext } from '../../types'
+import type { RuntimeContext } from '../../types'
 import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../../api'
 import { exportElementToPng } from '../../utils/exportPng'
 import { formatIssueTime } from '../../utils/briefingTime'
@@ -84,9 +84,6 @@ type SectorSymbol = {
 }
 
 const props = defineProps<{
-  mode: GraphicsWorkspaceMode
-  presentation?: 'default' | 'social-tab'
-  recommendation?: OpsToCommsRecommendation | null
   runtimeNow?: RuntimeContext | null
 }>()
 
@@ -729,7 +726,13 @@ onMounted(loadSavedSocialJson)
       </aside>
 
       <section class="swift-social-preview-panel" aria-label="Social media graphic preview">
-        <article ref="socialPreviewRef" class="swift-social-card" :style="socialCardStyle">
+        <article
+          ref="socialPreviewRef"
+          class="swift-social-card"
+          :style="socialCardStyle"
+          data-export-width="1120"
+          data-export-height="747"
+        >
           <header class="swift-social-card-header">
             <div class="swift-social-brand">
               <span class="swift-social-noaa-frame">
@@ -988,7 +991,7 @@ onMounted(loadSavedSocialJson)
 
 .swift-social-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 250px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
+  grid-template-columns: minmax(220px, 0.72fr) minmax(300px, 1fr) minmax(340px, 1.12fr);
   gap: 18px;
   align-items: start;
   min-width: 0;
@@ -1058,7 +1061,7 @@ onMounted(loadSavedSocialJson)
 }
 
 .swift-social-footer-panel {
-  grid-column: 1 / 4;
+  grid-column: 1 / -1;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
 }
@@ -1112,12 +1115,13 @@ onMounted(loadSavedSocialJson)
 }
 
 .swift-social-preview-panel {
-  grid-column: 4;
-  grid-row: 1 / span 2;
+  grid-column: 1 / -1;
   display: grid;
   width: 100%;
   min-width: 0;
-  justify-items: end;
+  justify-items: center;
+  overflow-x: auto;
+  padding-bottom: 6px;
 }
 
 .swift-social-card {
@@ -1617,19 +1621,65 @@ onMounted(loadSavedSocialJson)
   white-space: nowrap;
 }
 
-@media (max-width: 1300px) {
+@media (min-width: 2800px) {
+  .swift-social-grid {
+    grid-template-columns: minmax(220px, 250px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
+  }
+
+  .swift-social-footer-panel {
+    grid-column: 1 / 4;
+  }
+
+  .swift-social-preview-panel {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    justify-items: end;
+  }
+}
+
+@media (max-width: 1500px) {
+  .swift-social-grid {
+    grid-template-columns: minmax(220px, 0.7fr) minmax(360px, 1.3fr);
+  }
+
+  .swift-social-sector-panel {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .swift-social-json-panel,
+  .swift-social-review-panel {
+    grid-column: 2;
+  }
+
+  .swift-social-footer-panel,
+  .swift-social-preview-panel {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 950px) {
   .swift-social-grid {
     grid-template-columns: 1fr;
   }
 
+  .swift-social-sector-panel,
+  .swift-social-json-panel,
+  .swift-social-review-panel,
   .swift-social-footer-panel,
   .swift-social-preview-panel {
     grid-column: auto;
     grid-row: auto;
   }
 
+  .swift-social-footer-panel {
+    grid-template-columns: 1fr;
+  }
+
   .swift-social-card {
     justify-self: center;
+    min-width: 900px;
   }
 }
 </style>

@@ -1,5 +1,19 @@
-# Vue 3 + TypeScript + Vite
+# Partner Briefing Generator UI
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue 3, TypeScript, Vuetify, and Vite frontend for the SWIFT Partner Briefing Generator.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+```powershell
+npm install
+npm run dev
+```
+
+The development server listens on `http://127.0.0.1:5179` and proxies `/api` to the Falcon service on port `8089`.
+
+Verification:
+
+```powershell
+npm test
+npm run build
+```
+
+The active workspaces are Impact & Risk Matrix, Core Distribution Brief, Partner Tailored Brief, and Media Generator. The Compact interface preference is persisted locally without remounting these workspaces.
