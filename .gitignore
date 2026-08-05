@@ -3,6 +3,7 @@
 
 # Local generated assets / scratch copies
 graphics_library/
+docs/exercise/gannon/do-not-track/
 
 # Dependencies and build output
 node_modules/
