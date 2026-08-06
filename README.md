@@ -49,20 +49,31 @@ api/
     briefing_logic.py          template validation, derivation, previews
     templates/                 master/discussion/ICAO/staff templates
 docs/                          STPI and IDSS reference material
+  exercise/gannon/             tracked testbed briefings, JSON, and graphics
 generated/                     runtime social-graphics outputs
 graphics_library/              source visual assets and logos
 ui/                            Vue/Vuetify frontend
-email_briefing.db              local SQLite runtime database
+runtime-data/                  writable container data (database is created here)
+email_briefing.db              native-development SQLite runtime database
 ```
 
 ## Runtime Data
 
-Local persistence uses `email_briefing.db` at the repository root. On API startup, the app creates these tables if needed:
+Native development persistence uses `email_briefing.db` at the repository root.
+Docker persistence uses `runtime-data/email_briefing.db`. Both database files are
+local runtime state and are created automatically by the API. On startup, the app
+creates these tables if needed:
 
 - `drafts`
 - `generated_outputs`
 - `social_graphics_drafts`
 - `social_graphics_exports`
+- `email_briefing_documents`
+
+The May 2024 testbed library is not stored in the runtime database. Its briefing
+JSON, product JSON, and graphics are tracked under `docs/exercise/gannon/` and are
+bundled into the UI image. A fresh checkout therefore includes the complete
+exercise catalog even before a forecaster saves a working document.
 
 Generated social-graphics assets are written under:
 
@@ -122,9 +133,14 @@ The UI container serves the built Vue app with nginx and proxies `/api` to the
 API container. The API container persists local data through these bind mounts:
 
 ```text
-./email_briefing.db -> /srv/partner-briefing/data/email_briefing.db
-./generated         -> /srv/partner-briefing/generated
+./runtime-data -> /srv/partner-briefing/data
+./generated    -> /srv/partner-briefing/generated
 ```
+
+Mounting the directory allows SQLite to create the database on the first run.
+If upgrading a checkout that has saved records in the old root database, stop
+the containers and copy `email_briefing.db` to
+`runtime-data/email_briefing.db` before restarting.
 
 Optional port overrides:
 
@@ -218,7 +234,8 @@ Known gaps:
 - PDF generation is scaffolded but not implemented.
 - Active alert and ICAO advisory context are placeholder data.
 - Runtime clock and interface-density tests cover replay configuration and persisted responsive presentation behavior.
-- Runtime SQLite and generated assets should be treated as local artifacts, not source-controlled product data.
+- Runtime SQLite and generated assets are local artifacts. Exercise products that
+  must ship to the testbed belong in the tracked `docs/exercise/gannon/` fixture.
 
 Development guidance for keeping the Falcon API aligned with the SWIFT
 lightweight structure lives in `docs/API_DEVELOPMENT_GUIDE.md`.

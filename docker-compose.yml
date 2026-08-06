@@ -22,7 +22,9 @@ services:
       CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID}"
     command: ["python", "-m", "api.run_api"]
     volumes:
-      - ./email_briefing.db:/srv/partner-briefing/data/email_briefing.db
+      # Mount the writable data directory, not the database file. On a fresh
+      # checkout the API can now create email_briefing.db and its schema.
+      - ./runtime-data:/srv/partner-briefing/data
       - ./generated:/srv/partner-briefing/generated
     logging:
       options:
