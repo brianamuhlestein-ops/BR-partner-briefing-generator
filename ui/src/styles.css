@@ -50,21 +50,20 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --app-presentation-zoom: 1;
 }
 
 :root[data-ui-density="compact"] {
-  --app-presentation-zoom: 0.9;
+  font-size: 80%;
 }
 
-/* One presentation step up on the 3440x1440-class operational displays. */
+/* Pointer-safe presentation ladder: scale rem-based density, never the page. */
 @media (min-width: 3000px) and (min-height: 1100px) {
   :root {
-    --app-presentation-zoom: 1.1;
+    font-size: 110%;
   }
 
   :root[data-ui-density="compact"] {
-    --app-presentation-zoom: 1;
+    font-size: 88%;
   }
 }
 
@@ -92,7 +91,6 @@ body {
     radial-gradient(circle at top, rgba(18, 37, 62, 0.92), rgba(6, 8, 12, 1) 60%);
   background-size: 280px 280px, 320px 320px, 360px 360px, 420px 420px, 100% 100%;
   background-attachment: fixed;
-  zoom: var(--app-presentation-zoom);
 }
 
 button,
@@ -625,6 +623,7 @@ td {
 
 /* Responsive presentation controls. Product previews retain their own explicit geometry. */
 .ui-density-btn {
+  display: none !important;
   color: var(--app-text-dim) !important;
 }
 

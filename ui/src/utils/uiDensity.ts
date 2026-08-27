@@ -2,6 +2,7 @@ export type UiDensity = 'comfortable' | 'compact'
 
 export const UI_DENSITY_STORAGE_KEY = 'swift-partner-briefing-ui-density'
 export const DEFAULT_UI_DENSITY: UiDensity = 'comfortable'
+export const COMPACT_UI_ENABLED = false
 
 type DensityStorage = Pick<Storage, 'getItem' | 'setItem'>
 type DensityRoot = { dataset: { uiDensity?: string } }
@@ -24,6 +25,7 @@ function documentRoot(): DensityRoot | null {
 }
 
 export function readUiDensity(storage: DensityStorage | null = browserStorage()): UiDensity {
+  if (!COMPACT_UI_ENABLED) return DEFAULT_UI_DENSITY
   if (!storage) return DEFAULT_UI_DENSITY
   try {
     const stored = storage.getItem(UI_DENSITY_STORAGE_KEY)
@@ -37,8 +39,9 @@ export function applyUiDensity(
   density: UiDensity,
   root: DensityRoot | null = documentRoot(),
 ): UiDensity {
-  if (root) root.dataset.uiDensity = density
-  return density
+  const resolved = COMPACT_UI_ENABLED ? density : DEFAULT_UI_DENSITY
+  if (root) root.dataset.uiDensity = resolved
+  return resolved
 }
 
 export function persistUiDensity(
@@ -47,7 +50,7 @@ export function persistUiDensity(
 ): void {
   if (!storage) return
   try {
-    storage.setItem(UI_DENSITY_STORAGE_KEY, density)
+    storage.setItem(UI_DENSITY_STORAGE_KEY, COMPACT_UI_ENABLED ? density : DEFAULT_UI_DENSITY)
   } catch {
     // The current session still receives the selected density when storage is unavailable.
   }
@@ -65,7 +68,7 @@ export function setUiDensity(
   storage: DensityStorage | null = browserStorage(),
   root: DensityRoot | null = documentRoot(),
 ): UiDensity {
-  applyUiDensity(density, root)
-  persistUiDensity(density, storage)
-  return density
+  const resolved = applyUiDensity(density, root)
+  persistUiDensity(resolved, storage)
+  return resolved
 }
