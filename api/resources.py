@@ -6,6 +6,7 @@ import falcon
 from api.config import get_settings
 from api.http import collection_response, item_response, read_json, result_response
 from api.persistence import (
+    RecordRevisionConflict,
     create_draft_record,
     create_social_graphics_draft_record,
     get_draft_record,
@@ -36,6 +37,43 @@ from api.runtime import runtime_status
 SETTINGS = get_settings()
 TEMPLATES_DIR = Path(SETTINGS["templates_dir"])
 GENERATED_DIR = Path(SETTINGS["generated_dir"])
+
+
+def _if_match_version(req: falcon.Request) -> int:
+    raw = str(req.get_header("If-Match") or "").strip()
+    if not raw:
+        raise falcon.HTTPPreconditionRequired(
+            title="Precondition Required",
+            description="If-Match with the current record version is required.",
+        )
+    normalized = raw.removeprefix("W/").strip().strip('"')
+    try:
+        version = int(normalized)
+    except ValueError as exc:
+        raise falcon.HTTPBadRequest(
+            description="If-Match must contain an integer version."
+        ) from exc
+    if version < 0:
+        raise falcon.HTTPBadRequest(description="If-Match version must be non-negative.")
+    return version
+
+
+def _revision_conflict(
+    req: falcon.Request,
+    resp: falcon.Response,
+    exc: RecordRevisionConflict,
+) -> None:
+    resp.status = falcon.HTTP_409
+    resp.set_header("ETag", f'"{exc.latest_version}"')
+    resp.media = {
+        "status": "error",
+        "error": {
+            "code": "revision_conflict",
+            "message": "This record changed after it was loaded. Reload before saving again.",
+            "details": {"latest_version": exc.latest_version},
+        },
+        "request_id": str(getattr(req.context, "request_id", "") or ""),
+    }
 
 
 def require_draft(draft_id: str) -> dict:
@@ -110,15 +148,19 @@ class DraftCollectionResource:
         except (RuntimeError, ValueError) as exc:
             raise falcon.HTTPBadRequest(description=str(exc)) from exc
         resp.status = falcon.HTTP_201
+        resp.set_header("ETag", f'"{draft["record_version"]}"')
         resp.media = item_response(draft)
 
 
 class DraftResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
-        resp.media = item_response(require_draft(draft_id))
+        draft = require_draft(draft_id)
+        resp.set_header("ETag", f'"{draft["record_version"]}"')
+        resp.media = item_response(draft)
 
     def on_patch(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         current = require_draft(draft_id)
+        expected_version = _if_match_version(req)
         payload = read_json(req)
         merged = {
             "briefing_type": current["briefing_type"],
@@ -128,7 +170,19 @@ class DraftResource:
         validation = validate_draft_payload(merged, TEMPLATES_DIR)
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
-        resp.media = item_response(update_draft_record(draft_id, payload))
+        try:
+            updated = update_draft_record(
+                draft_id,
+                payload,
+                expected_version=expected_version,
+            )
+        except RecordRevisionConflict as exc:
+            _revision_conflict(req, resp, exc)
+            return
+        if updated is None:
+            raise falcon.HTTPNotFound(description=f"Draft '{draft_id}' was not found.")
+        resp.set_header("ETag", f'"{updated["record_version"]}"')
+        resp.media = item_response(updated)
 
 
 class EmailBriefingDocumentResource:
@@ -147,17 +201,29 @@ class EmailBriefingDocumentResource:
             raise falcon.HTTPNotFound(
                 description=f"Saved email briefing '{briefing_kind}' was not found."
             )
+        resp.set_header("ETag", f'"{document["record_version"]}"')
         resp.media = item_response(document)
 
     def on_put(self, req: falcon.Request, resp: falcon.Response, briefing_kind: str) -> None:
         self._validate_kind(briefing_kind)
+        expected_version = _if_match_version(req)
         payload = read_json(req, allow_empty=False)
         document = payload.get("document")
         if not isinstance(document, dict):
             raise falcon.HTTPBadRequest(
                 description="Email briefing payload requires a JSON object named 'document'."
             )
-        resp.media = item_response(save_email_briefing_document(briefing_kind, document))
+        try:
+            saved = save_email_briefing_document(
+                briefing_kind,
+                document,
+                expected_version=expected_version,
+            )
+        except RecordRevisionConflict as exc:
+            _revision_conflict(req, resp, exc)
+            return
+        resp.set_header("ETag", f'"{saved["record_version"]}"')
+        resp.media = item_response(saved)
 
 
 class DeriveResource:
@@ -190,19 +256,38 @@ class SocialGraphicsDraftCollectionResource:
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
         resp.status = falcon.HTTP_201
-        resp.media = item_response(create_social_graphics_draft_record(payload))
+        draft = create_social_graphics_draft_record(payload)
+        resp.set_header("ETag", f'"{draft["record_version"]}"')
+        resp.media = item_response(draft)
 
 
 class SocialGraphicsDraftResource:
     def on_get(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
-        resp.media = item_response(require_social_graphics_draft(draft_id))
+        draft = require_social_graphics_draft(draft_id)
+        resp.set_header("ETag", f'"{draft["record_version"]}"')
+        resp.media = item_response(draft)
 
     def on_patch(self, req: falcon.Request, resp: falcon.Response, draft_id: str) -> None:
         payload = read_json(req)
+        expected_version = _if_match_version(req)
         validation = validate_social_graphics_scene(payload.get("scene"))
         if not validation["valid"]:
             raise falcon.HTTPBadRequest(description=validation["message"])
-        resp.media = item_response(update_social_graphics_draft_record(draft_id, payload))
+        try:
+            updated = update_social_graphics_draft_record(
+                draft_id,
+                payload,
+                expected_version=expected_version,
+            )
+        except RecordRevisionConflict as exc:
+            _revision_conflict(req, resp, exc)
+            return
+        if updated is None:
+            raise falcon.HTTPNotFound(
+                description=f"Social graphics draft '{draft_id}' was not found."
+            )
+        resp.set_header("ETag", f'"{updated["record_version"]}"')
+        resp.media = item_response(updated)
 
 
 class SocialGraphicsExportCollectionResource:

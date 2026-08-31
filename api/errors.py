@@ -20,6 +20,7 @@ def handle_uncaught_exception(
             "code": "internal_error",
             "message": "An unexpected server error occurred.",
         },
+        "request_id": req.context.request_id,
     }
 
 

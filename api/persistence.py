@@ -8,6 +8,12 @@ from api.config import get_settings, open_database
 from api.runtime import temporal_snapshot
 
 
+class RecordRevisionConflict(RuntimeError):
+    def __init__(self, *, latest_version: int) -> None:
+        super().__init__("The record changed after it was loaded.")
+        self.latest_version = latest_version
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -17,6 +23,7 @@ def initialize_storage() -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
     Path(get_settings()["generated_dir"]).mkdir(parents=True, exist_ok=True)
     with open_database() as connection:
+        connection.execute("PRAGMA journal_mode = WAL")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS drafts (
@@ -38,6 +45,7 @@ def initialize_storage() -> None:
             "replay_scenario": "TEXT",
             "created_at": "TEXT",
             "updated_at": "TEXT",
+            "record_version": "INTEGER NOT NULL DEFAULT 1",
         }
         for column_name, definition in draft_columns.items():
             if column_name not in existing_columns:
@@ -85,6 +93,24 @@ def initialize_storage() -> None:
             )
             """
         )
+        social_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(social_graphics_drafts)").fetchall()
+        }
+        if "record_version" not in social_columns:
+            connection.execute(
+                "ALTER TABLE social_graphics_drafts "
+                "ADD COLUMN record_version INTEGER NOT NULL DEFAULT 1"
+            )
+        email_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(email_briefing_documents)").fetchall()
+        }
+        if "record_version" not in email_columns:
+            connection.execute(
+                "ALTER TABLE email_briefing_documents "
+                "ADD COLUMN record_version INTEGER NOT NULL DEFAULT 1"
+            )
         connection.commit()
 
 
@@ -103,6 +129,7 @@ def _row_to_draft(row: sqlite3.Row | None) -> dict | None:
         "replay_scenario": row["replay_scenario"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
+        "record_version": int(row["record_version"]),
     }
 
 
@@ -116,6 +143,7 @@ def _row_to_social_graphics_draft(row: sqlite3.Row | None) -> dict | None:
         "status": row["status"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
+        "record_version": int(row["record_version"]),
     }
 
 
@@ -145,6 +173,7 @@ def create_draft_record(payload: dict) -> dict:
         **temporal,
         "created_at": now,
         "updated_at": now,
+        "record_version": 1,
     }
     with open_database() as connection:
         connection.execute(
@@ -177,7 +206,8 @@ def get_draft_record(draft_id: str) -> dict | None:
         row = connection.execute(
             """
             SELECT draft_id, briefing_type, template_version, sections_json, status,
-                   issue_time_utc, valid_dates_json, runtime_mode, replay_scenario, created_at, updated_at
+                   issue_time_utc, valid_dates_json, runtime_mode, replay_scenario, created_at,
+                   updated_at, record_version
             FROM drafts WHERE draft_id = ?
             """,
             (draft_id,),
@@ -185,7 +215,12 @@ def get_draft_record(draft_id: str) -> dict | None:
     return _row_to_draft(row)
 
 
-def update_draft_record(draft_id: str, payload: dict) -> dict | None:
+def update_draft_record(
+    draft_id: str,
+    payload: dict,
+    *,
+    expected_version: int,
+) -> dict | None:
     current = get_draft_record(draft_id)
     if not current:
         return None
@@ -208,21 +243,31 @@ def update_draft_record(draft_id: str, payload: dict) -> dict | None:
         **temporal,
         "created_at": current["created_at"],
         "updated_at": _utc_now(),
+        "record_version": expected_version + 1,
     }
     with open_database() as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE drafts
             SET sections_json = ?, status = ?, issue_time_utc = ?, valid_dates_json = ?,
-                runtime_mode = ?, replay_scenario = ?, updated_at = ?
-            WHERE draft_id = ?
+                runtime_mode = ?, replay_scenario = ?, updated_at = ?,
+                record_version = record_version + 1
+            WHERE draft_id = ? AND record_version = ?
             """,
             (
                 json.dumps(updated["sections"]), updated["status"], updated["issue_time_utc"],
                 json.dumps(updated["valid_dates"]), updated["runtime_mode"],
-                updated["replay_scenario"], updated["updated_at"], draft_id,
+                updated["replay_scenario"], updated["updated_at"], draft_id, expected_version,
             ),
         )
+        if cursor.rowcount != 1:
+            latest = connection.execute(
+                "SELECT record_version FROM drafts WHERE draft_id = ?",
+                (draft_id,),
+            ).fetchone()
+            if latest is None:
+                return None
+            raise RecordRevisionConflict(latest_version=int(latest["record_version"]))
         connection.commit()
     return updated
 
@@ -231,7 +276,7 @@ def get_email_briefing_document(briefing_kind: str) -> dict | None:
     with open_database() as connection:
         row = connection.execute(
             """
-            SELECT briefing_kind, document_json, updated_at
+            SELECT briefing_kind, document_json, updated_at, record_version
             FROM email_briefing_documents
             WHERE briefing_kind = ?
             """,
@@ -243,27 +288,51 @@ def get_email_briefing_document(briefing_kind: str) -> dict | None:
         "briefing_kind": row["briefing_kind"],
         "document": json.loads(row["document_json"]),
         "updated_at": row["updated_at"],
+        "record_version": int(row["record_version"]),
     }
 
 
-def save_email_briefing_document(briefing_kind: str, document: dict) -> dict:
+def save_email_briefing_document(
+    briefing_kind: str,
+    document: dict,
+    *,
+    expected_version: int,
+) -> dict:
     updated_at = _utc_now()
     with open_database() as connection:
-        connection.execute(
-            """
-            INSERT INTO email_briefing_documents (briefing_kind, document_json, updated_at)
-            VALUES (?, ?, ?)
-            ON CONFLICT(briefing_kind) DO UPDATE SET
-                document_json = excluded.document_json,
-                updated_at = excluded.updated_at
-            """,
-            (briefing_kind, json.dumps(document), updated_at),
-        )
+        if expected_version == 0:
+            cursor = connection.execute(
+                """
+                INSERT INTO email_briefing_documents
+                    (briefing_kind, document_json, updated_at, record_version)
+                VALUES (?, ?, ?, 1)
+                ON CONFLICT(briefing_kind) DO NOTHING
+                """,
+                (briefing_kind, json.dumps(document), updated_at),
+            )
+        else:
+            cursor = connection.execute(
+                """
+                UPDATE email_briefing_documents
+                SET document_json = ?, updated_at = ?, record_version = record_version + 1
+                WHERE briefing_kind = ? AND record_version = ?
+                """,
+                (json.dumps(document), updated_at, briefing_kind, expected_version),
+            )
+        if cursor.rowcount != 1:
+            latest = connection.execute(
+                "SELECT record_version FROM email_briefing_documents WHERE briefing_kind = ?",
+                (briefing_kind,),
+            ).fetchone()
+            raise RecordRevisionConflict(
+                latest_version=int(latest["record_version"]) if latest is not None else 0
+            )
         connection.commit()
     return {
         "briefing_kind": briefing_kind,
         "document": document,
         "updated_at": updated_at,
+        "record_version": expected_version + 1,
     }
 
 
@@ -286,6 +355,7 @@ def create_social_graphics_draft_record(payload: dict) -> dict:
         "status": payload.get("status", "draft"),
         "created_at": now,
         "updated_at": now,
+        "record_version": 1,
     }
     with open_database() as connection:
         connection.execute(
@@ -311,7 +381,7 @@ def get_social_graphics_draft_record(draft_id: str) -> dict | None:
     with open_database() as connection:
         row = connection.execute(
             """
-            SELECT draft_id, template_id, scene_json, status, created_at, updated_at
+            SELECT draft_id, template_id, scene_json, status, created_at, updated_at, record_version
             FROM social_graphics_drafts
             WHERE draft_id = ?
             """,
@@ -320,7 +390,12 @@ def get_social_graphics_draft_record(draft_id: str) -> dict | None:
     return _row_to_social_graphics_draft(row)
 
 
-def update_social_graphics_draft_record(draft_id: str, payload: dict) -> dict | None:
+def update_social_graphics_draft_record(
+    draft_id: str,
+    payload: dict,
+    *,
+    expected_version: int,
+) -> dict | None:
     current = get_social_graphics_draft_record(draft_id)
     if not current:
         return None
@@ -331,13 +406,15 @@ def update_social_graphics_draft_record(draft_id: str, payload: dict) -> dict | 
         "status": payload.get("status", current["status"]),
         "created_at": current["created_at"],
         "updated_at": _utc_now(),
+        "record_version": expected_version + 1,
     }
     with open_database() as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE social_graphics_drafts
-            SET template_id = ?, scene_json = ?, status = ?, updated_at = ?
-            WHERE draft_id = ?
+            SET template_id = ?, scene_json = ?, status = ?, updated_at = ?,
+                record_version = record_version + 1
+            WHERE draft_id = ? AND record_version = ?
             """,
             (
                 updated["template_id"],
@@ -345,8 +422,17 @@ def update_social_graphics_draft_record(draft_id: str, payload: dict) -> dict | 
                 updated["status"],
                 updated["updated_at"],
                 draft_id,
+                expected_version,
             ),
         )
+        if cursor.rowcount != 1:
+            latest = connection.execute(
+                "SELECT record_version FROM social_graphics_drafts WHERE draft_id = ?",
+                (draft_id,),
+            ).fetchone()
+            if latest is None:
+                return None
+            raise RecordRevisionConflict(latest_version=int(latest["record_version"]))
         connection.commit()
     return updated
 

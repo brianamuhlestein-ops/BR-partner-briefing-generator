@@ -5,7 +5,7 @@ import vuetify from 'vite-plugin-vuetify'
 export default defineConfig({
   plugins: [vue(), vuetify({ autoImport: true })],
   server: {
-    port: 5179,
+    port: 5180,
     strictPort: true,
     proxy: {
       '/api': {

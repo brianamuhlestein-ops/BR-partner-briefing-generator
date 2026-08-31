@@ -10,14 +10,14 @@ from waitress import serve
 
 from api.config import get_settings
 from api.errors import register_error_handlers
-from api.middleware import CorsMiddleware
+from api.middleware import CorsMiddleware, RequestContextMiddleware
 from api.persistence import initialize_storage
 from api.routes import register_routes
 
 
 def create_app() -> falcon.App:
     initialize_storage()
-    app = falcon.App(middleware=[CorsMiddleware()])
+    app = falcon.App(middleware=[RequestContextMiddleware(), CorsMiddleware()])
     register_routes(app)
     register_error_handlers(app)
     return app

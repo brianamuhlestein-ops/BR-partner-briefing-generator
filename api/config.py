@@ -1,6 +1,8 @@
 import os
+from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
+from typing import Iterator
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,20 +27,26 @@ def get_settings() -> dict:
         "generated_dir": generated_dir,
         "cors_allow_origins": _csv_setting(
             "CORS_ALLOW_ORIGINS",
-            "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5179,http://127.0.0.1:5179",
+            "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5180,http://127.0.0.1:5180",
         ),
         "cors_allow_methods": _csv_setting(
             "CORS_ALLOW_METHODS",
-            "GET,POST,PATCH,OPTIONS",
+            "GET,POST,PUT,PATCH,OPTIONS",
         ),
         "cors_allow_headers": _csv_setting(
             "CORS_ALLOW_HEADERS",
-            "Content-Type,Accept,X-Request-ID",
+            "Content-Type,Accept,X-Request-ID,If-Match",
         ),
     }
 
 
-def open_database() -> sqlite3.Connection:
-    connection = sqlite3.connect(get_settings()["database_path"])
+@contextmanager
+def open_database() -> Iterator[sqlite3.Connection]:
+    connection = sqlite3.connect(get_settings()["database_path"], timeout=5.0)
     connection.row_factory = sqlite3.Row
-    return connection
+    connection.execute("PRAGMA busy_timeout = 5000")
+    connection.execute("PRAGMA foreign_keys = ON")
+    try:
+        yield connection
+    finally:
+        connection.close()

@@ -1,0 +1,830 @@
+.swift-social-workspace {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.swift-social-product-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.swift-social-exercise-picker {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 183, 77, 0.38);
+  border-radius: 8px;
+  background: rgba(177, 94, 13, 0.12);
+}
+
+.swift-social-exercise-picker label {
+  display: grid;
+  flex: 1;
+  gap: 5px;
+  color: #ffd9a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.swift-social-exercise-picker select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 183, 77, 0.45);
+  border-radius: 6px;
+  background: #101a27;
+  color: #f5f8fc;
+}
+
+.swift-social-exercise-picker > span {
+  padding-bottom: 9px;
+  color: rgba(255, 226, 184, 0.72);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.swift-social-product-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.swift-social-product-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  min-width: max-content;
+}
+
+.swift-social-save-status {
+  max-width: 190px;
+  color: rgba(232, 239, 248, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: right;
+  white-space: normal;
+}
+
+.swift-social-product-button,
+.swift-social-upload-button {
+  border: 1px solid rgba(95, 199, 255, 0.24);
+  background: rgba(95, 199, 255, 0.09);
+  color: rgba(232, 239, 248, 0.86);
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.swift-social-product-button--active {
+  background: rgba(95, 199, 255, 0.22);
+  color: #ffffff;
+}
+
+.swift-social-update-button {
+  min-width: 96px;
+}
+
+.swift-social-save-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-color: rgba(255, 229, 100, 0.48);
+  background: rgba(255, 229, 100, 0.13);
+  color: #fff0a8;
+  white-space: nowrap;
+}
+
+.swift-social-save-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.swift-social-export-button {
+  border-color: #168447;
+  background: #168447;
+  color: #ffffff;
+  min-height: 40px;
+  padding: 0 16px;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(22, 132, 71, 0.2);
+}
+
+.swift-social-export-button:hover {
+  border-color: #1da35a;
+  background: #1da35a;
+}
+
+.swift-social-upload-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.swift-social-product-source {
+  color: rgba(232, 239, 248, 0.58);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.swift-social-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(300px, 1fr) minmax(340px, 1.12fr);
+  gap: 18px;
+  align-items: start;
+  min-width: 0;
+}
+
+.swift-social-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(95, 199, 255, 0.22);
+  border-radius: var(--app-radius);
+  background:
+    linear-gradient(180deg, rgba(95, 199, 255, 0.06), rgba(95, 199, 255, 0.025)),
+    rgba(4, 10, 18, 0.28);
+}
+
+.swift-social-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.swift-social-heading h2 {
+  margin: 0;
+  color: var(--app-primary);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.swift-social-heading span {
+  color: rgba(232, 239, 248, 0.58);
+  font-size: 0.74rem;
+}
+
+.swift-social-panel label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: rgba(232, 239, 248, 0.78);
+  font-weight: 400;
+}
+
+.swift-social-panel input,
+.swift-social-panel textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-color: rgba(171, 199, 235, 0.58);
+  background: #ffffff;
+  color: #111827;
+  font-weight: 400;
+}
+
+.swift-social-panel textarea {
+  min-height: 98px;
+  resize: vertical;
+}
+
+.swift-social-sector-panel {
+  align-content: start;
+}
+
+.swift-social-footer-panel {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+}
+
+.swift-social-footer-panel .swift-social-heading {
+  grid-column: 1 / -1;
+}
+
+.swift-social-sector-list {
+  display: grid;
+  gap: 8px;
+}
+
+.swift-social-sector-option {
+  display: grid !important;
+  grid-template-columns: 18px 28px minmax(0, 1fr);
+  gap: 8px !important;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 7px;
+  border: 1px solid rgba(171, 199, 235, 0.18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(232, 239, 248, 0.84) !important;
+  cursor: pointer;
+}
+
+.swift-social-sector-option input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--app-primary);
+}
+
+.swift-social-sector-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: #e7a01b;
+  font-size: 1.24rem;
+  line-height: 1;
+}
+
+.swift-social-sector-icon .mdi::before {
+  display: block;
+  line-height: 1;
+}
+
+.swift-social-short-textarea {
+  min-height: 68px !important;
+}
+
+.swift-social-preview-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  justify-items: center;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.swift-social-card {
+  --product-color: #d94a1e;
+  --product-rgb: 217, 74, 30;
+  width: min(100%, 1120px);
+  aspect-ratio: 3 / 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  overflow: hidden;
+  border: 1px solid rgba(171, 199, 235, 0.18);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1e1e1e;
+  font-family: Arial, Helvetica, sans-serif;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+}
+
+.swift-social-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 14px;
+  background: linear-gradient(90deg, #001b3f, #003e7e);
+  color: #ffffff;
+}
+
+.swift-social-brand {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 8px;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+.swift-social-brand img {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.swift-social-noaa-frame {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.swift-social-noaa-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: scale(1.28);
+  object-fit: contain;
+  background: transparent;
+}
+
+.swift-social-brand div {
+  display: grid;
+  line-height: 0.96;
+}
+
+.swift-social-brand strong {
+  font-size: 1.62rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.swift-social-brand span {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.swift-social-badge-stack {
+  display: grid;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
+  flex: 0 0 330px;
+  justify-items: end;
+  gap: 5px;
+}
+
+.swift-social-badge {
+  display: flex;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
+  box-sizing: border-box;
+  min-height: 62px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px 10px 32px;
+  border-radius: 6px 0 0 6px;
+  background: var(--product-color);
+  color: #ffffff;
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%);
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.swift-social-badge .mdi {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.swift-social-badge .mdi::before {
+  display: block;
+  line-height: 1;
+}
+
+.swift-social-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swift-social-badge-icon--overlay {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+}
+
+.swift-social-badge-icon--overlay .mdi-file-document-outline {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  font-size: 2rem;
+}
+
+.swift-social-badge-icon--overlay .mdi-information-outline {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--product-color);
+  font-size: 1.15rem;
+}
+
+.swift-social-update-label {
+  width: fit-content;
+  max-width: 170px;
+  padding: 4px 9px;
+  border: 1px solid rgba(0, 43, 92, 0.18);
+  border-radius: 4px;
+  background: #f6d889;
+  color: #002b5c;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.swift-social-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(220px, 0.92fr);
+  gap: 18px;
+  align-items: stretch;
+  padding: 18px 20px 12px;
+  min-height: 0;
+}
+
+.swift-social-message {
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+  gap: 8px;
+  align-content: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+
+.swift-social-message h1 {
+  margin: 0;
+  color: #002b5c;
+  font-size: 2.12rem;
+  line-height: 1.05;
+}
+
+.swift-social-subhead,
+.swift-social-time,
+.swift-social-summary,
+.swift-social-confidence p {
+  margin: 0;
+}
+
+.swift-social-subhead {
+  color: var(--product-color);
+  font-size: 1.42rem;
+  font-weight: 700;
+}
+
+.swift-social-time {
+  color: #5c6b7a;
+  font-size: 0.82rem;
+}
+
+.swift-social-message-divider {
+  width: 44%;
+  height: 3px;
+  margin: 2px 0 1px;
+  background: var(--product-color);
+}
+
+.swift-social-summary {
+  font-size: 1.28rem;
+  line-height: 1.18;
+}
+
+.swift-social-confidence {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 128px;
+  height: 100%;
+  padding: 14px;
+  border-left: 6px solid var(--product-color);
+  background: #eaf3fb;
+  box-sizing: border-box;
+}
+
+.swift-social-confidence span {
+  color: #5c6b7a;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.swift-social-confidence strong {
+  color: #002b5c;
+  font-size: 1.36rem;
+}
+
+.swift-social-confidence p {
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.swift-social-message-support {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.52fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  align-self: stretch;
+  margin-top: 12px;
+  min-height: 0;
+}
+
+.swift-social-image-frame {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px dashed #b8c7d8;
+  background: #eaf3fb;
+}
+
+.swift-social-image-frame--fit {
+  width: 100%;
+  height: auto;
+  align-self: center;
+  justify-self: center;
+  aspect-ratio: var(--image-aspect-ratio);
+}
+
+.swift-social-image-frame--fit.swift-social-image-frame--portrait {
+  width: auto;
+  height: 100%;
+}
+
+.swift-social-image-frame--fill {
+  width: auto;
+  height: auto;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.swift-social-image-frame img {
+  width: 100%;
+  height: 100%;
+}
+
+.swift-social-image--fit {
+  object-fit: contain;
+}
+
+.swift-social-image--fill {
+  object-fit: cover;
+}
+
+.swift-social-image-frame div {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  color: #5c6b7a;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.swift-social-image-fit-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex !important;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(0, 43, 92, 0.22);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 18px rgba(0, 43, 92, 0.12);
+}
+
+.swift-social-image-fit-toggle button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid rgba(0, 43, 92, 0.14);
+  background: transparent;
+  color: #002b5c;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.swift-social-image-fit-toggle button:last-child {
+  border-right: 0;
+}
+
+.swift-social-image-fit-toggle--active {
+  background: #002b5c !important;
+  color: #ffffff !important;
+}
+
+.swift-social-image-upload {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(0, 43, 92, 0.28);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #002b5c;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.swift-social-image-upload input {
+  display: none;
+}
+
+.swift-social-impact-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 0 20px 14px;
+}
+
+.swift-social-know {
+  display: grid;
+  align-content: start;
+  min-height: 128px;
+  height: 100%;
+  padding: 14px;
+  border-left: 1px solid rgba(var(--product-rgb), 0.22);
+  background: #f8fbff;
+  box-sizing: border-box;
+}
+
+.swift-social-know h2 {
+  margin: 0 0 7px;
+  color: #002b5c;
+  font-size: 1.08rem;
+  text-transform: uppercase;
+}
+
+.swift-social-know ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.96rem;
+  line-height: 1.32;
+}
+
+.swift-social-know li + li {
+  margin-top: 7px;
+}
+
+.swift-social-impact-strip {
+  display: grid;
+  grid-template-columns: minmax(124px, 0.58fr) repeat(auto-fit, minmax(78px, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(var(--product-rgb), 0.55);
+  border-radius: 5px;
+  background: #f8fbff;
+}
+
+.swift-social-impact-label {
+  display: grid;
+  place-items: center;
+  padding: 11px 8px;
+  border-right: 1px solid rgba(var(--product-rgb), 0.38);
+  background: rgba(var(--product-rgb), 0.12);
+  color: #002b5c;
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.swift-social-impact {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 11px 4px 8px;
+  border-right: 1px solid rgba(var(--product-rgb), 0.26);
+  background: #ffffff;
+}
+
+.swift-social-impact:last-child {
+  border-right: 0;
+}
+
+.swift-social-impact span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--product-color);
+  font-size: 1.84rem;
+  line-height: 1;
+}
+
+.swift-social-impact .mdi::before {
+  display: block;
+  line-height: 1;
+}
+
+.swift-social-impact strong {
+  color: #002b5c;
+  font-size: 0.75rem;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.swift-social-card-footer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 58px;
+  gap: 0;
+  align-items: center;
+  padding: 8px 18px;
+  background: #002b5c;
+  color: #ffffff;
+  font-size: 0.82rem;
+  line-height: 1.16;
+}
+
+.swift-social-card-footer span,
+.swift-social-card-footer strong {
+  display: grid;
+  min-height: 34px;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  padding: 0 18px;
+  text-align: center;
+}
+
+.swift-social-card-footer span:nth-child(n + 2),
+.swift-social-card-footer strong {
+  border-left: 1px solid rgba(255, 255, 255, 0.36);
+}
+
+.swift-social-card-footer strong {
+  font-size: 1.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 2800px) {
+  .swift-social-grid {
+    grid-template-columns: minmax(220px, 250px) minmax(300px, 1fr) minmax(340px, 1.12fr) minmax(920px, 1120px);
+  }
+
+  .swift-social-footer-panel {
+    grid-column: 1 / 4;
+  }
+
+  .swift-social-preview-panel {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    justify-items: end;
+  }
+}
+
+@media (max-width: 1500px) {
+  .swift-social-grid {
+    grid-template-columns: minmax(220px, 0.7fr) minmax(360px, 1.3fr);
+  }
+
+  .swift-social-sector-panel {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .swift-social-json-panel,
+  .swift-social-review-panel {
+    grid-column: 2;
+  }
+
+  .swift-social-footer-panel,
+  .swift-social-preview-panel {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 950px) {
+  .swift-social-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .swift-social-sector-panel,
+  .swift-social-json-panel,
+  .swift-social-review-panel,
+  .swift-social-footer-panel,
+  .swift-social-preview-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .swift-social-footer-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .swift-social-card {
+    justify-self: center;
+    min-width: 900px;
+  }
+}

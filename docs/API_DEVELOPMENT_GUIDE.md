@@ -1,7 +1,7 @@
 # Partner Briefing API Development Guide
 
 This app follows the SWIFT lightweight Falcon approach in
-[`SWIFT_LIGHTWEIGHT_FALCON_APPROACH.md`](./SWIFT_LIGHTWEIGHT_FALCON_APPROACH.md).
+[suite API and runtime contract](https://github.com/brianamuhlestein-ops/SWIFT-Applications/blob/main/SWIFT_API_AND_RUNTIME_CONTRACTS.md).
 Keep backend changes small, explicit, and easy to trace from startup to route to
 resource to service logic.
 
@@ -85,8 +85,8 @@ CORS lives in `api/middleware.py` and is configured from environment variables:
 
 ```text
 CORS_ALLOW_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-CORS_ALLOW_METHODS=GET,POST,PATCH,OPTIONS
-CORS_ALLOW_HEADERS=Content-Type,Accept,X-Request-ID
+CORS_ALLOW_METHODS=GET,POST,PUT,PATCH,OPTIONS
+CORS_ALLOW_HEADERS=Content-Type,Accept,X-Request-ID,If-Match
 ```
 
 Local server settings can be changed with:
@@ -114,6 +114,8 @@ GET  /api/v1/partner-briefing/templates/{briefing_type}/versions/{version}
 POST /api/v1/partner-briefing/drafts
 GET  /api/v1/partner-briefing/drafts/{draft_id}
 PATCH /api/v1/partner-briefing/drafts/{draft_id}
+GET  /api/v1/partner-briefing/email-briefings/{briefing_kind}
+PUT  /api/v1/partner-briefing/email-briefings/{briefing_kind}
 POST /api/v1/partner-briefing/drafts/{draft_id}/derive
 POST /api/v1/partner-briefing/drafts/{draft_id}/preview
 POST /api/v1/partner-briefing/drafts/{draft_id}/pdf
@@ -125,3 +127,20 @@ GET  /api/v1/partner-briefing/social-graphics/exports/{export_id}/assets/{varian
 GET  /api/v1/partner-briefing/context/alerts/active
 GET  /api/v1/partner-briefing/context/advisories/icao/active
 ```
+
+## Shared Authoring Contract
+
+The mutable `drafts`, `social_graphics_drafts`, and
+`email_briefing_documents` records carry an integer `record_version`. Return
+that version in the response item and as a quoted `ETag`. A mutation must send
+the version it loaded as `If-Match`; use version `0` only when creating a saved
+email document that does not exist yet. Missing preconditions return `428` and
+stale writes return `409 revision_conflict` with the current version in both
+the response details and `ETag`.
+
+The compare-and-swap update belongs in `api/persistence.py`, not in a route
+read-then-write sequence. SQLite WAL plus the atomic version predicate is the
+supported single-host, single-API-deployment boundary. Do not deploy multiple
+API replicas against this SQLite file or place it on shared storage; move the
+authoritative records to PostgreSQL first. Append-only generated outputs and
+exports do not use `If-Match`.

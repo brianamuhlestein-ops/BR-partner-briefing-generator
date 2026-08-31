@@ -83,6 +83,20 @@ generated/social_graphics/<export_id>/
 
 Each export includes the scene JSON, the submitted base PNG, and generated PNG variants.
 
+### Shared authoring boundary
+
+Mutable drafts and saved email briefing documents use optimistic concurrency.
+Create responses and item reads expose `record_version` and an `ETag`; every
+`PATCH` or `PUT` must send that version in `If-Match`. A stale writer receives
+`409 revision_conflict`, so another user's newer work is never silently
+overwritten. A new saved email document is created with `If-Match: "0"`.
+
+SQLite runs in WAL mode with a write wait and is supported for multiple users
+through one API deployment on one host. The database file must remain on local
+storage. PostgreSQL is required before running multiple API replicas, placing
+the database on shared/network storage, or treating this app as a horizontally
+scaled production service. Generated outputs and social exports are append-only.
+
 ## API
 
 Default API URL:
@@ -101,6 +115,8 @@ Routes:
 - `POST /api/v1/partner-briefing/drafts`
 - `GET /api/v1/partner-briefing/drafts/{draft_id}`
 - `PATCH /api/v1/partner-briefing/drafts/{draft_id}`
+- `GET /api/v1/partner-briefing/email-briefings/{briefing_kind}`
+- `PUT /api/v1/partner-briefing/email-briefings/{briefing_kind}`
 - `POST /api/v1/partner-briefing/drafts/{draft_id}/derive`
 - `POST /api/v1/partner-briefing/drafts/{draft_id}/preview`
 - `POST /api/v1/partner-briefing/drafts/{draft_id}/pdf`
@@ -125,7 +141,7 @@ docker compose up --build
 Default Docker URLs:
 
 ```text
-UI:  http://localhost:5179
+UI:  http://localhost:5180
 API: http://localhost:8089
 ```
 
@@ -170,7 +186,7 @@ npm run dev
 Default local URLs:
 
 ```text
-UI:  http://127.0.0.1:5179
+UI:  http://127.0.0.1:5180
 API: http://127.0.0.1:8089
 ```
 

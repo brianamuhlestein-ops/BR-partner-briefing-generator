@@ -2,10 +2,21 @@ import os
 import unittest
 from unittest.mock import patch
 
+from falcon import testing
+
 from api import runtime
+from api.run_api import create_app
 
 
 class RuntimeClockTests(unittest.TestCase):
+    def test_request_id_is_preserved_or_generated(self):
+        client = testing.TestClient(create_app())
+        supplied = client.simulate_get("/health", headers={"X-Request-ID": "briefing-test"})
+        self.assertEqual(supplied.headers["X-Request-ID"], "briefing-test")
+
+        generated = client.simulate_get("/health")
+        self.assertTrue(generated.headers["X-Request-ID"])
+
     def test_operational_mode_uses_system_utc_and_ignores_replay_clock(self):
         with patch.dict(
             os.environ,

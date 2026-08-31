@@ -92,6 +92,7 @@ const pdfPreviewRef = ref<HTMLElement | null>(null)
 const issueTimeUtc = ref<string | null>(briefingPresets[0]!.issueTimeUtc)
 const isSaving = ref(false)
 const saveStatus = ref('Not saved')
+const persistedVersion = ref(0)
 const hasRestoredSavedDocument = ref(false)
 const issueTimeDisplay = computed(() => formatTailoredIssueTime(issueTimeUtc.value))
 const issueTimeInput = computed({
@@ -189,6 +190,7 @@ async function loadSavedBriefingJson() {
     }
     Object.assign(briefing, savedBriefing)
     mediaId = Math.max(0, ...briefing.media.map((item) => item.id))
+    persistedVersion.value = saved.record_version
     saveStatus.value = `Loaded ${new Date(saved.updated_at).toLocaleString()}`
   } catch (error) {
     saveStatus.value = error instanceof Error ? error.message : 'Unable to load saved JSON'
@@ -203,7 +205,8 @@ async function saveBriefingJson() {
       selectedPresetId: selectedPresetId.value,
       issueTimeUtc: issueTimeUtc.value,
       briefing: JSON.parse(JSON.stringify(briefing)),
-    })
+    }, persistedVersion.value)
+    persistedVersion.value = saved.record_version
     hasRestoredSavedDocument.value = true
     saveStatus.value = `Saved ${new Date(saved.updated_at).toLocaleString()}`
   } catch (error) {

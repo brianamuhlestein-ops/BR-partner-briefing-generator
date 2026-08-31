@@ -17,7 +17,7 @@ services:
       PARTNER_BRIEFING_API_DATA_SOURCE: "${PARTNER_BRIEFING_API_DATA_SOURCE:-operational}"
       PARTNER_BRIEFING_REPLAY_NOW_UTC: "${PARTNER_BRIEFING_REPLAY_NOW_UTC:-}"
       PARTNER_BRIEFING_REPLAY_SCENARIO: "${PARTNER_BRIEFING_REPLAY_SCENARIO:-}"
-      CORS_ALLOW_ORIGINS: "${CORS_ALLOW_ORIGINS:-http://localhost:5179,http://127.0.0.1:5179}"
+      CORS_ALLOW_ORIGINS: "${CORS_ALLOW_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}"
       CORS_ALLOW_METHODS: "${CORS_ALLOW_METHODS:-GET,POST,PATCH,OPTIONS}"
       CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID}"
     command: ["python", "-m", "api.run_api"]
@@ -36,7 +36,7 @@ services:
       context: .
       dockerfile: ui/Dockerfile
     ports:
-      - "${EXTERNAL_UI_PORT:-5179}:80"
+      - "${EXTERNAL_UI_PORT:-5180}:80"
     tty: true
     restart: always
     depends_on:
