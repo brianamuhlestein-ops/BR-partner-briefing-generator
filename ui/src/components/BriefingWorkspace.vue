@@ -119,6 +119,7 @@ onMounted(async () => {
           :class="{ 'runtime-mode-badge--replay': runtimeNow?.data_source === 'replay' }"
           :title="runtimeError || runtimeNow?.clock_source"
         >{{ runtimeBadgeText }}</span>
+        <span data-swift-hazard-anchor></span>
         <button
           v-for="action in titleActions"
           :key="action.label"

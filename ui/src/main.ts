@@ -1,3 +1,4 @@
+import './swift-hazard-services'
 import { createApp } from 'vue'
 
 import '@mdi/font/css/materialdesignicons.css'
