@@ -14,18 +14,30 @@ services:
       API_PORT: "${PARTNER_BRIEFING_API_PORT:-8089}"
       DATABASE_PATH: "/srv/partner-briefing/data/email_briefing.db"
       GENERATED_DIR: "/srv/partner-briefing/generated"
+      SUMMARY_BUILDER_DATA_ROOT: "/srv/partner-briefing/data/synopsis"
+      SUMMARY_BUILDER_CONTRACTS_ROOT: "/srv/contracts/suite"
+      SUMMARY_BUILDER_OBSERVATIONS_SCHEMA: "/srv/contracts/observations.json"
+      SUMMARY_BUILDER_FORECAST_SCHEMA: "/srv/contracts/forecast.json"
+      SUMMARY_BUILDER_OBSERVATIONS_BASE_URL: "${SUMMARY_BUILDER_OBSERVATIONS_BASE_URL:-http://host.docker.internal:8056}"
+      SUMMARY_BUILDER_FORECAST_BASE_URL: "${SUMMARY_BUILDER_FORECAST_BASE_URL:-http://host.docker.internal:8066}"
+      SUMMARY_BUILDER_RUNTIME_MODE: "${PARTNER_BRIEFING_API_DATA_SOURCE:-operational}"
+      SUMMARY_BUILDER_REPLAY_SCENARIO: "${PARTNER_BRIEFING_REPLAY_SCENARIO:-}"
       PARTNER_BRIEFING_API_DATA_SOURCE: "${PARTNER_BRIEFING_API_DATA_SOURCE:-operational}"
       PARTNER_BRIEFING_REPLAY_NOW_UTC: "${PARTNER_BRIEFING_REPLAY_NOW_UTC:-}"
       PARTNER_BRIEFING_REPLAY_SCENARIO: "${PARTNER_BRIEFING_REPLAY_SCENARIO:-}"
       CORS_ALLOW_ORIGINS: "${CORS_ALLOW_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}"
-      CORS_ALLOW_METHODS: "${CORS_ALLOW_METHODS:-GET,POST,PATCH,OPTIONS}"
-      CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID}"
+      CORS_ALLOW_METHODS: "${CORS_ALLOW_METHODS:-GET,POST,PUT,PATCH,OPTIONS}"
+      CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID,If-Match}"
     command: ["python", "-m", "api.run_api"]
     volumes:
       # Mount the writable data directory, not the database file. On a fresh
       # checkout the API can now create email_briefing.db and its schema.
       - ./runtime-data:/srv/partner-briefing/data
       - ./generated:/srv/partner-briefing/generated
+      - synopsis_runtime:/srv/partner-briefing/data/synopsis
+      - ../SWIFT-Applications:/srv/contracts/suite:ro
+      - ../AN-geomagnetic-observations-monitor/docs/api/schemas/swift-geomagnetic-observations-monitor-context-v1.schema.json:/srv/contracts/observations.json:ro
+      - ../FC-geomagnetic-forecast-console/docs/api/schemas/swift-geomagnetic-forecast-console-context-v1.schema.json:/srv/contracts/forecast.json:ro
     logging:
       options:
         max-size: "10m"
@@ -47,3 +59,8 @@ services:
     logging:
       options:
         max-size: "10m"
+
+volumes:
+  synopsis_runtime:
+    name: br-space-weather-summary-builder_summary_runtime
+    external: true

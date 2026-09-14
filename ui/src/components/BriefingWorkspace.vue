@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { fetchRuntimeNow } from '../api'
 import type { RuntimeContext, WorkspaceTypeId } from '../types'
 import { readUiDensity, setUiDensity, type UiDensity } from '../utils/uiDensity'
-import PartnerBriefing from './PartnerBriefing.vue'
+import SynopsisWorkspace from './SynopsisWorkspace.vue'
 import PartnerEmailBriefing from './PartnerEmailBriefing.vue'
 import PartnerTailoredBrief from './PartnerTailoredBrief.vue'
 import SocialGraphicsWorkspace from './social-graphics/SocialGraphicsWorkspace.vue'
@@ -16,7 +16,7 @@ const titleActions = [
 ]
 
 const workspaceBriefingTypes = [
-  { id: 'impact-risk', label: 'Impact & Risk Matrix' },
+  { id: 'synopsis', label: 'Synopsis' },
   { id: 'partner', label: 'Core Distribution Brief' },
   { id: 'partner-tailored', label: 'Partner Tailored Brief' },
   { id: 'social-graphic', label: 'Media Generator' },
@@ -24,7 +24,7 @@ const workspaceBriefingTypes = [
 
 const activeWorkspaceStorageKey = 'partnerbrief-hub.active-workspace'
 
-const selectedType = ref<WorkspaceTypeId>('impact-risk')
+const selectedType = ref<WorkspaceTypeId>('synopsis')
 const runtimeNow = ref<RuntimeContext | null>(null)
 const runtimeError = ref('')
 const uiDensity = ref<UiDensity>(readUiDensity())
@@ -37,7 +37,7 @@ const runtimeBadgeText = computed(() => {
   return 'OPERATIONAL UTC'
 })
 
-const isImpactRiskMode = computed(() => selectedType.value === 'impact-risk')
+const isSynopsisMode = computed(() => selectedType.value === 'synopsis')
 const isPartnerMode = computed(() => selectedType.value === 'partner')
 const isPartnerTailoredMode = computed(() => selectedType.value === 'partner-tailored')
 const isPartnerBriefMode = computed(() => isPartnerMode.value || isPartnerTailoredMode.value)
@@ -45,7 +45,7 @@ const isSocialGraphicsMode = computed(() => selectedType.value === 'social-graph
 
 function briefingTypeIcon(briefingTypeId: WorkspaceTypeId) {
   const icons: Record<WorkspaceTypeId, string> = {
-    'impact-risk': 'mdi-view-grid-outline',
+    synopsis: 'mdi-text-box-outline',
     partner: 'mdi-email-outline',
     'partner-tailored': 'mdi-account-details-outline',
     'social-graphic': 'mdi-share-variant-outline',
@@ -96,8 +96,8 @@ onMounted(async () => {
         </div>
         <div class="title-copy">
           <p class="eyebrow">NOAA Space Weather Prediction Center</p>
-          <h1>Partner Briefing Generator</h1>
-          <p class="mission-line">Brief: A unified impact-based decision support services briefing generator</p>
+          <h1>Briefing &amp; Synopsis</h1>
+          <p class="mission-line">Brief: Shared situational assessment, partner communications, and media products.</p>
         </div>
       </div>
 
@@ -133,8 +133,8 @@ onMounted(async () => {
     </header>
 
     <div class="ma-nav-shell">
-      <v-card class="ma-tabs-card" elevation="0">
-        <v-tabs v-model="selectedType" color="primary" density="comfortable" grow :show-arrows="false">
+      <v-card class="ma-tabs-card swift-primary-tabs" elevation="0">
+        <v-tabs v-model="selectedType" color="primary" density="comfortable" grow show-arrows>
           <v-tab
             v-for="item in workspaceBriefingTypes"
             :key="item.id"
@@ -153,13 +153,13 @@ onMounted(async () => {
         <div
           class="workspace-grid workflow-view"
           :class="{
-            'workspace-grid--partner': isImpactRiskMode,
+            'workspace-grid--partner': isSynopsisMode,
             'workspace-grid--graphics': isSocialGraphicsMode,
           }"
         >
-          <section class="panel panel--primary" :class="{ 'panel--full-width': isImpactRiskMode || isPartnerBriefMode }">
+          <section class="panel panel--primary" :class="{ 'panel--full-width': isSynopsisMode || isPartnerBriefMode }">
             <!-- All workspaces remain mounted so switching tabs cannot discard in-progress edits. -->
-            <PartnerBriefing v-show="isImpactRiskMode" />
+            <SynopsisWorkspace v-show="isSynopsisMode" />
             <PartnerEmailBriefing v-show="isPartnerMode" :runtime-now="runtimeNow" />
             <PartnerTailoredBrief v-show="isPartnerTailoredMode" :runtime-now="runtimeNow" />
             <div v-show="isSocialGraphicsMode" class="social-media-stack">

@@ -1,4 +1,24 @@
-# Partner Briefing Generator
+# Briefing & Synopsis
+
+As of 2026-09-14, this application also owns the former Summary Builder evidence
+engine and the new Synopsis workspace. The standalone Summary Builder deployment
+is retired. Existing partner briefing routes remain stable; the additional
+`/api/v1/space-weather-summary` routes run in this API process.
+
+The Synopsis tab collects the existing geomagnetic source contexts, prepares
+cited suggested text, and saves a forecaster-edited workspace with optimistic
+concurrency. Solar, particle, and Edited Events adapters remain planned. Saves
+are working state, not issuance. Event summaries and Product Launcher integration
+are subsequent work. The former Impact & Risk Matrix is now a read-only reference
+in Sector Risk Dashboard; manual risk scoring is removed.
+
+Docker retains the existing summary evidence volume under its original name.
+For a fresh deployment, create it once with
+`docker volume create br-space-weather-summary-builder_summary_runtime`.
+The external volume is deliberately not removed by `docker compose down -v`.
+Native deployments may set `SUMMARY_BUILDER_DATA_ROOT` to the former evidence
+directory to preserve existing bundles and drafts. Source contracts are mounted
+from the suite and geomagnetic applications as documented in Compose.
 
 Partner Briefing Generator is a SWIFT briefing and communications prototype for turning operational space-weather context into partner-ready products. It combines a Falcon API, a Vue/Vuetify workspace, SQLite-backed briefing storage, replay fixtures, and client-side PDF/social-graphics export workflows.
 

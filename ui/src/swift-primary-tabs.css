@@ -1,0 +1,99 @@
+/* SWIFT primary tabs v1. Canonical: SWIFT-Applications/ui/swift-primary-tabs.css.
+   Vendored identically for independent application/container builds.
+   Scoped to marked primary navigation; never targets nested tabs or controls. */
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs {
+  box-sizing: border-box !important;
+  min-height: 48px !important;
+  padding: 0 !important;
+  border: 1px solid #263d50 !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, #11263d, #091320) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  color: #c5d3e2;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tabs {
+  --v-tabs-height: 46px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 46px !important;
+  background: transparent !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-slide-group__content {
+  flex-wrap: nowrap !important;
+  min-width: 100%;
+  gap: 0 !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs > .nav-button {
+  flex: 1 0 auto !important;
+  min-width: max-content !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .05em !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  color: #c5d3e2 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab .v-btn__content {
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  white-space: nowrap !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab .v-icon {
+  display: inline-flex !important;
+  font-size: 18px !important;
+  color: inherit !important;
+  margin-inline-end: 8px !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab .v-btn__prepend { display:inline-flex !important; }
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab[aria-selected="true"],
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab--selected,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs > .nav-button[aria-selected="true"] {
+  background: rgba(95, 199, 255, .08) !important;
+  color: #5fc7ff !important;
+  box-shadow: none !important;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab:hover,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs > .nav-button:hover { background:rgba(95, 199, 255, .05) !important; }
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab:focus-visible,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs > .nav-button:focus-visible {
+  outline: 2px solid #5fc7ff !important;
+  outline-offset: -3px;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab::before,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab::after,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab__slider,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-btn__overlay,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-btn__underlay { display:none !important; }
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs.nav-group {
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  gap:0 !important;
+  overflow-x:auto;
+}
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-slide-group__prev,
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-slide-group__next {
+  display: flex !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  color: #5fc7ff;
+}
+@media (max-width: 800px) {
+  html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs .v-tab,
+  html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs > .nav-button { padding-inline:12px !important; }
+}

@@ -20,6 +20,10 @@ def create_app() -> falcon.App:
     app = falcon.App(middleware=[RequestContextMiddleware(), CorsMiddleware()])
     register_routes(app)
     register_error_handlers(app)
+    from api.synopsis.app import create_app as install_synopsis
+    from api.synopsis.workspace import WorkspaceResource
+    install_synopsis(existing_app=app)
+    app.add_route('/api/v1/space-weather-summary/workspace', WorkspaceResource())
     return app
 
 

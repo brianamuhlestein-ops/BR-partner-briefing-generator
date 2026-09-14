@@ -1,5 +1,5 @@
 export type WorkspaceTypeId =
-  | 'impact-risk'
+  | 'synopsis'
   | 'partner'
   | 'partner-tailored'
   | 'social-graphic'
