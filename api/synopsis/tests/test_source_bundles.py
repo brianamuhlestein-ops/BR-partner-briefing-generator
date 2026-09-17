@@ -217,6 +217,40 @@ class SourceBundleTests(unittest.TestCase):
             context = contexts[source["application_slug"]][0]
             self.assertEqual(source["source_sha256"], canonical_sha256(context))
 
+    def test_automatic_observations_feed_narrative_without_manual_export(self) -> None:
+        contexts = _operational_contexts()
+        observed = contexts["geomagnetic-observations-monitor"][0]
+        observed["lifecycle"]["state"] = "working"
+        observed["lifecycle"]["reviewed_at_utc"] = None
+        service, _ = self._service(contexts)
+        bundle = service.create_bundle(
+            cutoff_at_utc="2026-08-14T22:05:00Z", context_ids=None,
+            actor_id="narrative-builder", actor_type="service",
+        )
+        self.assertEqual(bundle["state"], "ready")
+        self.assertEqual(bundle["sources"][0]["lifecycle_state"], "working")
+        self.assertTrue(bundle["fact_ledger"])
+        client = testing.TestClient(create_app(
+            settings=self.settings, producer_client=FakeProducerClient(contexts),
+        ))
+        draft = client.simulate_post(
+            "/api/v1/space-weather-summary/drafts",
+            json={"bundle_id": bundle["bundle_id"]},
+        )
+        self.assertEqual(draft.status_code, 201)
+        self.assertTrue(draft.json["item"]["sections"])
+        stale = service.create_bundle(
+            cutoff_at_utc="2026-08-14T22:10:01Z", context_ids=None,
+            actor_id="narrative-builder", actor_type="service",
+        )
+        self.assertEqual(stale["state"], "needs_attention")
+        contexts["geomagnetic-forecast-console"][0]["lifecycle"]["state"] = "working"
+        unreviewed_forecast = service.create_bundle(
+            cutoff_at_utc="2026-08-14T22:05:00Z", context_ids=None,
+            actor_id="narrative-builder", actor_type="service",
+        )
+        self.assertEqual(unreviewed_forecast["state"], "needs_attention")
+
     def test_missing_forecast_context_needs_attention_and_blocks_ledger(self) -> None:
         contexts = _operational_contexts()
         contexts.pop("geomagnetic-forecast-console")

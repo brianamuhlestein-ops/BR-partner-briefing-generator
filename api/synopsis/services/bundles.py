@@ -219,7 +219,7 @@ class BundleService:
             errors.append(
                 {
                     "code": "lifecycle_not_eligible",
-                    "message": f"Context lifecycle {lifecycle['state']} is not reviewed or approved.",
+                    "message": f"Context lifecycle {lifecycle['state']} is not eligible under this source's selection policy.",
                     "retryable": False,
                 }
             )
@@ -278,11 +278,14 @@ class BundleService:
         start = parse_utc(window["start_utc"])
         end = parse_utc(window["end_utc"])
         requirement = application["selection_policy"]["valid_window_requirement"]
-        valid_window = (
-            start <= cutoff <= end
-            if requirement == "contains_cutoff"
-            else end > cutoff
-        )
+        if requirement == "recent_observations_before_cutoff":
+            # Observations end when captured; never claim coverage into the future.
+            max_age = application["selection_policy"]["maximum_age_seconds"]
+            valid_window = start <= end <= cutoff and 0 <= (cutoff - end).total_seconds() <= max_age
+        elif requirement == "contains_cutoff":
+            valid_window = start <= cutoff <= end
+        else:
+            valid_window = end > cutoff
         if not valid_window:
             errors.append(
                 {
