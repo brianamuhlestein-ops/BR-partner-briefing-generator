@@ -11,3 +11,5 @@ initializeUiDensity()
 
 createApp(App).use(vuetify).mount('#app')
 import './swift-primary-tabs.css'
+
+import './typography.css'

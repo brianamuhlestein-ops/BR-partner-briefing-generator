@@ -1,0 +1,22 @@
+/* Accepted suite typography. Preserve title-bar branding and authored graphics. */
+:is(.application-workspace) {
+  --workspace-font: "Segoe UI", "Aptos", "DejaVu Sans", system-ui, sans-serif;
+  font-family: var(--workspace-font);
+  font-size: 14px;
+  font-weight: 400;
+}
+:is(.application-workspace) :where(*:not(.mdi):not(.v-icon):not(.v-icon *):not(.swift-social-preview-panel):not(.swift-social-preview-panel *)) {
+  font-family: var(--workspace-font) !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+}
+:is(.application-workspace) :is(button, input, select, textarea, label, p, td, th, dt, dd):not(.swift-social-preview-panel):not(.swift-social-preview-panel *) { font-size: 14px !important; }
+:is(.application-workspace) :is(h2, h3, h4, .section-title, .panel-title):not(.swift-social-preview-panel):not(.swift-social-preview-panel *) { font-size: 16px !important; line-height: 1.3; }
+:is(.application-workspace) :is(small, .meta, .label, .helper-text):not(.swift-social-preview-panel):not(.swift-social-preview-panel *) { font-size: 12px !important; }
+:is(.application-workspace) :is(pre, code):not(.swift-social-preview-panel):not(.swift-social-preview-panel *) { font-family: Consolas, monospace !important; }
+html .swift-primary-tabs.swift-primary-tabs.swift-primary-tabs :is(.v-tab, .nav-button) {
+  font-family: "Segoe UI", "Aptos", "DejaVu Sans", system-ui, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+}
