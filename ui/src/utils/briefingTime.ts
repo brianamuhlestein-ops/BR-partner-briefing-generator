@@ -43,10 +43,11 @@ export function fromDatetimeLocal(value: string): string | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().replace('.000Z', 'Z')
 }
 
-export function forecastDayLabels(value: string | null | undefined): string[] {
+export function forecastDayLabels(value: string | null | undefined, count = 5): string[] {
+  const offsets = Array.from({ length: Number.isFinite(count) ? Math.max(1, Math.min(7, Math.trunc(count))) : 5 }, (_, i) => i)
   const issue = parseUtc(value)
-  if (!issue) return ['Day 1', 'Day 2', 'Day 3']
-  return [0, 1, 2].map((offset) => {
+  if (!issue) return offsets.map(offset => `Day ${offset + 1}`)
+  return offsets.map((offset) => {
     const date = new Date(issue)
     date.setUTCDate(date.getUTCDate() + offset)
     const label = new Intl.DateTimeFormat('en-US', {

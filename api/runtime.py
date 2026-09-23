@@ -77,6 +77,9 @@ def runtime_status() -> dict[str, Any]:
     configured_envs = [name for name in REPLAY_NOW_ENV_VARS if (os.getenv(name) or "").strip()]
     warnings: list[str] = []
     errors: list[str] = []
+    exercise = bool(os.getenv('SWIFT_EXERCISE_CATALOGUE_URL', '').strip())
+    if exercise and mode != 'replay':
+        errors.append('The synthetic exercise catalogue requires replay mode.')
 
     if mode == "operational":
         effective_now = system_now
@@ -93,10 +96,14 @@ def runtime_status() -> dict[str, Any]:
             errors.append("Replay mode requires a valid replay UTC timestamp; system time was not used.")
 
     return {
+        'exercise_delivery_enabled': exercise and mode == 'replay' and bool(os.getenv('SYNOPSIS_EXERCISE_LAUNCHER_URL', '').strip()),
         "status": "ok" if not errors else "configuration_error",
         "now_utc": format_utc_z(effective_now) if effective_now else None,
         "system_utc": format_utc_z(system_now),
         "data_source": mode,
+        "data_kind": "synthetic" if exercise else None,
+        "exercise_workspace_url": os.getenv('PARTNER_BRIEFING_EXERCISE_WORKSPACE_URL', '').strip() or None,
+        "operational_workspace_url": os.getenv('PARTNER_BRIEFING_OPERATIONAL_WORKSPACE_URL', '').strip() or None,
         "source": mode,
         "clock_source": clock_source,
         "scenario": os.getenv("PARTNER_BRIEFING_REPLAY_SCENARIO", "").strip() or None if mode == "replay" else None,

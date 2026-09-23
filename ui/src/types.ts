@@ -5,6 +5,7 @@ export type WorkspaceTypeId =
   | 'social-graphic'
 
 export type RuntimeContext = {
+  data_kind?: 'synthetic' | null
   status: 'ok' | 'configuration_error'
   now_utc: string | null
   system_utc: string

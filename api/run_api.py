@@ -21,9 +21,13 @@ def create_app() -> falcon.App:
     register_routes(app)
     register_error_handlers(app)
     from api.synopsis.app import create_app as install_synopsis
-    from api.synopsis.workspace import WorkspaceResource
+    from api.synopsis.workspace import WorkspaceResource, ReviewResource, DeliveryResource
+    from api.synopsis.exercise import ExerciseResource
+    app.add_route('/api/v1/space-weather-summary/exercise', ExerciseResource())
     install_synopsis(existing_app=app)
     app.add_route('/api/v1/space-weather-summary/workspace', WorkspaceResource())
+    app.add_route('/api/v1/space-weather-summary/reviewed', ReviewResource())
+    app.add_route('/api/v1/space-weather-summary/deliver', DeliveryResource())
     return app
 
 

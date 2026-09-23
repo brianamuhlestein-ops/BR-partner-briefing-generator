@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import SynopsisReuse from './SynopsisReuse.vue'
+import type { ReviewedSynopsis } from '../synopsis/review'
 import type { RuntimeContext } from '../types'
 import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../api'
 import coreBriefingCatalog from '../../../docs/exercise/gannon/core-briefings/may-2024-core-briefings.json'
@@ -8,9 +10,10 @@ import { forecastDayLabels, formatIssueTime, fromDatetimeLocal, toDatetimeLocal 
 
 const props = defineProps<{ runtimeNow: RuntimeContext | null }>()
 
-type RiskLevel = 'Little to None' | 'Minor' | 'Moderate' | 'High' | 'Extreme'
+type RiskLevel = 'Unassessed' | 'Little to None' | 'Minor' | 'Moderate' | 'High' | 'Extreme'
 
 const riskLevels: { label: RiskLevel; color: string; text: string }[] = [
+  { label: 'Unassessed', color: '#d3dce5', text: '#243344' },
   { label: 'Little to None', color: '#a8e6a1', text: '#102316' },
   { label: 'Minor', color: '#ffe564', text: '#111827' },
   { label: 'Moderate', color: '#ff9838', text: '#111827' },
@@ -29,7 +32,7 @@ const sectors = [
 
 function emptyRiskOutlook(): Record<string, RiskLevel[]> {
   return Object.fromEntries(
-    sectors.map((sector) => [sector, ['Little to None', 'Little to None', 'Little to None']]),
+    sectors.map((sector) => [sector, Array.from({ length: 7 }, () => 'Unassessed')]),
   ) as Record<string, RiskLevel[]>
 }
 
@@ -143,6 +146,8 @@ const availableBriefingPresets = computed(() => {
 })
 
 const briefing = reactive({
+  synopsisSource: null as ReviewedSynopsis | null,
+  forecastDays: 5,
   headline: briefingPresets[0]!.headline,
   summary:
     briefingPresets[0]!.summary,
@@ -177,7 +182,7 @@ const saveStatus = ref('Not saved')
 const persistedVersion = ref(0)
 const hasRestoredSavedDocument = ref(false)
 const issueTimeDisplay = computed(() => formatIssueTime(issueTimeUtc.value))
-const days = computed(() => forecastDayLabels(issueTimeUtc.value))
+const days = computed(() => forecastDayLabels(issueTimeUtc.value, briefing.forecastDays))
 const issueTimeInput = computed({
   get: () => toDatetimeLocal(issueTimeUtc.value),
   set: (value: string) => {
@@ -216,7 +221,7 @@ function riskStyle(level: RiskLevel) {
 }
 
 function riskLevelFor(sector: string, index: number): RiskLevel {
-  return briefing.riskOutlook[sector]?.[index] ?? 'Little to None'
+  return briefing.riskOutlook[sector]?.[index] ?? 'Unassessed'
 }
 
 function handleRiskChange(sector: string, index: number, event: Event) {
@@ -239,6 +244,7 @@ function resetIssueTime() {
 function applyPreset(preset: BriefingPreset) {
   selectedPresetId.value = preset.id
   issueTimeUtc.value = preset.issueTimeUtc
+  briefing.synopsisSource = null
   briefing.headline = preset.headline
   briefing.summary = preset.summary
   briefing.statusBadge = preset.statusBadge
@@ -308,6 +314,7 @@ async function loadSavedBriefingJson() {
     selectedPresetId.value = saved.document.selectedPresetId
     issueTimeUtc.value = saved.document.issueTimeUtc
     Object.assign(briefing, saved.document.briefing)
+    briefing.forecastDays = Number.isInteger(briefing.forecastDays) ? Math.max(1, Math.min(7, briefing.forecastDays)) : 5
     briefing.media = briefing.media.map((item) => ({
       ...item,
       dataUrl: item.dataUrl.startsWith('data:')
@@ -364,46 +371,6 @@ onMounted(loadSavedBriefingJson)
       <span>{{ availableBriefingPresets.length }} of {{ briefingPresets.length }} briefings available</span>
     </div>
     <div class="partner-email-workspace">
-      <aside class="partner-email-editor partner-email-editor--forecast" aria-label="Core distribution forecast inputs">
-        <div class="partner-email-column-heading">
-          <h2>Forecast</h2>
-          <span>SWIFT suite JSON</span>
-        </div>
-
-        <section class="partner-email-input-section">
-          <div class="partner-email-editor-heading">Active Products</div>
-          <label>
-            <span class="partner-email-field-note">Future feed: auto-populated from SWIFT Suite product JSON APIs.</span>
-            <textarea v-model="briefing.activeProducts" />
-          </label>
-        </section>
-
-        <details v-if="briefing.hasRiskOutlook" class="partner-email-input-section partner-email-risk-editor" open>
-          <summary class="partner-email-editor-heading">Risk Outlook</summary>
-          <div class="partner-email-risk-grid">
-            <div class="partner-email-risk-head">Sector</div>
-            <div v-for="day in days" :key="day" class="partner-email-risk-head">
-              {{ day.split('\n')[0] }}
-            </div>
-            <template v-for="sector in sectors" :key="sector">
-              <div class="partner-email-risk-sector">{{ sector }}</div>
-              <select
-                v-for="(_, index) in days"
-                :key="`${sector}-editor-${index}`"
-                :value="riskLevelFor(sector, index)"
-                :style="riskStyle(riskLevelFor(sector, index))"
-                class="partner-email-risk-select"
-                @change="handleRiskChange(sector, index, $event)"
-              >
-                <option v-for="risk in riskLevels" :key="risk.label" :value="risk.label">
-                  {{ risk.label }}
-                </option>
-              </select>
-            </template>
-          </div>
-        </details>
-      </aside>
-
       <aside class="partner-email-editor partner-email-editor--narrative" aria-label="Core distribution narrative inputs">
         <div class="partner-email-column-heading">
           <h2>Narrative</h2>
@@ -428,6 +395,7 @@ onMounted(loadSavedBriefingJson)
 
         <section class="partner-email-input-section partner-email-review-section">
           <div class="partner-email-editor-heading">Summary</div>
+          <SynopsisReuse :source="briefing.synopsisSource" @apply="item => { briefing.summary = item.text; briefing.synopsisSource = item }" />
           <label>
             Forecaster-reviewed summary
             <textarea v-model="briefing.summary" />
@@ -493,6 +461,52 @@ onMounted(loadSavedBriefingJson)
           <button class="partner-add-media-button" type="button" @click="addMediaItem">
             Add More Media
           </button>
+        </details>
+      </aside>
+
+      <aside class="partner-email-editor partner-email-editor--forecast" aria-label="Core distribution forecast inputs">
+        <div class="partner-email-column-heading">
+          <h2>Forecast</h2>
+          <span>SWIFT suite JSON</span>
+        </div>
+
+        <section class="partner-email-input-section">
+          <div class="partner-email-editor-heading">Active Products</div>
+          <label>
+            <span class="partner-email-field-note">Future feed: auto-populated from SWIFT Suite product JSON APIs.</span>
+            <textarea v-model="briefing.activeProducts" />
+          </label>
+        </section>
+
+        <details v-if="briefing.hasRiskOutlook" class="partner-email-input-section partner-email-risk-editor" open>
+          <summary class="partner-email-editor-heading">Risk Outlook</summary>
+          <label class="forecast-horizon">Forecast days
+            <select v-model.number="briefing.forecastDays" aria-label="Forecast days">
+              <option v-for="count in 7" :key="count" :value="count">{{ count }} days</option>
+            </select>
+          </label>
+          <div class="partner-email-risk-scroll"><div class="partner-email-risk-grid" :style="{ gridTemplateColumns: `minmax(150px, 1.5fr) repeat(${days.length}, minmax(76px, 1fr))` }">
+            <div class="partner-email-risk-head">Sector</div>
+            <div v-for="day in days" :key="day" class="partner-email-risk-head">
+              {{ day.split('\n')[0] }}
+            </div>
+            <template v-for="sector in sectors" :key="sector">
+              <div class="partner-email-risk-sector">{{ sector }}</div>
+              <select
+                v-for="(_, index) in days"
+                :key="`${sector}-editor-${index}`"
+                :aria-label="`${sector} Day ${index + 1}`"
+                :value="riskLevelFor(sector, index)"
+                :style="riskStyle(riskLevelFor(sector, index))"
+                class="partner-email-risk-select"
+                @change="handleRiskChange(sector, index, $event)"
+              >
+                <option v-for="risk in riskLevels" :key="risk.label" :value="risk.label">
+                  {{ risk.label }}
+                </option>
+              </select>
+            </template>
+          </div></div>
         </details>
       </aside>
 
@@ -1241,5 +1255,17 @@ onMounted(loadSavedBriefingJson)
   .partner-email-media-row {
     grid-template-columns: 1fr;
   }
+}
+/* Two work areas: narrative left; forecast and product preview right. */
+.partner-email-workspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-template-areas: "narrative forecast" "narrative preview"; grid-template-rows: auto 1fr; }
+.partner-email-editor--narrative { grid-area: narrative; }
+.partner-email-editor--forecast { grid-area: forecast; }
+.partner-preview-column { grid-area: preview; width: 100%; }
+.partner-pdf-preview { grid-column: auto; }
+.partner-email-risk-scroll { overflow-x: auto; }
+.forecast-horizon { display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 12px; }
+.forecast-horizon select { width: auto; min-width: 95px; }
+@media(max-width: 980px) {
+  .partner-email-workspace { grid-template-columns: 1fr; grid-template-areas: "narrative" "forecast" "preview"; grid-template-rows: auto; }
 }
 </style>

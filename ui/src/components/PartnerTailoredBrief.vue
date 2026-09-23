@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import SynopsisReuse from './SynopsisReuse.vue'
+import type { ReviewedSynopsis } from '../synopsis/review'
 import type { RuntimeContext } from '../types'
 import { fetchEmailBriefingDocument, saveEmailBriefingDocument } from '../api'
 import { exportElementToPdf } from '../utils/exportPdf'
@@ -30,6 +32,7 @@ const legacyGeoelectricCaption =
   'Modeled peak geoelectric-field response for a Kp 9 scenario. Actual local response may differ.'
 
 const initialBriefing = {
+  synopsisSource: null as ReviewedSynopsis | null,
   productTitle: 'Grid Operations Briefing',
   headline: 'Geomagnetic Disturbance Expected Today into Saturday',
   audience:
@@ -310,6 +313,7 @@ onMounted(loadSavedBriefingJson)
 
         <section class="tailored-editor-section tailored-review-section">
           <h3>Synopsis</h3>
+          <SynopsisReuse :source="briefing.synopsisSource" @apply="item => { briefing.overview = item.text; briefing.synopsisSource = item }" />
           <label>
             Forecaster-reviewed synopsis
             <textarea v-model="briefing.overview" />
