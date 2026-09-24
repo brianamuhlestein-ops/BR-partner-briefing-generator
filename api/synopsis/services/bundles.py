@@ -334,7 +334,9 @@ class BundleService:
             **base,
             "context_id": context_id,
             "source_sha256": canonical_sha256(context),
-            "href": f"/api/v1/geomagnetic/context/exports/{context_id}",
+            "href": application["routes"]["export_detail"].replace(
+                "{context_id}", context_id
+            ),
             "retrieved_at_utc": format_utc(retrieved_at),
             "generated_at_utc": context["generated_at_utc"],
             "valid_window": {

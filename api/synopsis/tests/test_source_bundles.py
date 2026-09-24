@@ -142,14 +142,18 @@ class _QuietRequestHandler(WSGIRequestHandler):
 
 
 class LiveProducerServer:
-    def __init__(self, contexts: list[dict[str, Any]]) -> None:
+    def __init__(
+        self,
+        contexts: list[dict[str, Any]],
+        api_prefix: str,
+    ) -> None:
         app = falcon.App()
         app.add_route(
-            "/api/v1/geomagnetic/context/exports",
+            f"{api_prefix}/context/exports",
             _ExportCollectionResource(contexts),
         )
         app.add_route(
-            "/api/v1/geomagnetic/context/exports/{context_id}",
+            f"{api_prefix}/context/exports/{{context_id}}",
             _ExportDetailResource(contexts),
         )
         self.server = make_server(
@@ -419,8 +423,14 @@ class SourceBundleTests(unittest.TestCase):
 
     def test_http_client_collects_from_live_producer_route_stubs(self) -> None:
         contexts = _operational_contexts()
-        with LiveProducerServer(contexts["geomagnetic-observations-monitor"]) as observations_url:
-            with LiveProducerServer(contexts["geomagnetic-forecast-console"]) as forecast_url:
+        with LiveProducerServer(
+            contexts["geomagnetic-observations-monitor"],
+            "/api/v1/geomagnetic-monitor",
+        ) as observations_url:
+            with LiveProducerServer(
+                contexts["geomagnetic-forecast-console"],
+                "/api/v1/geomagnetic",
+            ) as forecast_url:
                 settings = replace(
                     self.settings,
                     observations_base_url=observations_url,

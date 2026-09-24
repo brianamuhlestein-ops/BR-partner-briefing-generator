@@ -33,10 +33,14 @@ class HttpProducerClient:
             "geomagnetic-observations-monitor": settings.observations_base_url,
             "geomagnetic-forecast-console": settings.forecast_base_url,
         }
+        self.api_prefixes = {
+            "geomagnetic-observations-monitor": "/api/v1/geomagnetic-monitor",
+            "geomagnetic-forecast-console": "/api/v1/geomagnetic",
+        }
 
     def list_exports(self, application_slug: str) -> list[dict[str, Any]]:
         payload = self._get(
-            f"{self._base_url(application_slug)}/api/v1/geomagnetic/context/exports?limit=250"
+            f"{self._base_url(application_slug)}{self._api_prefix(application_slug)}/context/exports?limit=250"
         )
         items = payload.get("items")
         if not isinstance(items, list):
@@ -50,7 +54,7 @@ class HttpProducerClient:
     def get_export(self, application_slug: str, context_id: str) -> dict[str, Any]:
         encoded_id = quote(context_id, safe="")
         payload = self._get(
-            f"{self._base_url(application_slug)}/api/v1/geomagnetic/context/exports/{encoded_id}"
+            f"{self._base_url(application_slug)}{self._api_prefix(application_slug)}/context/exports/{encoded_id}"
         )
         item = payload.get("item")
         if not isinstance(item, dict):
@@ -68,6 +72,16 @@ class HttpProducerClient:
             raise ProducerRequestError(
                 "application_not_registered",
                 f"No producer endpoint is configured for {application_slug}.",
+                False,
+            ) from exc
+
+    def _api_prefix(self, application_slug: str) -> str:
+        try:
+            return self.api_prefixes[application_slug]
+        except KeyError as exc:
+            raise ProducerRequestError(
+                "application_not_registered",
+                f"No producer API prefix is configured for {application_slug}.",
                 False,
             ) from exc
 

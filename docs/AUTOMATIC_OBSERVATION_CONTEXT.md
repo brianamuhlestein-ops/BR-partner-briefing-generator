@@ -2,7 +2,7 @@
 
 Geomagnetic Observations Monitor persists a 24-hour context every five minutes
 without requiring an operator or open browser. The narrative builder reads these
-immutable snapshots using `/api/v1/geomagnetic/context/exports` and the ID-specific
+immutable snapshots using `/api/v1/geomagnetic-monitor/context/exports` and the ID-specific
 detail route. Creating the source bundle and draft remains in Partner Briefing
 Generator; capturing context does not create or send a briefing.
 
