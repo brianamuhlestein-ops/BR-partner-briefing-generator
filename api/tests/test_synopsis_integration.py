@@ -16,7 +16,14 @@ class SynopsisIntegrationTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         folder = Path(temporary.name)
-        environment = patch.dict(os.environ, {'DATABASE_PATH':str(folder/'briefing.db'), 'GENERATED_DIR':str(folder/'generated'), 'SUMMARY_BUILDER_DATA_ROOT':str(folder/'synopsis'), 'SYNOPSIS_PRODUCT_LAUNCHER_URL':'http://launcher.test'})
+        environment = patch.dict(os.environ, {
+            'DATABASE_PATH':str(folder/'briefing.db'),
+            'GENERATED_DIR':str(folder/'generated'),
+            'SUMMARY_BUILDER_DATA_ROOT':str(folder/'synopsis'),
+            'SYNOPSIS_PRODUCT_LAUNCHER_URL':'http://launcher.test',
+            'SYNOPSIS_EXERCISE_LAUNCHER_URL':'',
+            'SWIFT_EXERCISE_CATALOGUE_URL':'',
+        })
         environment.start(); self.addCleanup(environment.stop)
         clock = patch('api.synopsis.workspace.runtime_status', return_value=dict(CLOCK))
         self.clock = clock.start(); self.addCleanup(clock.stop)
@@ -108,5 +115,24 @@ class SynopsisIntegrationTests(unittest.TestCase):
                 with patch('api.synopsis.workspace.urlopen',return_value=io.BytesIO(json.dumps(wrong).encode())) as send:
                     self.assertEqual(self.post('deliver').status_code,503)
                     self.assertEqual(send.call_count,1)
+
+    def test_exercise_review_retains_native_decision_provenance(self):
+        self.clock.return_value={**CLOCK,'data_source':'replay','scenario':'test-storm'}
+        seed={'record':{'id':'synopsis-seed','sha256':'seed-hash'},
+              'scenario':{'id':'test-storm'}}
+        sources=[
+            {'slug':'solar','readouts':[{'value':42}], 'record_id':'solar-review-4','revision':4},
+            {'slug':'particles','readouts':[{'value':18}], 'record_id':'particle-forecast-7','revision':'2026-09-23T11:55:00Z'},
+            {'slug':'radio','readouts':[]},
+        ]
+        with patch('api.synopsis.exercise.exercise_seed', return_value=seed), \
+             patch('api.synopsis.exercise.exercise_sources', return_value=sources):
+            saved=self.save('Exercise assessment', exercise_seed_id='synopsis-seed')
+            self.assertEqual(saved.status_code,200,saved.text)
+            reviewed=self.post('reviewed').json['item']
+        native=[ref for ref in reviewed['evidence_refs'] if ref['kind']=='native_exercise_decision']
+        self.assertEqual([(ref['source'],ref['record_id'],ref['revision']) for ref in native],
+                         [('solar','solar-review-4','4'),
+                          ('particles','particle-forecast-7','2026-09-23T11:55:00Z')])
 
 if __name__=='__main__': unittest.main()

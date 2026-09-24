@@ -58,12 +58,21 @@ def source_evidence(payload, runtime):
     bundle_id, draft_id = payload.get('source_bundle_id'), payload.get('source_draft_id')
     exercise_refs = []
     if payload.get('exercise_seed_id'):
-        from api.synopsis.exercise import exercise_seed
+        from api.synopsis.exercise import exercise_seed, exercise_sources
         seed = exercise_seed()
         if payload['exercise_seed_id'] != seed['record']['id']:
             raise falcon.HTTPBadRequest(description='Unknown exercise seed.')
         exercise_refs = [{'kind':'synthetic_exercise_seed','record_id':seed['record']['id'],
                           'scenario':seed['scenario']['id'],'sha256':seed['record']['sha256']}]
+        for source in exercise_sources():
+            if source.get('readouts') and source.get('record_id'):
+                exercise_refs.append({
+                    'kind':'native_exercise_decision',
+                    'source':source['slug'],
+                    'record_id':source['record_id'],
+                    'revision':str(source.get('revision') or ''),
+                    'scenario':seed['scenario']['id'],
+                })
     if not bundle_id:
         if draft_id:
             raise falcon.HTTPBadRequest(description='A source draft requires its evidence bundle.')
@@ -153,7 +162,9 @@ class ReviewResource:
             payload = json.loads(row['payload'])
             if stamp(payload['reporting_end_utc']) > stamp(runtime['now_utc']):
                 raise falcon.HTTPConflict(description='The saved Synopsis is ahead of the current replay clock.')
-            source_evidence(payload,runtime)
+            current_evidence = source_evidence(payload,runtime)
+            if current_evidence != payload.get('evidence_refs'):
+                raise falcon.HTTPConflict(description='Source evidence changed after this Synopsis was saved. Reload and save again before review.')
             review_id = 'synopsis-' + hashlib.sha256(key.encode()).hexdigest()[:12] + '-' + str(version)
             existing = db.execute('SELECT payload FROM synopsis_reviews WHERE id=?',(review_id,)).fetchone()
             if existing:

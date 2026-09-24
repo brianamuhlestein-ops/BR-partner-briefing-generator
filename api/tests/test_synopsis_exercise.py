@@ -10,16 +10,37 @@ from api.synopsis.exercise import exercise_seed, exercise_sources
 
 
 class ExerciseImportTests(unittest.TestCase):
-    def test_source_readouts_preserve_quantities_and_isolate_missing_records(self):
-        observations = [{'id':key,'label':key,'value':value,'unit':unit,'observed_at_utc':'2024-05-11T03:00:00Z'}
-                        for key,value,unit in [('xray','X2.1','GOES class'),('f107',228,'sfu'),('proton',35,'pfu'),('fluence',1200000,'cm^-2 sr^-1'),('electron',85000000,'cm^-2 sr^-1'),('radio245',420,'sfu')]]
-        with patch('api.synopsis.exercise.exercise_record',side_effect=[{'item':{'observations':observations}},falcon.HTTPServiceUnavailable()]):
+    def test_source_readouts_use_native_reviewed_decisions_and_keep_missing_inputs_visible(self):
+        runtime={'status':'ok','data_source':'replay','scenario':'synthetic-storm-v1','now_utc':'2024-05-11T03:00:00Z'}
+        solar={'result':{'runtime':{'mode':'replay','scenario':runtime['scenario'],'nowUtc':runtime['now_utc']},
+            'sourceChanged':False,'review':{'ready':True,'savedAt':runtime['now_utc'],'candidate':{
+                'source_record_id':'solar-review:1','source_revision':'1','quality':{'synthetic':True},
+                'content':{'product_object':{'flare_guidance':{'wholeDisk':{'forecast':[
+                    {'label':'M Class','day1':70}]}},'f107_forecast':{'valuesSfu':[228]}}}}}}}
+        particle={'result':{'forecastId':'particle-1','issuedAt':runtime['now_utc'],
+            'runtime':{'mode':'replay','scenario':runtime['scenario'],'now_utc':runtime['now_utc']},
+            'proton':{'days':[{'greaterThan10MevPercent':45,'greaterThan100MevPercent':10}]},
+            'electron':{'days':[{'greaterThan2MevLevel':'moderate'}]}}}
+        with patch('api.synopsis.exercise.runtime_status',return_value=runtime), patch(
+                'api.synopsis.exercise._native_json',side_effect=[solar,particle,{},ValueError('No Edited Events archive supplied')]):
             sources={s['slug']:s for s in exercise_sources()}
         self.assertEqual(len(sources['solar']['readouts']),2)
-        self.assertEqual([r['unit'] for r in sources['particles']['readouts']],['pfu','cm^-2 sr^-1','cm^-2 sr^-1'])
-        self.assertEqual(sources['radio']['readouts'][0]['value'],420)
+        self.assertEqual([r['unit'] for r in sources['particles']['readouts']],['%','%','category'])
+        self.assertEqual(sources['solar']['record_id'],'solar-review:1')
+        self.assertEqual(sources['particles']['record_id'],'particle-1')
+        self.assertEqual(sources['radio']['readouts'],[])
         self.assertEqual(sources['events']['readouts'],[])
         self.assertIn('unavailable',sources['events']['status'])
+
+    def test_native_clock_mismatch_does_not_fall_back_to_catalogue_values(self):
+        runtime={'status':'ok','data_source':'replay','scenario':'synthetic-storm-v1','now_utc':'2024-05-11T03:00:00Z'}
+        wrong={'result':{'runtime':{'mode':'replay','scenario':'other','nowUtc':runtime['now_utc']}}}
+        with patch('api.synopsis.exercise.runtime_status',return_value=runtime), patch(
+                'api.synopsis.exercise._native_json',side_effect=[wrong,wrong,{},{}]):
+            sources={s['slug']:s for s in exercise_sources()}
+        self.assertEqual(sources['solar']['readouts'],[])
+        self.assertEqual(sources['particles']['readouts'],[])
+        self.assertIn('mismatch',sources['solar']['status'])
 
     def test_operational_mode_cannot_load_exercise_seed(self):
         with patch.dict(os.environ, {'SWIFT_EXERCISE_CATALOGUE_URL':'http://catalogue.test'}), patch('api.synopsis.exercise.runtime_status', return_value={'status':'ok','data_source':'operational'}), patch('api.synopsis.exercise.urlopen') as fetch:
