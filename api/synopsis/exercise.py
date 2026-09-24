@@ -103,29 +103,48 @@ def _particle_source():
             'record_id':payload.get('forecastId'),'revision':payload.get('issuedAt')}
 
 
-def _unavailable_native(slug, label, environment, route):
-    try:
-        _native_json(environment, route)
-    except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError) as exc:
-        return {'slug':slug,'status':label+' unavailable: '+str(getattr(exc, 'reason', exc)),
-                'readouts':[],'native_route':route}
-    return {'slug':slug,'status':label+' endpoint returned no supported exercise summary',
-            'readouts':[],'native_route':route}
+def _radio_source():
+    payload=_native_json('SYNOPSIS_EXERCISE_SOLAR_URL','/api/v1/solar-forecast/solar-radio-flux')['result']
+    _validate_native_clock(payload.get('runtime'))
+    source=payload.get('exerciseSource') or {}
+    if not source.get('record_id'):
+        raise ValueError('Solar radio response lacks exercise provenance')
+    readouts=[]
+    observed={detail.get('canonicalFrequency',detail.get('frequency')):observation.get('time_tag')
+              for observation in payload.get('observations',[]) for detail in observation.get('details',[])}
+    for summary in payload.get('summaries',[]):
+        if summary.get('frequency')==245 and summary.get('maxFlux') is not None:
+            readouts.append({'label':'Daily maximum 245 MHz flux','value':summary['maxFlux'],'unit':'sfu',
+                             'at_utc':observed.get(245) or payload['runtime'].get('now_utc')})
+    if not readouts:raise ValueError('No 245 MHz exercise observation is available')
+    return {'slug':'radio','status':'Native Solar radio exercise observation','readouts':readouts,
+            'record_id':source['record_id'],'revision':source.get('sha256')}
+
+
+def _events_source():
+    payload=_native_json('SYNOPSIS_EXERCISE_SOLAR_URL','/api/v1/solar-forecast/replay/events')['result']
+    _validate_native_clock(payload.get('runtime'))
+    source=payload.get('exerciseSource') or {}
+    if not source.get('record_id'):
+        raise ValueError('Edited Events response lacks exercise provenance')
+    bins=payload.get('bins') or []
+    if not bins:raise ValueError('No Edited Events exercise bins are available')
+    return {'slug':'events','status':'Native Solar Edited Events exercise context',
+            'readouts':[{'label':'Linked physical-event bins','value':len(bins),'unit':'bins',
+                         'at_utc':payload['runtime'].get('now_utc')}],
+            'record_id':source['record_id'],'revision':source.get('sha256')}
 
 
 def exercise_sources():
     """Read real exercise workspaces; missing native inputs remain unavailable."""
     sources = []
-    for slug, loader in (('solar', _solar_source), ('particles', _particle_source)):
+    for slug, loader in (('solar', _solar_source), ('particles', _particle_source),
+                         ('radio', _radio_source), ('events', _events_source)):
         try:
             sources.append(loader())
         except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError) as exc:
             sources.append({'slug':slug,'status':'Native exercise decision unavailable: '+str(getattr(exc, 'reason', exc)),
                             'readouts':[]})
-    sources.append(_unavailable_native('radio','Daily 245 MHz summary','SYNOPSIS_EXERCISE_SOLAR_URL',
-                                       '/api/v1/solar-forecast/solar-radio-flux'))
-    sources.append(_unavailable_native('events','Edited Events','SYNOPSIS_EXERCISE_SOLAR_URL',
-                                       '/api/v1/solar-forecast/replay/events'))
     return sources
 
 
