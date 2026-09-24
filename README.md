@@ -5,11 +5,12 @@ engine and the new Synopsis workspace. The standalone Summary Builder deployment
 is retired. Existing partner briefing routes remain stable; the additional
 `/api/v1/space-weather-summary` routes run in this API process.
 
-The Synopsis tab collects the existing geomagnetic source contexts, prepares
-cited suggested text, and saves a forecaster-edited workspace with optimistic
-concurrency. Solar, particle, and Edited Events adapters remain planned. Saves
-are working state, not issuance. Event summaries and Product Launcher integration
-are subsequent work. The former Impact & Risk Matrix is now a read-only reference
+The Synopsis tab collects reviewed source contexts, prepares cited suggested
+text, and saves a forecaster-edited workspace with optimistic concurrency.
+`GET /api/v1/space-weather-summary/source-context/cme-sa` reads the configured
+`SYNOPSIS_CME_CONTEXT_URL` and accepts only usable, current, reviewed CME
+assessments whose runtime and replay scenario match Synopsis. Saves are working
+state, not issuance. The former Impact & Risk Matrix is now a read-only reference
 in Sector Risk Dashboard; manual risk scoring is removed.
 
 Docker retains the existing summary evidence volume under its original name.
