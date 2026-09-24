@@ -51,7 +51,7 @@ def _validate_native_clock(clock):
     if (not isinstance(clock, dict)
             or clock.get('scenario') != current.get('scenario')
             or clock.get('mode', clock.get('source', clock.get('data_source'))) != 'replay'
-            or instant(clock.get('now_utc', clock.get('nowUtc'))) != instant(current.get('now_utc'))):
+            or instant(clock.get('now_utc', clock.get('nowUtc', clock.get('effective_at_utc')))) != instant(current.get('now_utc'))):
         raise ValueError('Native exercise source clock or scenario mismatch')
 
 
@@ -135,11 +135,25 @@ def _events_source():
             'record_id':source['record_id'],'revision':source.get('sha256')}
 
 
+def _cme_source():
+    response=_native_json('SYNOPSIS_EXERCISE_CME_URL','/api/v1/cme-sa/context')
+    payload=response.get('item',response)
+    _validate_native_clock(payload.get('runtime'))
+    lifecycle=payload.get('lifecycle') or {}
+    assessment=(payload.get('cme_analysis') or {}).get('assessment') or {}
+    if lifecycle.get('state')!='reviewed' or not payload.get('context_id') or not assessment.get('nominal_arrival_utc'):
+        raise ValueError('Reviewed CME exercise context is unavailable')
+    return {'slug':'cme','status':'Native reviewed CME exercise context',
+            'readouts':[{'label':'Reviewed CME nominal arrival','value':assessment['nominal_arrival_utc'],
+                         'unit':'UTC','at_utc':payload.get('generated_at_utc')}],
+            'record_id':payload['context_id'],'revision':lifecycle.get('revision')}
+
+
 def exercise_sources():
     """Read real exercise workspaces; missing native inputs remain unavailable."""
     sources = []
     for slug, loader in (('solar', _solar_source), ('particles', _particle_source),
-                         ('radio', _radio_source), ('events', _events_source)):
+                         ('radio', _radio_source), ('events', _events_source), ('cme', _cme_source)):
         try:
             sources.append(loader())
         except (HTTPError, URLError, TimeoutError, ValueError, KeyError, TypeError) as exc:

@@ -27,8 +27,12 @@ class ExerciseImportTests(unittest.TestCase):
             'summaries':[{'frequency':245,'maxFlux':420}]}}
         events={'result':{'runtime':{'mode':'replay','scenario':runtime['scenario'],'now_utc':runtime['now_utc']},
             'exerciseSource':{'record_id':'linked-events','sha256':'event-hash'},'bins':[{'id':'flare-1'}]}}
+        cme={'status':'ok','item':{'context_id':'exercise-cme-sa-display-r1','generated_at_utc':runtime['now_utc'],
+            'runtime':{'mode':'replay','scenario':runtime['scenario'],'effective_at_utc':runtime['now_utc']},
+            'lifecycle':{'state':'reviewed','revision':1},
+            'cme_analysis':{'assessment':{'nominal_arrival_utc':'2024-05-12T08:59:23Z'}}}}
         with patch('api.synopsis.exercise.runtime_status',return_value=runtime), patch(
-                'api.synopsis.exercise._native_json',side_effect=[solar,particle,radio,events]):
+                'api.synopsis.exercise._native_json',side_effect=[solar,particle,radio,events,cme]):
             sources={s['slug']:s for s in exercise_sources()}
         self.assertEqual(len(sources['solar']['readouts']),2)
         self.assertEqual([r['unit'] for r in sources['particles']['readouts']],['%','%','category'])
@@ -38,12 +42,13 @@ class ExerciseImportTests(unittest.TestCase):
         self.assertEqual(sources['events']['readouts'][0]['value'],1)
         self.assertEqual(sources['radio']['record_id'],'science-observations')
         self.assertEqual(sources['events']['record_id'],'linked-events')
+        self.assertEqual(sources['cme']['record_id'],'exercise-cme-sa-display-r1')
 
     def test_native_clock_mismatch_does_not_fall_back_to_catalogue_values(self):
         runtime={'status':'ok','data_source':'replay','scenario':'synthetic-storm-v1','now_utc':'2024-05-11T03:00:00Z'}
         wrong={'result':{'runtime':{'mode':'replay','scenario':'other','nowUtc':runtime['now_utc']}}}
         with patch('api.synopsis.exercise.runtime_status',return_value=runtime), patch(
-                'api.synopsis.exercise._native_json',side_effect=[wrong,wrong,wrong,wrong]):
+                'api.synopsis.exercise._native_json',side_effect=[wrong,wrong,wrong,wrong,wrong]):
             sources={s['slug']:s for s in exercise_sources()}
         self.assertEqual(sources['solar']['readouts'],[])
         self.assertEqual(sources['particles']['readouts'],[])
