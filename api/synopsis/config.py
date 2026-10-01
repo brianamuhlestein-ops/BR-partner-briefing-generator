@@ -64,10 +64,15 @@ def load_settings() -> Settings:
         "SUMMARY_BUILDER_CONTRACTS_ROOT",
         WORKSPACE_ROOT / "SWIFT-Applications",
     )
-    runtime_mode = os.getenv("SUMMARY_BUILDER_RUNTIME_MODE", "operational").strip().lower()
+    suite_source_mode = os.getenv("PARTNER_BRIEFING_SOURCE_MODE", "").strip().lower()
+    runtime_mode = (
+        "replay" if suite_source_mode == "gannon"
+        else "operational" if suite_source_mode == "live"
+        else os.getenv("SUMMARY_BUILDER_RUNTIME_MODE", "operational").strip().lower()
+    )
     if runtime_mode not in {"operational", "replay", "historical", "fake"}:
         raise ValueError(f"Unsupported SUMMARY_BUILDER_RUNTIME_MODE: {runtime_mode}")
-    scenario = os.getenv("SUMMARY_BUILDER_REPLAY_SCENARIO", "").strip() or None
+    scenario = "gannon-2024" if suite_source_mode == "gannon" else os.getenv("SUMMARY_BUILDER_REPLAY_SCENARIO", "").strip() or None
     if runtime_mode == "replay" and not scenario:
         raise ValueError("SUMMARY_BUILDER_REPLAY_SCENARIO is required in replay mode")
     if runtime_mode != "replay":

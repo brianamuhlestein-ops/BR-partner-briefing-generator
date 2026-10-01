@@ -458,10 +458,16 @@ h1 {
 }
 
 .runtime-mode-badge--replay {
-  border-color: #ffe05c;
-  background: #ffe05c;
-  color: #111820;
-  box-shadow: 0 0 0 1px rgba(255, 224, 92, 0.16), 0 3px 12px rgba(255, 201, 51, 0.18);
+  min-height: 32px;
+  padding: 0 10px;
+  border-color: rgba(255, 229, 94, 0.72);
+  background: #ffe55e;
+  color: #101826;
+  box-shadow: 0 0 18px rgba(255, 229, 94, 0.16);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0;
 }
 
 .social-media-stack {

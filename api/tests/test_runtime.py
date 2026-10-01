@@ -60,6 +60,22 @@ class RuntimeClockTests(unittest.TestCase):
         self.assertEqual(snapshot["runtime_mode"], "replay")
         self.assertEqual(snapshot["replay_scenario"], "may_2024")
 
+    def test_gannon_mode_reads_shared_hel_session(self):
+        with patch.dict(
+            os.environ,
+            {
+                "PARTNER_BRIEFING_SOURCE_MODE": "gannon",
+                "SWIFT_REPLAY_CATALOG_URL": "http://hel/api/v1/historical-events/gannon-2024",
+                "SWIFT_REPLAY_SESSION_ID": "session-1",
+            },
+            clear=True,
+        ), patch.object(runtime, "hel_session", return_value={"event_id": "gannon-2024", "clock_utc": "2024-05-10T18:00:00Z"}):
+            status = runtime.runtime_status()
+        self.assertEqual(status["status"], "ok")
+        self.assertEqual(status["source_mode"], "gannon")
+        self.assertEqual(status["clock_source"], "swift_replay_session")
+        self.assertEqual(status["now_utc"], "2024-05-10T18:00:00Z")
+
 
 if __name__ == "__main__":
     unittest.main()

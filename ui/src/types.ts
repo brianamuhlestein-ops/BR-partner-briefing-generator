@@ -10,6 +10,7 @@ export type RuntimeContext = {
   now_utc: string | null
   system_utc: string
   data_source: 'operational' | 'replay'
+  source_mode?: 'live' | 'gannon' | 'standalone_replay'
   source: 'operational' | 'replay'
   clock_source: string
   scenario: string | null

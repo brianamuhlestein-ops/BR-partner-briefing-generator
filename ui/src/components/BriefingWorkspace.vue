@@ -32,7 +32,7 @@ const uiDensity = ref<UiDensity>(readUiDensity())
 const runtimeBadgeText = computed(() => {
   if (!runtimeNow.value) return 'CLOCK UNAVAILABLE'
   if (runtimeNow.value.data_source === 'replay') {
-    return `${runtimeNow.value.data_kind === 'synthetic' ? 'EXERCISE' : 'REPLAY'} ${runtimeNow.value.now_utc?.replace('T', ' ').replace(':00Z', 'Z') ?? 'CLOCK?'}`
+    return `${runtimeNow.value.data_kind === 'synthetic' ? 'EXERCISE' : 'REPLAY'} ${runtimeNow.value.now_utc?.replace('T', ' ').replace(/:\d{2}Z$/, 'Z') ?? 'TIME UNAVAILABLE'}`
   }
   return 'OPERATIONAL UTC'
 })
