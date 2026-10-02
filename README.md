@@ -211,24 +211,26 @@ UI:  http://127.0.0.1:5180
 API: http://127.0.0.1:8089
 ```
 
-### Operational And Replay Time
+### Operational, Replay, And Exercise Time
 
 The API owns the authoritative clock. Operational mode uses server UTC:
 
 ```powershell
-$env:PARTNER_BRIEFING_API_DATA_SOURCE = "operational"
+$env:PARTNER_BRIEFING_SOURCE_MODE = "live"
 ```
 
-Replay mode requires an explicit UTC timestamp and never falls back to live time:
+Gannon replay reads the same HEL session clock used by the rest of the suite:
 
 ```powershell
-$env:PARTNER_BRIEFING_API_DATA_SOURCE = "replay"
-$env:PARTNER_BRIEFING_REPLAY_NOW_UTC = "2024-05-10T16:37:00Z"
-$env:PARTNER_BRIEFING_REPLAY_SCENARIO = "may_2024_geomagnetic_storm"
+$env:PARTNER_BRIEFING_SOURCE_MODE = "gannon"
+$env:SWIFT_REPLAY_CATALOG_URL = "http://localhost:8088/api/v1/historical-events/gannon-2024"
+$env:SWIFT_REPLAY_SESSION_ID = "your-session-id"
 docker compose up --build
 ```
 
-`SWIFT_REPLAY_NOW_UTC` is supported as a suite-wide clock alias. Briefing drafts
+The synthetic suite integration exercise remains explicit through
+`SWIFT_EXERCISE_CATALOGUE_URL` and `PARTNER_EXERCISE_NOW_UTC`; it does not act
+as another Gannon runtime. Briefing drafts
 store the forecast issue-time snapshot and three derived UTC valid dates separately
 from their physical `created_at` and `updated_at` audit timestamps.
 

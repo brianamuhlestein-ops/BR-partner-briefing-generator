@@ -73,10 +73,11 @@ class ExerciseImportTests(unittest.TestCase):
                 with self.assertRaises(falcon.HTTPServiceUnavailable):
                     exercise_seed()
 
-    def test_misconfigured_operational_exercise_clock_fails_closed(self):
-        with patch.dict(os.environ, {'SWIFT_EXERCISE_CATALOGUE_URL':'http://catalogue.test', 'PARTNER_BRIEFING_API_DATA_SOURCE':'operational'}):
+    def test_explicit_exercise_clock_is_isolated(self):
+        with patch.dict(os.environ, {'SWIFT_EXERCISE_CATALOGUE_URL':'http://catalogue.test', 'PARTNER_EXERCISE_NOW_UTC':'2024-05-11T03:00:00Z'}):
             status=runtime_status()
-            self.assertEqual(status['status'],'configuration_error')
+            self.assertEqual(status['status'],'ok')
+            self.assertEqual(status['source_mode'],'exercise')
             self.assertEqual(status['data_kind'],'synthetic')
 
 
