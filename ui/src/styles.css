@@ -998,3 +998,4 @@ td {
     font-size: 0.76rem;
   }
 }
+.user-guide-dialog{max-height:92vh;border:1px solid rgba(121,160,199,.3)!important;border-radius:16px!important;background:#081828!important;color:var(--app-text)!important;overflow:hidden}.user-guide-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid var(--app-border-soft);background:#0d2337}.user-guide-header span{color:#84d4eb;font-size:11px;letter-spacing:.1em;text-transform:uppercase}.user-guide-header h2{margin:3px 0 0;font-size:20px;font-weight:500}.user-guide-dialog .v-card-text{padding:20px;overflow:auto}

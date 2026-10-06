@@ -8,11 +8,10 @@ import SynopsisWorkspace from './SynopsisWorkspace.vue'
 import PartnerEmailBriefing from './PartnerEmailBriefing.vue'
 import PartnerTailoredBrief from './PartnerTailoredBrief.vue'
 import SocialGraphicsWorkspace from './social-graphics/SocialGraphicsWorkspace.vue'
+import BriefingUserGuide from './BriefingUserGuide.vue'
 
 const titleActions = [
-  { label: 'Science Layer', icon: 'mdi-atom' },
   { label: 'User Guide', icon: 'mdi-book-open-page-variant-outline' },
-  { label: 'Export Application JSON', icon: 'mdi-database-export-outline' },
 ]
 
 const workspaceBriefingTypes = [
@@ -28,6 +27,7 @@ const selectedType = ref<WorkspaceTypeId>('synopsis')
 const runtimeNow = ref<RuntimeContext | null>(null)
 const runtimeError = ref('')
 const uiDensity = ref<UiDensity>(readUiDensity())
+const userGuideOpen = ref(false)
 
 const runtimeBadgeText = computed(() => {
   if (!runtimeNow.value) return 'CLOCK UNAVAILABLE'
@@ -127,6 +127,7 @@ onMounted(async () => {
           type="button"
           :title="action.label"
           :aria-label="action.label"
+          @click="userGuideOpen = true"
         >
           <v-icon :icon="action.icon" size="21" />
         </button>
@@ -170,5 +171,11 @@ onMounted(async () => {
         </div>
       </div>
     </section>
+    <v-dialog v-model="userGuideOpen" max-width="1240" scrollable>
+      <v-card class="user-guide-dialog">
+        <header class="user-guide-header"><div><span>User manual</span><h2>Briefing &amp; Synopsis</h2></div><v-btn icon="mdi-close" variant="text" aria-label="Close user manual" @click="userGuideOpen = false" /></header>
+        <v-card-text><BriefingUserGuide /></v-card-text>
+      </v-card>
+    </v-dialog>
   </main>
 </template>
