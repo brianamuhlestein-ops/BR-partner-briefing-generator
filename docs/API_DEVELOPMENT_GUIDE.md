@@ -16,11 +16,7 @@ api/
   errors.py              app-level unexpected-error handling
   http.py                shared request parsing helpers
   resources.py           thin Falcon resource classes
-  persistence.py         SQLite storage
-  social_graphics.py     social-graphics export services
-  science/
-    briefing_logic.py    briefing templates, derivation, previews
-    templates/           JSON template contracts
+  persistence.py         saved briefing-document storage
 ```
 
 `create_app()` is the start of the backend. It initializes local storage,
@@ -45,9 +41,9 @@ so avoid duplicate route trees.
 
 ## Adding An Endpoint
 
-1. Add or update application logic in the service module that owns the behavior:
-   `api/science/briefing_logic.py`, `api/social_graphics.py`, `api/persistence.py`,
-   or a new focused service module.
+1. Add or update application logic in the focused service module that owns the
+   behavior. Saved briefing documents belong in `api/persistence.py`; Synopsis
+   logic belongs under `api/synopsis/`.
 2. Add a thin resource class in `api/resources.py`.
 3. Parse JSON bodies with `api.http.read_json()`.
 4. Raise Falcon HTTP exceptions for expected client errors.
@@ -96,42 +92,24 @@ API_HOST=127.0.0.1
 API_PORT=8089
 SERVICE_NAME=partner-briefing-api
 DATABASE_PATH=email_briefing.db
-GENERATED_DIR=generated
 ```
 
-In Docker, the API binds to `0.0.0.0`, keeps SQLite under
-`/srv/partner-briefing/data/email_briefing.db`, and writes generated graphics to
-`/srv/partner-briefing/generated`. The UI container serves the production build
+In Docker, the API binds to `0.0.0.0` and keeps SQLite under
+`/srv/partner-briefing/data/email_briefing.db`. The UI container serves the production build
 with nginx and proxies `/api` to the API service.
 
 ## Current Stable Route Surface
 
 ```text
 GET  /health
-GET  /api/v1/partner-briefing/briefing-types
-GET  /api/v1/partner-briefing/templates/{briefing_type}
-GET  /api/v1/partner-briefing/templates/{briefing_type}/versions/{version}
-POST /api/v1/partner-briefing/drafts
-GET  /api/v1/partner-briefing/drafts/{draft_id}
-PATCH /api/v1/partner-briefing/drafts/{draft_id}
+GET  /api/v1/partner-briefing/now
 GET  /api/v1/partner-briefing/email-briefings/{briefing_kind}
 PUT  /api/v1/partner-briefing/email-briefings/{briefing_kind}
-POST /api/v1/partner-briefing/drafts/{draft_id}/derive
-POST /api/v1/partner-briefing/drafts/{draft_id}/preview
-POST /api/v1/partner-briefing/drafts/{draft_id}/pdf
-POST /api/v1/partner-briefing/social-graphics/drafts
-GET  /api/v1/partner-briefing/social-graphics/drafts/{draft_id}
-PATCH /api/v1/partner-briefing/social-graphics/drafts/{draft_id}
-POST /api/v1/partner-briefing/social-graphics/exports
-GET  /api/v1/partner-briefing/social-graphics/exports/{export_id}/assets/{variant_id}
-GET  /api/v1/partner-briefing/context/alerts/active
-GET  /api/v1/partner-briefing/context/advisories/icao/active
 ```
 
 ## Shared Authoring Contract
 
-The mutable `drafts`, `social_graphics_drafts`, and
-`email_briefing_documents` records carry an integer `record_version`. Return
+The mutable `email_briefing_documents` records carry an integer `record_version`. Return
 that version in the response item and as a quoted `ETag`. A mutation must send
 the version it loaded as `If-Match`; use version `0` only when creating a saved
 email document that does not exist yet. Missing preconditions return `428` and
@@ -142,5 +120,4 @@ The compare-and-swap update belongs in `api/persistence.py`, not in a route
 read-then-write sequence. SQLite WAL plus the atomic version predicate is the
 supported single-host, single-API-deployment boundary. Do not deploy multiple
 API replicas against this SQLite file or place it on shared storage; move the
-authoritative records to PostgreSQL first. Append-only generated outputs and
-exports do not use `If-Match`.
+authoritative records to PostgreSQL first.

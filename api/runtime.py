@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 from urllib.request import Request, urlopen
 
@@ -75,11 +75,6 @@ def effective_now_utc() -> datetime:
     return replay_now
 
 
-def valid_dates(issue_time: datetime) -> list[str]:
-    issue_date = issue_time.astimezone(timezone.utc).date()
-    return [(issue_date + timedelta(days=offset)).isoformat() for offset in range(3)]
-
-
 def runtime_status() -> dict[str, Any]:
     configured_source = source_mode()
     system_now = system_now_utc()
@@ -108,19 +103,4 @@ def runtime_status() -> dict[str, Any]:
         "ignored_replay_clock_env": [],
         "warnings": [],
         "configuration_errors": errors,
-    }
-
-
-def temporal_snapshot(issue_time_value: str | None = None) -> dict[str, Any]:
-    status = runtime_status()
-    if status["status"] != "ok":
-        raise RuntimeError(" ".join(status["configuration_errors"]))
-    issue_time = parse_utc_iso(issue_time_value) if issue_time_value else effective_now_utc()
-    if issue_time is None:
-        raise ValueError("issue_time_utc must be a valid UTC ISO timestamp")
-    return {
-        "issue_time_utc": format_utc_z(issue_time),
-        "valid_dates": valid_dates(issue_time),
-        "runtime_mode": status["data_source"],
-        "replay_scenario": status["scenario"],
     }

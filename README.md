@@ -40,8 +40,7 @@ Backend:
 - Python
 - Falcon API
 - Waitress local server
-- Pillow for social-graphics image processing
-- SQLite for local draft/export persistence
+- SQLite for local briefing persistence
 
 Frontend:
 
@@ -64,14 +63,9 @@ api/
   http.py                      shared request parsing helpers
   resources.py                 thin Falcon route resources
   config.py                    local settings and SQLite location
-  persistence.py               draft/export SQLite tables
-  social_graphics.py           PNG export variant generation
-  science/
-    briefing_logic.py          template validation, derivation, previews
-    templates/                 master/discussion/ICAO/staff templates
+  persistence.py               saved briefing-document storage
 docs/                          STPI and IDSS reference material
   exercise/gannon/             tracked testbed briefings, JSON, and graphics
-generated/                     runtime social-graphics outputs
 graphics_library/              source visual assets and logos
 ui/                            Vue/Vuetify frontend
 runtime-data/                  writable container data (database is created here)
@@ -83,32 +77,20 @@ email_briefing.db              native-development SQLite runtime database
 Native development persistence uses `email_briefing.db` at the repository root.
 Docker persistence uses `runtime-data/email_briefing.db`. Both database files are
 local runtime state and are created automatically by the API. On startup, the app
-creates these tables if needed:
-
-- `drafts`
-- `generated_outputs`
-- `social_graphics_drafts`
-- `social_graphics_exports`
-- `email_briefing_documents`
+creates the `email_briefing_documents` table if needed. Synopsis source bundles,
+drafts, reviewed products, and delivery receipts use the separate Synopsis
+stores described in `docs/SYNOPSIS_API.md` and `docs/SYNOPSIS_PRODUCT.md`.
 
 The May 2024 testbed library is not stored in the runtime database. Its briefing
 JSON, product JSON, and graphics are tracked under `docs/exercise/gannon/` and are
 bundled into the UI image. A fresh checkout therefore includes the complete
 exercise catalog even before a forecaster saves a working document.
 
-Generated social-graphics assets are written under:
-
-```text
-generated/social_graphics/<export_id>/
-```
-
-Each export includes the scene JSON, the submitted base PNG, and generated PNG variants.
-
 ### Shared authoring boundary
 
-Mutable drafts and saved email briefing documents use optimistic concurrency.
-Create responses and item reads expose `record_version` and an `ETag`; every
-`PATCH` or `PUT` must send that version in `If-Match`. A stale writer receives
+Saved briefing documents use optimistic concurrency. Item reads expose
+`record_version` and an `ETag`; every `PUT` must send that version in `If-Match`.
+A stale writer receives
 `409 revision_conflict`, so another user's newer work is never silently
 overwritten. A new saved email document is created with `If-Match: "0"`.
 
@@ -130,24 +112,11 @@ Routes:
 
 - `GET /health`
 - `GET /api/v1/partner-briefing/now`
-- `GET /api/v1/partner-briefing/briefing-types`
-- `GET /api/v1/partner-briefing/templates/{briefing_type}`
-- `GET /api/v1/partner-briefing/templates/{briefing_type}/versions/{version}`
-- `POST /api/v1/partner-briefing/drafts`
-- `GET /api/v1/partner-briefing/drafts/{draft_id}`
-- `PATCH /api/v1/partner-briefing/drafts/{draft_id}`
 - `GET /api/v1/partner-briefing/email-briefings/{briefing_kind}`
 - `PUT /api/v1/partner-briefing/email-briefings/{briefing_kind}`
-- `POST /api/v1/partner-briefing/drafts/{draft_id}/derive`
-- `POST /api/v1/partner-briefing/drafts/{draft_id}/preview`
-- `POST /api/v1/partner-briefing/drafts/{draft_id}/pdf`
-- `POST /api/v1/partner-briefing/social-graphics/drafts`
-- `GET /api/v1/partner-briefing/social-graphics/drafts/{draft_id}`
-- `PATCH /api/v1/partner-briefing/social-graphics/drafts/{draft_id}`
-- `POST /api/v1/partner-briefing/social-graphics/exports`
-- `GET /api/v1/partner-briefing/social-graphics/exports/{export_id}/assets/{variant_id}`
-- `GET /api/v1/partner-briefing/context/alerts/active`
-- `GET /api/v1/partner-briefing/context/advisories/icao/active`
+
+The Synopsis route surface is documented in `docs/SYNOPSIS_API.md` and
+`docs/SYNOPSIS_PRODUCT.md`.
 
 ## Local Development
 
@@ -171,7 +140,6 @@ API container. The API container persists local data through these bind mounts:
 
 ```text
 ./runtime-data -> /srv/partner-briefing/data
-./generated    -> /srv/partner-briefing/generated
 ```
 
 Mounting the directory allows SQLite to create the database on the first run.
@@ -249,11 +217,6 @@ The Vite dev server proxies `/api` to the API service configured in `ui/vite.con
 
 ## External Inputs And References
 
-The current API context feeds are placeholders:
-
-- active SWPC alerts are represented by placeholder records
-- active ICAO advisories are represented by placeholder records
-
 Reference material lives under `docs/`, including STPI report material, SWIFT IDSS sector threshold tables, and the authoritative Gannon replay fixture. Runtime branding assets live under `ui/public/assets/visual-finder/logos/`.
 
 ## Current Maturity
@@ -262,18 +225,15 @@ Prototype.
 
 Implemented:
 
-- API route surface for templates, drafts, derivation, preview, and graphics export
-- SQLite persistence for briefing and social-graphics records
+- revisioned SQLite persistence for the three current briefing workspaces
+- Synopsis evidence collection, review, and Product Launcher handoff
 - Vue workspace and social-graphics components
-- reusable template JSON files and derivation rules
 - local visual asset catalog
 
 Known gaps:
 
-- PDF generation is scaffolded but not implemented.
-- Active alert and ICAO advisory context are placeholder data.
 - Runtime clock and interface-density tests cover replay configuration and persisted responsive presentation behavior.
-- Runtime SQLite and generated assets are local artifacts. Exercise products that
+- Runtime SQLite is local application state. Exercise products that
   must ship to the testbed belong in the tracked `docs/exercise/gannon/` fixture.
 
 Development guidance for keeping the Falcon API aligned with the SWIFT

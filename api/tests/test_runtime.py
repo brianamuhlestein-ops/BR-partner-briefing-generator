@@ -43,21 +43,6 @@ class RuntimeClockTests(unittest.TestCase):
         self.assertEqual(status["status"], "configuration_error")
         self.assertIsNone(status["now_utc"])
 
-    def test_replay_snapshot_derives_three_utc_forecast_dates(self):
-        with patch.dict(
-            os.environ,
-            {
-                "SWIFT_EXERCISE_CATALOGUE_URL": "http://catalogue.test",
-                "PARTNER_EXERCISE_NOW_UTC": "2024-05-10T16:37:00Z",
-            },
-            clear=True,
-        ):
-            snapshot = runtime.temporal_snapshot()
-        self.assertEqual(snapshot["issue_time_utc"], "2024-05-10T16:37:00Z")
-        self.assertEqual(snapshot["valid_dates"], ["2024-05-10", "2024-05-11", "2024-05-12"])
-        self.assertEqual(snapshot["runtime_mode"], "replay")
-        self.assertEqual(snapshot["replay_scenario"], "briefing-exercise")
-
     def test_gannon_mode_reads_shared_hel_session(self):
         with patch.dict(
             os.environ,

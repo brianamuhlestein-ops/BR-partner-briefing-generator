@@ -18,7 +18,6 @@ class SynopsisIntegrationTests(unittest.TestCase):
         folder = Path(temporary.name)
         environment = patch.dict(os.environ, {
             'DATABASE_PATH':str(folder/'briefing.db'),
-            'GENERATED_DIR':str(folder/'generated'),
             'SUMMARY_BUILDER_DATA_ROOT':str(folder/'synopsis'),
             'SYNOPSIS_PRODUCT_LAUNCHER_URL':'http://launcher.test',
             'SYNOPSIS_EXERCISE_LAUNCHER_URL':'',

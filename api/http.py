@@ -30,23 +30,8 @@ def read_json(req: falcon.Request, *, allow_empty: bool = True) -> dict:
     return payload
 
 
-def collection_response(items: list[dict]) -> dict:
-    return {
-        "status": "ok",
-        "items": items,
-        "total": len(items),
-    }
-
-
 def item_response(item: dict) -> dict:
     return {
         "status": "ok",
         "item": item,
-    }
-
-
-def result_response(result: dict) -> dict:
-    return {
-        "status": "ok",
-        "result": result,
     }

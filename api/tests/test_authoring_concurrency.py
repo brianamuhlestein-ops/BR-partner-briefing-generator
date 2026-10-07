@@ -10,15 +10,9 @@ from falcon import testing
 
 from api.persistence import (
     RecordRevisionConflict,
-    create_draft_record,
-    create_social_graphics_draft_record,
-    get_draft_record,
     get_email_briefing_document,
-    get_social_graphics_draft_record,
     initialize_storage,
     save_email_briefing_document,
-    update_draft_record,
-    update_social_graphics_draft_record,
 )
 from api.run_api import create_app
 
@@ -31,7 +25,6 @@ class AuthoringConcurrencyTests(unittest.TestCase):
             os.environ,
             {
                 "DATABASE_PATH": str(root / "briefings.db"),
-                "GENERATED_DIR": str(root / "generated"),
             },
         )
         self.environment.start()
@@ -75,48 +68,6 @@ class AuthoringConcurrencyTests(unittest.TestCase):
         self.assertEqual([kind for kind, _ in outcomes].count("conflict"), 1)
         self.assertEqual(get_email_briefing_document("core")["record_version"], 2)
 
-    def test_simultaneous_draft_updates_reject_the_stale_writer(self):
-        draft = create_draft_record({"sections": {"summary": "initial"}})
-        outcomes = self._race(
-            lambda: update_draft_record(
-                draft["draft_id"],
-                {"sections": {"summary": "writer-a"}},
-                expected_version=1,
-            ),
-            lambda: update_draft_record(
-                draft["draft_id"],
-                {"sections": {"summary": "writer-b"}},
-                expected_version=1,
-            ),
-        )
-
-        self.assertEqual([kind for kind, _ in outcomes].count("saved"), 1)
-        self.assertEqual([kind for kind, _ in outcomes].count("conflict"), 1)
-        self.assertEqual(get_draft_record(draft["draft_id"])["record_version"], 2)
-
-    def test_simultaneous_social_draft_updates_reject_the_stale_writer(self):
-        draft = create_social_graphics_draft_record(
-            {"template_id": "landscape", "scene": {"headline": "initial"}}
-        )
-        outcomes = self._race(
-            lambda: update_social_graphics_draft_record(
-                draft["draft_id"],
-                {"scene": {"headline": "writer-a"}},
-                expected_version=1,
-            ),
-            lambda: update_social_graphics_draft_record(
-                draft["draft_id"],
-                {"scene": {"headline": "writer-b"}},
-                expected_version=1,
-            ),
-        )
-
-        self.assertEqual([kind for kind, _ in outcomes].count("saved"), 1)
-        self.assertEqual([kind for kind, _ in outcomes].count("conflict"), 1)
-        self.assertEqual(
-            get_social_graphics_draft_record(draft["draft_id"])["record_version"], 2
-        )
-
     def test_email_api_requires_and_enforces_if_match(self):
         client = testing.TestClient(create_app())
         endpoint = "/api/v1/partner-briefing/email-briefings/core"
@@ -157,6 +108,17 @@ class AuthoringConcurrencyTests(unittest.TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertIn("PUT", response.headers["Access-Control-Allow-Methods"])
         self.assertIn("If-Match", response.headers["Access-Control-Allow-Headers"])
+
+    def test_retired_legacy_authoring_routes_are_not_registered(self):
+        client = testing.TestClient(create_app())
+        for endpoint in (
+            "/api/v1/partner-briefing/briefing-types",
+            "/api/v1/partner-briefing/templates/master",
+            "/api/v1/partner-briefing/drafts",
+            "/api/v1/partner-briefing/social-graphics/drafts",
+            "/api/v1/partner-briefing/context/alerts/active",
+        ):
+            self.assertEqual(client.simulate_get(endpoint).status_code, 404)
 
 
 if __name__ == "__main__":
