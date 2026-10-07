@@ -403,6 +403,10 @@ class SourceBundleTests(unittest.TestCase):
             "/health", headers={"X-Request-ID": "summary-builder-test"}
         )
         self.assertEqual(traced.headers["X-Request-ID"], "summary-builder-test")
+        self.assertEqual(
+            client.simulate_get("/api/v1/space-weather-summary/health").status_code,
+            404,
+        )
 
     def test_api_rejects_out_of_scope_context_id(self) -> None:
         client = testing.TestClient(

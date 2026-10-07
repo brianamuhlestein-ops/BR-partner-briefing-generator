@@ -27,7 +27,6 @@ def register_routes(
     health = HealthResource(settings)
     if include_root_health:
         app.add_route("/health", health)
-    app.add_route(f"{API_PREFIX}/health", health)
     app.add_route(
         f"{API_PREFIX}/source-bundles",
         SourceBundleCollectionResource(service, store),
