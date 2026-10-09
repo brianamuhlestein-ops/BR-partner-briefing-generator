@@ -5,11 +5,7 @@ services:
       context: .
       dockerfile: api/Dockerfile
     ports:
-      - name: api
-        target: ${PARTNER_BRIEFING_API_PORT:-8089}
-        published: "${PARTNER_BRIEFING_API_PORT:-8089}"
-        protocol: tcp
-        app_protocol: http
+      - "${PARTNER_BRIEFING_API_PORT:-8089}:${PARTNER_BRIEFING_API_PORT:-8089}"
     tty: true
     restart: always
     environment:
@@ -54,11 +50,7 @@ services:
       context: .
       dockerfile: ui/Dockerfile
     ports:
-      - name: ui
-        target: 80
-        published: "${EXTERNAL_UI_PORT:-5180}"
-        protocol: tcp
-        app_protocol: http
+      - "${EXTERNAL_UI_PORT:-5180}:80"
     tty: true
     restart: always
     depends_on:
