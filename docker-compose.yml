@@ -32,6 +32,11 @@ services:
       CORS_ALLOW_METHODS: "${CORS_ALLOW_METHODS:-GET,POST,PUT,PATCH,OPTIONS}"
       CORS_ALLOW_HEADERS: "${CORS_ALLOW_HEADERS:-Content-Type,Accept,X-Request-ID,If-Match}"
     command: ["python", "-m", "api.run_api"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ['API_PORT'] + '/health', timeout=3).read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     volumes:
       # Mount the writable data directory, not the database file. On a fresh
       # checkout the API can now create email_briefing.db and its schema.
@@ -54,10 +59,16 @@ services:
     tty: true
     restart: always
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     environment:
       API_UPSTREAM_HOST: "api"
       API_UPSTREAM_PORT: "${PARTNER_BRIEFING_API_PORT:-8089}"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     logging:
       options:
         max-size: "10m"
