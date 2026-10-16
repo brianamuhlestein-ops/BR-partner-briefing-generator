@@ -3,9 +3,15 @@ from __future__ import annotations
 import json
 import os
 import re
+from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any
 from urllib.request import Request, urlopen
+
+from api.request_coalescing import SingleFlight
+
+
+_HEL_REQUESTS = SingleFlight()
 
 
 def parse_utc_iso(value: str | None) -> datetime | None:
@@ -49,8 +55,16 @@ def hel_session() -> dict[str, Any]:
     session_id = os.getenv("SWIFT_REPLAY_SESSION_ID", "").strip()
     if not base or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", session_id):
         raise RuntimeError("Gannon replay requires SWIFT_REPLAY_CATALOG_URL and SWIFT_REPLAY_SESSION_ID")
-    with urlopen(Request(f"{base}/replay-sessions/{session_id}", headers={"Accept": "application/json"}), timeout=15) as response:
-        session = json.load(response)
+    url = f"{base}/replay-sessions/{session_id}"
+
+    def load() -> dict[str, Any]:
+        with urlopen(Request(url, headers={"Accept": "application/json"}), timeout=15) as response:
+            payload = json.load(response)
+        if not isinstance(payload, dict):
+            raise RuntimeError("HEL replay session response is not an object")
+        return payload
+
+    session = deepcopy(_HEL_REQUESTS.run(url, load))
     if session.get("event_id") != "gannon-2024":
         raise RuntimeError("HEL session is not a Gannon replay session")
     return session

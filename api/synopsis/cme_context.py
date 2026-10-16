@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -10,6 +11,10 @@ from urllib.request import Request, urlopen
 import falcon
 
 from api.runtime import runtime_status
+from api.request_coalescing import SingleFlight
+
+
+_CME_REQUESTS = SingleFlight()
 
 
 class CmeContextUnavailableError(RuntimeError):
@@ -34,11 +39,17 @@ def reviewed_cme_context() -> dict[str, Any]:
     url = os.getenv("SYNOPSIS_CME_CONTEXT_URL", "").strip()
     if not url:
         raise CmeContextUnavailableError("The Synopsis CME reviewed-context URL is not configured.")
-    try:
-        with urlopen(Request(url, headers={"Accept": "application/json"}, method="GET"), timeout=10) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-        raise CmeContextUnavailableError(f"Unable to load reviewed CME context: {exc}") from exc
+    def load() -> dict[str, Any]:
+        try:
+            with urlopen(Request(url, headers={"Accept": "application/json"}, method="GET"), timeout=10) as response:
+                loaded = json.loads(response.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+            raise CmeContextUnavailableError(f"Unable to load reviewed CME context: {exc}") from exc
+        if not isinstance(loaded, dict):
+            raise CmeContextInvalidError("CME Display returned a non-object response.")
+        return loaded
+
+    payload = deepcopy(_CME_REQUESTS.run(url, load))
     if not isinstance(payload, dict):
         raise CmeContextInvalidError("CME Display returned a non-object response.")
     context = payload.get("item", payload)

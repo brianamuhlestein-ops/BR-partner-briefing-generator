@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import falcon
 
 from api.config import get_settings
-from api.http import item_response, read_json
+from api.http_helpers import item_response, read_json
 from api.persistence import (
     RecordRevisionConflict,
     get_email_briefing_document,

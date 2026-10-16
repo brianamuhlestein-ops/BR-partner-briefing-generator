@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Protocol
 from urllib.error import HTTPError, URLError
@@ -8,6 +9,10 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from api.synopsis.config import Settings
+from api.request_coalescing import SingleFlight
+
+
+_PRODUCER_REQUESTS = SingleFlight()
 
 
 class ProducerClient(Protocol):
@@ -86,34 +91,37 @@ class HttpProducerClient:
             ) from exc
 
     def _get(self, url: str) -> dict[str, Any]:
-        request = Request(url, headers={"Accept": "application/json"}, method="GET")
-        try:
-            with urlopen(request, timeout=self.timeout_seconds) as response:
-                body = response.read().decode("utf-8")
-        except HTTPError as exc:
-            raise ProducerRequestError(
-                "producer_http_error",
-                f"Producer returned HTTP {exc.code} for {url}.",
-                500 <= exc.code < 600,
-            ) from exc
-        except (URLError, TimeoutError, OSError) as exc:
-            raise ProducerRequestError(
-                "producer_unavailable",
-                f"Unable to reach producer at {url}: {exc}",
-                True,
-            ) from exc
-        try:
-            payload = json.loads(body)
-        except json.JSONDecodeError as exc:
-            raise ProducerRequestError(
-                "invalid_json_response",
-                f"Producer returned invalid JSON for {url}.",
-                False,
-            ) from exc
-        if not isinstance(payload, dict):
-            raise ProducerRequestError(
-                "invalid_response",
-                f"Producer returned a non-object response for {url}.",
-                False,
-            )
-        return payload
+        def load() -> dict[str, Any]:
+            request = Request(url, headers={"Accept": "application/json"}, method="GET")
+            try:
+                with urlopen(request, timeout=self.timeout_seconds) as response:
+                    body = response.read().decode("utf-8")
+            except HTTPError as exc:
+                raise ProducerRequestError(
+                    "producer_http_error",
+                    f"Producer returned HTTP {exc.code} for {url}.",
+                    500 <= exc.code < 600,
+                ) from exc
+            except (URLError, TimeoutError, OSError) as exc:
+                raise ProducerRequestError(
+                    "producer_unavailable",
+                    f"Unable to reach producer at {url}: {exc}",
+                    True,
+                ) from exc
+            try:
+                payload = json.loads(body)
+            except json.JSONDecodeError as exc:
+                raise ProducerRequestError(
+                    "invalid_json_response",
+                    f"Producer returned invalid JSON for {url}.",
+                    False,
+                ) from exc
+            if not isinstance(payload, dict):
+                raise ProducerRequestError(
+                    "invalid_response",
+                    f"Producer returned a non-object response for {url}.",
+                    False,
+                )
+            return payload
+
+        return deepcopy(_PRODUCER_REQUESTS.run(url, load))
