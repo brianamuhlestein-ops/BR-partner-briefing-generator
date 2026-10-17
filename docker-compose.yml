@@ -55,7 +55,7 @@ services:
       context: .
       dockerfile: ui/Dockerfile
     ports:
-      - "127.0.0.1:${EXTERNAL_UI_PORT:-5180}:80"
+      - "${HOST_BIND_IP:-0.0.0.0}:${EXTERNAL_UI_PORT:-5180}:80"
     tty: true
     restart: always
     depends_on:
