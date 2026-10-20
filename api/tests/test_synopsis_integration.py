@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from http.client import RemoteDisconnected
 from pathlib import Path
 from unittest.mock import patch
 from falcon import testing
@@ -94,6 +95,22 @@ class SynopsisIntegrationTests(unittest.TestCase):
         self.assertEqual(self.save(source_bundle_id='missing').status_code,400)
         self.clock.return_value={**CLOCK,'status':'configuration_error'}
         self.assertEqual(self.client.simulate_get(ROOT+'/workspace').status_code,503)
+
+    def test_lost_launcher_connection_retains_review_and_allows_retry(self):
+        self.save()
+        reviewed = self.post('reviewed').json['item']
+        with patch('api.synopsis.workspace.urlopen', side_effect=RemoteDisconnected('Receiver closed after accepting')):
+            failed = self.post('deliver')
+        self.assertEqual(failed.status_code, 503, failed.text)
+        self.assertIn('retry safely', failed.json['description'])
+        self.assertEqual(self.state()['reviewed'], reviewed)
+        response = {'candidate': {'candidate_id': 'accepted-before-disconnect', 'current_revision': 1}}
+        with patch('api.synopsis.workspace.urlopen', return_value=io.BytesIO(json.dumps(response).encode())) as send:
+            delivered = self.post('deliver')
+            self.assertEqual(delivered.status_code, 200, delivered.text)
+            self.assertEqual(json.loads(send.call_args.args[0].data)['idempotency_key'], reviewed['review_id'])
+            self.assertEqual(self.post('deliver').json, delivered.json)
+            self.assertEqual(send.call_count, 1)
 
     def test_exercise_delivery_requires_matching_target_and_retains_provenance(self):
         self.clock.return_value={**CLOCK,'data_source':'replay','scenario':'test-storm'}

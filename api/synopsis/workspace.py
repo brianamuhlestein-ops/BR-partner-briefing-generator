@@ -221,7 +221,7 @@ class DeliveryResource:
                 result = json.load(response)
             record = result['candidate']
             receipt = {'candidate_id':record['candidate_id'],'candidate_revision':record['current_revision'],'review_id':item['review_id'],'status':'ready_for_review'}
-        except (URLError, TimeoutError, ValueError, KeyError) as exc:
+        except (OSError, ValueError, KeyError) as exc:
             raise falcon.HTTPServiceUnavailable(description='Product Launcher did not confirm receipt. The reviewed Synopsis is retained; retry safely.') from exc
         with open_database() as db:
             db.execute('INSERT OR REPLACE INTO synopsis_receipts VALUES (?,?)',(item['review_id'],json.dumps(receipt)))

@@ -58,15 +58,66 @@ untouched.
 No UI, authoring sequence, product content, science rule, public route, response
 contract, replay selection, or persistence record was changed.
 
-## Remaining measurements
+## Bounded browser and delivery check — 2026-10-20
 
-- Measure cold and warm source-bundle collection with one and four forecasters
-  against deployed GOM, GFC, CME, and HEL services.
-- Exercise SQLite conflict recovery with the deployed shared-volume topology.
-  Move authored state to an operations database before running multiple API
-  replicas, because SQLite and local atomic files do not coordinate replicas.
-- Confirm Product Launcher's idempotency behavior under a lost response in a
-  disposable end-to-end environment.
+The built UI/proxy and production four-thread Waitress API were exercised with
+one and four independent Edge browser contexts. Test authoring used a private
+Windows bind-mounted SQLite database and separate Docker volume for immutable
+Synopsis files, matching the local storage arrangement. Normal records, the
+13 existing Synopsis files, and the HEL session were preserved. This establishes
+behavior on this local single-process topology, not an untested deployment's
+shared filesystem or multiple API replicas.
+
+- Three single-user saves/reloads retained exact text. Four competing saves
+  produced one winner and three 409s; every browser retained its own narrative
+  and displayed an actionable conflict. Explicit reload retrieved the winner.
+- A newer draft did not modify its earlier review. An older browser could not
+  review the superseded workspace version. Core email writes independently
+  produced one winner and three 409s. SQLite integrity passed in WAL mode.
+- Real source-bundle collection at the existing 18Z replay clock took 109–174 ms
+  for one caller and 159–221 ms for four. These include missing/ineligible
+  evidence, not successful complete scientific bundles. “Cold” means a freshly
+  started briefing process; upstream/OS caches were not cleared.
+- The retained GOM context uses the session ID as scenario and reports partial,
+  degraded quality; GFC's retained replay forecast is later than the cutoff;
+  CME has no reviewed context. The application rejected these as expected.
+  Successful collection/draft generation was checked separately with explicit
+  synthetic context fixtures, without editing normal source exports.
+- Four overlapping fixture collectors shared each active upstream read but
+  retained four distinct bundles/drafts. Read-back contents matched. An injected
+  producer outage or ten-second timeout left saved/reviewed text unchanged;
+  an independent email read completed in 47 ms during the timeout. HEL outage
+  safely blocked clock-dependent Synopsis operations and recovered on retry.
+- A real private PostgreSQL Launcher accepted a reviewed candidate, then the
+  test relay closed the connection before the briefing app received the result.
+  This exposed an uncaught `RemoteDisconnected`/`OSError`, previously a generic
+  500. Delivery now catches transport `OSError` and returns the existing 503
+  message that the review is retained and retry is safe. No delivery protocol
+  or idempotency key changed.
+- Four retries yielded one candidate, one revision, zero issues, and exact
+  reviewed product text. API restart preserved the review and receipt; later
+  retries reused the receipt without resending. Delivery used only private
+  operational-mode instances with synthetic wording; normal replay-to-live
+  delivery remained disabled. Replay/exercise guards were not bypassed.
+- 43 API tests passed on Windows; all eight Synopsis integration tests passed
+  in the rebuilt Linux image. Six UI tests and the production build passed.
+  Browser checks had no JavaScript exceptions. Test containers, network, volume,
+  and private SQLite files were removed. No new service, UI, science, schema,
+  route, deployment setting, or worker was added.
+
+Full measurements, resource limits and experiment evidence are in the suite's
+`docs/PARTNER_BRIEFING_READINESS_2026-10-20.md` and
+`docs/evidence/partner-briefing-workflow-2026-10-20.json`.
+
+## Remaining operational decisions
+
+- Repeat storage/conflict and representative complete-source measurements on
+  the intended deployment filesystem. Choose the operations database and shared
+  immutable-file storage before multiple API replicas; separate local files do
+  not provide replica coordination.
+- Refresh/create eligible producer context exports for the chosen replay
+  cutoff before claiming complete native-source coverage. Do not relax scenario,
+  quality, cutoff or reviewed-context checks to fill a briefing.
 - Review the tracked 42.9 MB Gannon social-media reference PDF and 14.5 MB
   aurora image with the product owner before any asset retention change; both
   are current reference or exercise inputs and were not proven disposable.
