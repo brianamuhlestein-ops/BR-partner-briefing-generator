@@ -19,5 +19,8 @@ def _add_partner_briefing_routes(app: falcon.App, prefix: str) -> None:
 
 
 def register_routes(app: falcon.App) -> None:
+    from api import research_capture as research, research_records as exports
+    app.add_route(f"{PUBLIC_PREFIX}/research-captures", exports.CollectionResource(research.APPLICATION, research.FAMILIES, research.records))
+    app.add_route(f"{PUBLIC_PREFIX}/research-captures/{{capture_id}}/export", exports.ExportResource(research.APPLICATION, research.FAMILIES, research.records))
     app.add_route("/health", HealthResource())
     _add_partner_briefing_routes(app, PUBLIC_PREFIX)

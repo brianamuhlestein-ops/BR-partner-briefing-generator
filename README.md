@@ -238,3 +238,10 @@ Known gaps:
 
 Development guidance for keeping the Falcon API aligned with the SWIFT
 lightweight structure lives in `docs/API_DEVELOPMENT_GUIDE.md`.
+
+## R2O2R Evidence
+
+Saved research records are available through the owning read-only API and the
+Performance Review R2O2R Evidence tab. Selected portable exports preserve available
+dependencies and declare historical gaps. See the suite
+[export scope and connection inventory](../SWIFT-Applications/docs/RESEARCH_CASE_EXPORTS.md#suite-integration-closeout).
